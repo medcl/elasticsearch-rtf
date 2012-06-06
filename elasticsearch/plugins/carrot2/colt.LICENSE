@@ -1,0 +1,13 @@
+
+Code ported from the COLT project (the part covered by BSD-like license).
+
+Permission to use, copy, modify, distribute and sell this software and its documentation for any
+purpose is hereby granted without fee, provided that the above copyright notice appear in all copies
+and that both that copyright notice and this permission notice appear in supporting documentation.
+CERN makes no representations about the suitability of this software for any purpose. It is provided
+"as is" without expressed or implied warranty.
+
+[Mahout note: We have included, as source, parts of the CERN Colt Java Matrix library as a Module in
+the Mahout source tree. The parts included are those in cern.colt* , cern.jet*, cern.clhep. We have
+excluded the hep.aida* packages.]
+

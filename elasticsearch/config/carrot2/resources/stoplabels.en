@@ -1,0 +1,6 @@
+(?i)(new|information|list|skip|join|cheap|link|great|use|offer|offers|view|post|top|part|really|index|use|used|user|like|say|says|real|good|world|original|called|rights|right|rights reserved|reserved|version|days?|listens?|old|system|related|fwd|old|just|big|web|homepage|general|think|late|look|things?|products?|items?|stuff|features?|works?|due|specializes?|times?|hands?|names?|archive(s|d)?|fun(ny)?|read(ing)?s?|pages?|creates?|associates?|assists?|groups?|public|resources?|access(es)?|corp(oration)?s?|words?|body|development|shows?|large|titles?|data)
+(?i)information (about|on).*
+(?i)(index|list) of.*
+(?i).*(page|part|copyright) \d+.*
+(?i)(official|offer(ing)?s?|lists|uses?).*
+(?i).*(known|information|offer(ing)?s?|a range)
