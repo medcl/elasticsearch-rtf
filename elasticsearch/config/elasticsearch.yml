@@ -29,7 +29,7 @@
 # Cluster name identifies your cluster for auto-discovery. If you're running
 # multiple clusters on the same network, make sure you're using unique names.
 #
-cluster.name: elasticsearch_RTF_1.0
+cluster.name: elasticsearch
 
 
 #################################### Node #####################################
