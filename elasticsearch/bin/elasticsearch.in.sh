@@ -1,4 +1,6 @@
-ES_CLASSPATH=$ES_CLASSPATH:$ES_HOME/lib/*:$ES_HOME/lib/sigar/*
+#!/bin/sh
+
+ES_CLASSPATH=$ES_CLASSPATH:$ES_HOME/lib/elasticsearch-0.19.8.jar:$ES_HOME/lib/*:$ES_HOME/lib/sigar/*
 
 if [ "x$ES_MIN_MEM" = "x" ]; then
     ES_MIN_MEM=256m
@@ -25,6 +27,9 @@ fi
 
 # reduce the per-thread stack size
 JAVA_OPTS="$JAVA_OPTS -Xss256k"
+
+# set to headless, just in case
+JAVA_OPTS="$JAVA_OPTS -Djava.awt.headless=true"
 
 # Force the JVM to use IPv4 stack
 # JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"

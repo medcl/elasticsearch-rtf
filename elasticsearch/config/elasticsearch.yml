@@ -29,7 +29,7 @@
 # Cluster name identifies your cluster for auto-discovery. If you're running
 # multiple clusters on the same network, make sure you're using unique names.
 #
-cluster.name: elasticsearch
+#cluster.name: elasticsearch
 
 
 #################################### Node #####################################
@@ -379,6 +379,12 @@ index:
       mmseg_simple:
           type: mmseg
           seg_type: "simple"
+      semicolon_spliter:
+          type: pattern 
+          pattern: ";"
+      pct_spliter:
+          type: "pattern"
+          pattern: "[%]+"  
 
     filter:
       ngram_min_2:
@@ -428,6 +434,16 @@ index:
       comma_spliter:
           type: "pattern"
           pattern: "[,|\\s]+"      
+      pct_spliter:
+          type: "pattern"
+          pattern: "[%]+"   
+      custom_snowball_analyzer:
+          type: "snowball"
+          language: "English"
+      simple_english_analyzer:
+          type: "custome"
+          tokenizer: whitespace
+          filter: [standard,lowercase,snowball] 
       edge_ngram:
           type: custom
           tokenizer: edgeNGram
@@ -440,6 +456,6 @@ index:
           type: custom
           tokenizer: pinyin_first_letter
           filter: [standard,lowercase] 
-            
+          
 
 index.analysis.analyzer.default.type : "keyword"

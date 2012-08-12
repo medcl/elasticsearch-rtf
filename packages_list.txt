@@ -1,4 +1,4 @@
-elasticsearch-0.19.4
+elasticsearch-0.19.8
 elasticsearch-servicewrapper
 
 ²å¼þ£º
