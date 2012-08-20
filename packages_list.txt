@@ -8,4 +8,4 @@ elasticsearch/elasticsearch-mapper-attachments/1.4.0
 medcl/elasticsearch-carrot2/1.1
 medcl/elasticsearch-analysis-ik/1.1.0
 medcl/elasticsearch-analysis-mmseg/1.1.0
-medcl/elasticsearch-analysis-pinyin-1.1.0
+medcl/elasticsearch-analysis-pinyin-1.1.1
