@@ -456,6 +456,9 @@ index:
           type: custom
           tokenizer: pinyin_first_letter
           filter: [standard,lowercase] 
+      paoding:
+          alias: [paoding_analyzer]
+          type: org.elasticsearch.index.analysis.PaodingAnalyzerProvider 
           
 
 index.analysis.analyzer.default.type : "keyword"
