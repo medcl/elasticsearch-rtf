@@ -1,0 +1,9 @@
+.na_chart_box {
+    fill: #ddd;
+    /*stroke: #aaa;*/
+    stroke: none;
+}
+
+.na_chart_text {
+    fill: #888;
+}

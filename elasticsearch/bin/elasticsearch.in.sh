@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ES_CLASSPATH=$ES_CLASSPATH:$ES_HOME/lib/elasticsearch-0.19.8.jar:$ES_HOME/lib/*:$ES_HOME/lib/sigar/*
+ES_CLASSPATH=$ES_CLASSPATH:$ES_HOME/lib/elasticsearch-0.19.10.jar:$ES_HOME/lib/*:$ES_HOME/lib/sigar/*
 
 if [ "x$ES_MIN_MEM" = "x" ]; then
     ES_MIN_MEM=256m
@@ -25,6 +25,11 @@ if [ "x$ES_HEAP_NEWSIZE" != "x" ]; then
     JAVA_OPTS="$JAVA_OPTS -Xmn${ES_HEAP_NEWSIZE}"
 fi
 
+# max direct memory
+if [ "x$ES_DIRECT_SIZE" != "x" ]; then
+    JAVA_OPTS="$JAVA_OPTS -XX:MaxDirectMemorySize=${ES_DIRECT_SIZE}"
+fi
+
 # reduce the per-thread stack size
 JAVA_OPTS="$JAVA_OPTS -Xss256k"
 
@@ -33,10 +38,6 @@ JAVA_OPTS="$JAVA_OPTS -Djava.awt.headless=true"
 
 # Force the JVM to use IPv4 stack
 # JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
-
-# Enable aggressive optimizations in the JVM
-#    - Disabled by default as it might cause the JVM to crash
-# JAVA_OPTS="$JAVA_OPTS -XX:+AggressiveOpts"
 
 JAVA_OPTS="$JAVA_OPTS -XX:+UseParNewGC"
 JAVA_OPTS="$JAVA_OPTS -XX:+UseConcMarkSweepGC"

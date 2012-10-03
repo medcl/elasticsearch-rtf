@@ -1,0 +1,29 @@
+.area1 {
+    fill: #88d;
+}
+
+.area2 {
+    fill: #daa;
+}
+
+.area3 {
+    fill: #deb;
+}
+
+.line1 {
+    fill: none;
+    stroke: #44c;
+    stroke-width: 1;
+}
+
+.line2 {
+    fill: none;
+    stroke: #c77;
+    stroke-width: 1;
+}
+
+.line3 {
+    fill: none;
+    /*stroke: #c77;*/
+    /*stroke-width: 1;*/
+}

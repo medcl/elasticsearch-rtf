@@ -1,0 +1,41 @@
+circle {
+    /*fill: rgb(31, 119, 180);*/
+    /*fill-opacity: .25;*/
+    stroke: rgb(31, 119, 180);
+    stroke-width: 1px;
+}
+
+circle:hover {
+    stroke-width: 3px;
+    cursor: pointer;
+}
+
+.leaf circle {
+    fill: #ff7f0e;
+    fill-opacity: 0.5;
+}
+
+.leaf.primary circle {
+    fill: #ff7f0e;
+    fill-opacity: 1;
+}
+
+.node {
+    fill: rgb(31, 119, 180);
+    fill-opacity: .25;
+}
+
+.master.node {
+    fill-opacity: .45;
+}
+
+text {
+    font: 10px sans-serif;
+    fill: rgb(10, 10, 10);
+    fill-opacity: 1;
+}
+
+text:hover {
+    font: 10px sans-serif;
+    cursor: pointer;
+}

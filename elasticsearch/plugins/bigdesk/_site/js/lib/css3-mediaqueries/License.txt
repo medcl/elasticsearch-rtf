@@ -1,0 +1,8 @@
+http://code.google.com/p/css3-mediaqueries-js/
+
+css3-mediaqueries.js by Wouter van der Graaf is a JavaScript library to make IE 5+,
+Firefox 1+ and Safari 2 transparently parse, test and apply CSS3 Media Queries.
+Firefox 3.5+, Opera 7+, Safari 3+ and Chrome already offer native support.
+
+License: MIT License
+http://www.opensource.org/licenses/mit-license.php

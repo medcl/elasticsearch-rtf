@@ -1,4 +1,4 @@
-elasticsearch-0.19.8
+elasticsearch-0.19.10
 elasticsearch-servicewrapper
 
 插件：
@@ -10,3 +10,6 @@ medcl/elasticsearch-analysis-ik/1.1.0
 medcl/elasticsearch-analysis-mmseg/1.1.0
 medcl/elasticsearch-analysis-pinyin-1.1.1
 medcl/elasticsearch-analysis-paoding/1.0.0
+mobz/elasticsearch-head [访问地址：http://localhost:9200/_plugin/head/]
+lukas-vlcek/bigdesk [访问地址：http://localhost:9200/_plugin/bigdesk/]
+karmi/elasticsearch-paramedic [访问地址：http://localhost:9200/_plugin/paramedic/index.html]

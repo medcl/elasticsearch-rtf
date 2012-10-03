@@ -1,0 +1,87 @@
+.chart_box {
+    fill: none;
+    /*stroke: #999;*/
+    stroke: none;
+}
+
+.plot_box {
+    fill: none;
+    stroke-width: 0.1;
+    /*stroke: #444;*/
+    stroke: none;
+}
+
+.area {
+    fill: #969696;
+}
+
+.tick {
+    stroke: #000;
+    stroke-width: 0.6;
+}
+
+.domain {
+    fill: none;
+    stroke: #000;
+    stroke-width: 0.6;
+    /*shape-rendering: crispEdges;*/ /* does not look good on FF and Chrome */
+}
+
+.axis {
+    font-size: 70%;
+    font-family: Verdana;
+}
+
+.circle_line1 {
+    stroke: #44c;
+    stroke-width: 0.7;
+    fill: white;
+}
+
+.circle_line2 {
+    stroke: #c77;
+    stroke-width: 0.7;
+    fill: white;
+}
+
+.circle_line3 {
+    stroke: #7c9;
+    stroke-width: 0.7;
+    fill: white;
+}
+
+.legend_background {
+    stroke: #ccc;
+    stroke-width: 0.7;
+    fill: white;
+    opacity: 0.7;
+}
+
+.legend_text {
+    fill: #555;
+}
+
+.legend_caption {
+    fill: black;
+    font-size: 14px;
+    font-weight: bolder;
+    font-family: serif;
+}
+
+.legend_circle_line1 {
+    stroke: #44c;
+    stroke-width: 1.5;
+    fill: white;
+}
+
+.legend_circle_line2 {
+    stroke: #c77;
+    stroke-width: 1.5;
+    fill: white;
+}
+
+.legend_circle_line3 {
+    stroke: #7c9;
+    stroke-width: 1.5;
+    fill: white;
+}
