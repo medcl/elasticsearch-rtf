@@ -435,6 +435,11 @@ index:
           delimiter: ","
           keep_both: "true"
           convert_type: "t2s"
+      my_string2int:
+          type: "string2int"
+          redis_server: "127.0.0.1"
+          redis_port: 6379
+          redis_key: "index1_type2_name2"
 
     analyzer:      
       lowercase_keyword:
@@ -521,5 +526,9 @@ index:
           redis_server: "127.0.0.1"
           redis_port: 6379
           redis_key: "index1_type1_name1"
+      custom_string2int:
+          type: custom
+          tokenizer: whitespace
+          filter: [my_string2int,lowercase]   
 		  
 index.analysis.analyzer.default.type : "keyword"
