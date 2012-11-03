@@ -1,0 +1,28 @@
+{
+    "test": {
+        "string2int": {
+            "_meta": {
+                "author": "medcl"
+            },
+            "_all": {
+                "analyzer": "ik"
+            },
+            "_source": {
+                "enabled": false
+            },
+            "properties": {
+                "author": {
+                    "type": "string",
+                    "analyzer": "string2int",
+                    "include_in_all": false
+                }
+            }
+        },
+        "_default_": {
+            "_source": {
+                "enabled": false
+            },
+            "properties": {}
+        }
+    }
+}

@@ -179,7 +179,7 @@
 #
 # Set this property to true to lock the memory:
 #
-bootstrap.mlockall: true
+# bootstrap.mlockall: true
 
 # Make sure that the ES_MIN_MEM and ES_MAX_MEM environment variables are set
 # to the same value, and that the machine has enough memory to allocate
@@ -198,24 +198,24 @@ bootstrap.mlockall: true
 
 # Set the bind address specifically (IPv4 or IPv6):
 #
-#network.bind_host: 127.0.0.1
+network.bind_host: 127.0.0.1
 
 # Set the address other nodes will use to communicate with this node. If not
 # set, it is automatically derived. It must point to an actual IP address.
 #
-#network.publish_host: 127.0.0.1
+network.publish_host: 127.0.0.1
 
 # Set both 'bind_host' and 'publish_host':
 #
-#network.host: 127.0.0.1
+network.host: 127.0.0.1
 
 # Set a custom port for the node to node communication (9300 by default):
 #
-#transport.tcp.port: 9300
+transport.tcp.port: 9300
 
 # Enable compression for all communication between nodes (disabled by default):
 #
-#transport.tcp.compress: true
+transport.tcp.compress: true
 
 # Set a custom port to listen for HTTP traffic:
 #
@@ -385,7 +385,25 @@ index:
       pct_spliter:
           type: "pattern"
           pattern: "[%]+"  
-
+      s2t_convert:
+          type: "stconvert"
+          delimiter: ","
+          convert_type: "s2t"
+      t2s_convert:
+          type: "stconvert"
+          delimiter: ","
+          convert_type: "t2s"
+      s2t_keep_both_convert:
+          type: "stconvert"
+          delimiter: ","
+          keep_both: "true"
+          convert_type: "s2t"
+      t2s_keep_both_convert:
+          type: "stconvert"
+          delimiter: ","
+          keep_both: "true"
+          convert_type: "t2s"
+		  
     filter:
       ngram_min_2:
           max_gram: 10
@@ -399,6 +417,24 @@ index:
           min:  2
           max:  4
           type: length
+      s2t_convert:
+          type: "stconvert"
+          delimiter: ","
+          convert_type: "s2t"
+      t2s_convert:
+          type: "stconvert"
+          delimiter: ","
+          convert_type: "t2s"
+      s2t_keep_both_convert:
+          type: "stconvert"
+          delimiter: ","
+          keep_both: "true"
+          convert_type: "s2t"
+      t2s_keep_both_convert:
+          type: "stconvert"
+          delimiter: ","
+          keep_both: "true"
+          convert_type: "t2s"
 
     analyzer:      
       lowercase_keyword:
@@ -459,6 +495,31 @@ index:
       paoding:
           alias: [paoding_analyzer]
           type: org.elasticsearch.index.analysis.PaodingAnalyzerProvider 
-          
-
+      stconvert:
+          alias: [st_analyzer]
+          type: org.elasticsearch.index.analysis.STConvertAnalyzerProvider           
+      s2t_convert:
+          type: "stconvert"
+          delimiter: ","
+          convert_type: "s2t"
+      t2s_convert:
+          type: "stconvert"
+          delimiter: ","
+          convert_type: "t2s"
+      s2t_keep_both_convert:
+          type: "stconvert"
+          delimiter: ","
+          keep_both: "true"
+          convert_type: "s2t"
+      t2s_keep_both_convert:
+          type: "stconvert"
+          delimiter: ","
+          keep_both: "true"
+          convert_type: "t2s"
+      string2int:
+          type: org.elasticsearch.index.analysis.String2IntAnalyzerProvider 
+          redis_server: "127.0.0.1"
+          redis_port: 6379
+          redis_key: "index1_type1_name1"
+		  
 index.analysis.analyzer.default.type : "keyword"
