@@ -534,4 +534,4 @@ index:
           alias: [ansj_analyzer]
           type: org.elasticsearch.index.analysis.AnsjAnalyzerProvider		  
 		  
-index.analysis.analyzer.default.type : "keyword"
+index.analysis.analyzer.default.type : "ik"
