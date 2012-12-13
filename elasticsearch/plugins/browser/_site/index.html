@@ -1,0 +1,407 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Elasticsearch Data Browser</title>
+    <link rel="stylesheet" type="text/css" href="http://cdn.sencha.io/ext-4.1.0-gpl/resources/css/ext-all.css" />
+	<script type="text/javascript" src="http://cdn.sencha.io/ext-4.1.0-gpl/ext-all.js"></script>
+    <style type="text/css">
+	.x-grid-row .x-grid-cell-inner {
+		white-space: normal;
+	}
+	.x-grid-row-over .x-grid-cell-inner {
+		white-space: normal;
+	}
+	</style>
+    <script type="text/javascript">
+
+var GET = {};
+window.location.href.replace(/[?&]+(table|database)=([a-z0-9]+)/gi, function(o, k, v) {GET[k] = v;});
+if(GET.database == undefined || GET.table == undefined) {
+	document.write('Add to URL required parameters: <b>?database=[index]&table=[type]</b><br/>where<br/> [index] ElasticSearch index<br/> [type] ElasticSearch index type');
+}
+    
+Ext.require([
+	'Ext.data.*',
+	'Ext.grid.*',
+    'Ext.util.*',
+	'Ext.tip.*',
+    'Ext.chart.*'
+]);
+
+Ext.define('Ext.ux.form.SearchField', {
+    extend: 'Ext.form.field.Trigger',
+    alias: 'widget.searchfield',
+    trigger1Cls: Ext.baseCSSPrefix + 'form-clear-trigger',
+    trigger2Cls: Ext.baseCSSPrefix + 'form-search-trigger',
+    hasSearch : false,
+    paramName : 'query',
+    initComponent: function() {
+        var me = this;
+        me.callParent(arguments);
+        me.on('specialkey', function(f, e){
+            if (e.getKey() == e.ENTER) {
+                me.onTrigger2Click();
+            }
+        });
+        me.store.remoteFilter = true;
+        if (!me.store.proxy.hasOwnProperty('filterParam')) {
+            me.store.proxy.filterParam = me.paramName;
+        }
+        me.store.proxy.encodeFilters = function(filters) {
+            return filters[0].value;
+        }
+    },
+
+    afterRender: function(){
+        this.callParent();
+        this.triggerCell.item(0).setDisplayed(false);
+    },
+
+    onTrigger1Click : function(){
+        var me = this;
+
+        if (me.hasSearch) {
+            me.setValue('');
+            me.store.clearFilter();
+            me.hasSearch = false;
+            me.triggerCell.item(0).setDisplayed(false);
+            me.updateLayout();
+        }
+    },
+
+    onTrigger2Click : function(){
+        var me = this,
+            value = me.getValue();
+        if (value.length > 0) {
+            me.store.filter({
+                id: me.paramName,
+                property: me.paramName,
+                value: value
+            });
+            me.hasSearch = true;
+            me.triggerCell.item(0).setDisplayed(true);
+            me.updateLayout();
+        }
+    }
+});
+
+Ext.define('Ext.ux.grid.HeaderToolTip', {
+    alias: 'plugin.headertooltip',
+    init : function(grid) {
+        var headerCt = grid.headerCt;
+        grid.headerCt.on("afterrender", function(g) {
+            grid.tip = Ext.create('Ext.tip.ToolTip', {
+                target: headerCt.el,
+                delegate: ".x-column-header",
+                trackMouse: true,
+                maxWidth: 800,
+                maxHeight: 500,
+                autoHide: false,
+                listeners: {
+                    beforeshow: function(tip) {
+                        var c = headerCt.down('gridcolumn[id=' + tip.triggerElement.id  +']');
+                        if (c  && c.tooltip) {
+                            tip.items.replace(0, c.tooltip);
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+            });
+        });
+    }
+});
+
+
+
+
+Ext.onReady(function(){
+	var grid = {};
+    var dataStore = {};
+	
+	var columnModel = [];
+	var fieldModel = [];
+    var fieldList = [];
+    var facetsConfig = {};
+    var schemaStore = Ext.create('Ext.data.Store', {
+        autoLoad: true,
+		fields: [{
+			name: 'type'
+		}],
+		proxy: {
+            filterParam: undefined,
+            groupParam: undefined,
+            pageParam: undefined,
+            startParam: undefined,
+            sortParam: undefined,
+            limitParam: undefined,
+            type: 'rest',
+            url: 'http://' +window.location.hostname + ':9200/' + GET.database + '/' + GET.table + '/' + '_mapping?pretty=true',
+            reader: {
+                type: 'json',
+                root: GET.table,
+				readRecords: function(data) {
+					for (p in data[this.root].properties) {
+                        var type = data[this.root].properties[p].type;
+                        var xtype = 'textfield';
+                        switch (type) {
+                            case 'float':
+                            case 'double':
+                            case 'integer':
+                            case 'long':
+                            case 'short':
+                            case 'byte':
+                                type = 'int';
+                                xtype = 'numberfield';
+                                facetsConfig[p] = {"statistical": {"field" : p}};
+                                break;
+                            case 'date':
+                                xtype = 'datefield';
+                                var d = new Date()
+                                var n = d.getTimezoneOffset();
+                                facetsConfig[p] = {"date_histogram": {"field" : p, "interval": "hour", "post_zone" : n/60}};
+                                break;
+                            case 'boolean':
+                                xtype = 'checkbox';
+                                facetsConfig[p] = {"terms": {"field" : p, "size": 7}};
+                                break;
+                            case 'string':
+                                xtype = 'textfield';
+                                facetsConfig[p] = {"terms": {"field" : p, "size": 7}};
+                                break;
+                            default:
+                                xtype = 'textfield';
+                                break;
+                        }
+						columnModel.push({
+							text: p.charAt(0).toUpperCase() + p.slice(1), 
+							dataIndex: p,
+                            flex: 1
+						});
+						fieldModel.push({
+							name: p,
+							mapping: 'fields.' + p,
+							type: type
+						});
+                        fieldList.push(p);
+					}
+				}
+            }
+        },
+		listeners: {
+            load: function() {
+				var dataStore = Ext.create('Ext.data.Store', {
+                    autoLoad: true,
+					fields: fieldModel,
+					remoteSort: true,
+					buffered: true,
+					pageSize: 100,
+					leadingBufferZone: 100,
+					proxy: {
+						type: 'rest',
+						url: 'http://' +window.location.hostname + ':9200/' + GET.database + '/' + GET.table + '/' + '_search?pretty=true&track_scores=false',
+                        filterParam: 'query',
+                        limitParam: 'size',
+                        startParam: 'from',
+						reader: {
+							type: 'json',
+							root: 'hits.hits',
+							totalProperty: 'hits.total'
+						},
+                        doRequest: function(operation, callback, scope) {
+                            var request = this.buildRequest(operation, callback, scope);
+                            // console.log(request.params.query);
+                            // defaults
+                            var raw = {
+                                "fields": fieldList,
+                                "from": request.params.from,
+                                "size": request.params.size
+                            };
+                            // query
+                            raw['query'] = {
+                                "match_all": {}
+                            };
+                            if (request.params.query !== undefined) {
+                                raw['query'] = {
+                                    "query_string": {
+                                        "default_operator": "AND",
+                                        "default_field": "_all",
+                                        "query": request.params.query
+                                    }
+                                };
+                            }
+                            // facets
+                            raw['facets'] = facetsConfig;
+                            
+                            Ext.apply(request, {
+                                headers: this.headers,
+                                timeout: this.timeout,
+                                scope: this,
+                                callback: this.createRequestCallback(request, operation, callback, scope),
+                                method: 'POST',
+                                params: Ext.encode(raw),
+                                disableCaching: false 
+                            });
+                            Ext.Ajax.request(request);
+                            return request;
+                        }
+					},
+					simpleSortMode: true,
+					remoteFilter: true,
+					listeners: {
+						totalcountchange: function() {
+                            grid.down('#status').update({count: dataStore.getTotalCount()});
+                            
+                            if(dataStore.proxy.reader.jsonData.facets === undefined)
+                                return;
+                            for(i in grid.columns) {
+                                if(dataStore.proxy.reader.jsonData.facets[grid.columns[i].dataIndex] !== undefined) {
+                                    var facet = dataStore.proxy.reader.jsonData.facets[grid.columns[i].dataIndex];
+                                    switch(facet._type) {
+                                        case 'terms':
+                                            if(facet.other > 0)
+                                                facet.terms.push({'term':'Other', 'count': facet.other})
+                                            grid.columns[i].tooltip = Ext.create('Ext.chart.Chart', {
+                                                frame: true,
+                                                floating: false,
+                                                width: 280,
+                                                height: 320,
+                                                legend: true,
+                                                animate: false,
+                                                store: Ext.create('Ext.data.Store', {
+                                                    fields: ['term', 'count'],
+                                                    data: facet.terms
+                                                }),
+                                                shadow: false,
+                                                insetPadding: 20,
+                                                series: [{
+                                                    type: 'pie',
+                                                    field: 'count',
+                                                    highlight: true,
+                                                    showInLegend: true,
+                                                    label: {
+                                                        field: 'term',
+                                                        display: 'rotate',
+                                                        contrast: true
+                                                    }
+                                                }]
+                                            });
+                                            break;
+                                        case 'statistical':
+                                            grid.columns[i].tooltip =Ext.create('Ext.Component', {
+                                                html: 
+                                                    'Count: ' + facet.count + '<br/>' +
+                                                    'Sum: ' + facet.total + '<br/>' +
+                                                    'Minimum: ' + facet.min + '<br/>' +
+                                                    'Maximum: ' + facet.max + '<br/>' +
+                                                    'Average: ' + facet.mean + '<br/>' +
+                                                    'Variance: ' + facet.variance + '<br/>' +
+                                                    'Sum of squares: ' + facet.sum_of_squares + '<br/>' +
+                                                    'Deviation: ' + facet.std_deviation,
+                                                padding: 5,
+                                                width: 200,
+                                                style: {
+                                                    'font-size': '1.2em'
+                                                },
+                                                frame: true
+                                            });
+                                            break;
+                                        case 'date_histogram':
+                                            grid.columns[i].tooltip = Ext.create('Ext.chart.Chart', {
+                                                frame: true,
+                                                floating: false,
+                                                width: 500,
+                                                height: 320,
+                                                legend: false,
+                                                animate: false,
+                                                store: Ext.create('Ext.data.Store', {
+                                                    fields: ['time', 'count'],
+                                                    data: facet.entries
+                                                }),
+                                                shadow: false,
+                                                insetPadding: 20,
+                                                axes: [{
+                                                    type: 'Numeric',
+                                                    position: 'left',
+                                                    fields: ['count'],
+                                                    title: 'Records',
+                                                    grid: true,
+                                                    minimum: 0
+                                                },{
+                                                    type: 'Category',
+                                                    position: 'bottom',
+                                                    fields: ['time'],
+                                                    label: {
+                                                        renderer: function(v){
+                                                            return Ext.Date.format(new Date(v), 'Y-m-d h:i');
+                                                        }
+                                                    },
+                                                    title: 'Hour'
+                                                }],
+                                                series: [{
+                                                    type: 'column',
+                                                    axis: 'left',
+                                                    xField: 'time',
+                                                    yField: 'count',
+                                                    label: {
+                                                        field: 'count',
+                                                        display: 'insideEnd',
+                                                        orientation: 'vertical'
+                                                    }
+                                                }]
+                                            });
+                                            break;
+                                    }
+                                }
+                            };
+						}
+                    }
+				});
+
+				grid = Ext.create('Ext.grid.Panel', {
+					renderTo: document.body,
+					viewConfig: {
+						enableTextSelection: true
+					},
+					stateful: true,
+					width: '100%',
+					height: (window.innerWidth !== undefined) ?
+                        window.innerHeight : Math.max(document.documentElement.clientHeight, document.body.clientHeight),
+					frame: false,
+					title: GET.table.charAt(0).toUpperCase() + GET.table.slice(1),
+					store: dataStore,
+                    plugins: ['headertooltip'],
+					loadmask: true,
+					columns: columnModel,
+					dockedItems: [
+					{
+						dock: 'top',
+						xtype: 'toolbar',
+						items: [
+						{
+							width: 500,
+							labelWidth: 40,
+							fieldLabel: 'Search',
+							itemId: 'search',
+							emptyText: 'keyword OR AND NOT () field:value...',
+							xtype: 'searchfield',
+							store: dataStore
+						},'->',{
+							xtype: 'component',
+							itemId: 'status',
+							tpl: 'Matching records: {count}',
+							style: 'margin-right:5px'
+						}]
+					}]
+				});
+			}
+        }
+    });
+});
+
+</script>
+</head>
+<body>
+</body>
+</html>
