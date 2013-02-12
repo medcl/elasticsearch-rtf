@@ -469,6 +469,9 @@ index:
       ik:
           alias: [ik_analyzer]
           type: org.elasticsearch.index.analysis.IkAnalyzerProvider 
+      ik_smart:
+          type: ik
+          use_smart: true 	  
       mmseg:
           alias: [mmseg_analyzer]
           type: org.elasticsearch.index.analysis.MMsegAnalyzerProvider 
