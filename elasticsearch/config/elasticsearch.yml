@@ -468,10 +468,13 @@ index:
           tokenizer: whitespace
       ik:
           alias: [ik_analyzer]
-          type: org.elasticsearch.index.analysis.IkAnalyzerProvider 
+          type: org.elasticsearch.index.analysis.IkAnalyzerProvider
+      ik_max_word:
+          type: ik
+          use_smart: false
       ik_smart:
           type: ik
-          use_smart: true 	  
+          use_smart: true
       mmseg:
           alias: [mmseg_analyzer]
           type: org.elasticsearch.index.analysis.MMsegAnalyzerProvider 
