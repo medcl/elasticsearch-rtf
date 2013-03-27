@@ -4,6 +4,8 @@ logger:
   action: DEBUG
   # reduce the logging for aws, too much is logged under the default INFO
   com.amazonaws: WARN
+  #org.elasticsearch.river.email: DEBUG
+  #org.elasticsearch.plugin.river.email: DEBUG
 
   # gateway
   #gateway: DEBUG
