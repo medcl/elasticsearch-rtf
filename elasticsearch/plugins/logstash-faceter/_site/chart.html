@@ -1,0 +1,206 @@
+<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
+<link rel="stylesheet" href="/css/amcharts.css" type="text/css">
+<script src="/javascript/jquery-1.7.2.min.js" type="text/javascript"></script>
+<script src="/javascript/bootstrap.min.js" type="text/javascript"></script>
+<script src="/javascript/amstock.js" type="text/javascript"></script>
+<script>
+    var fields = {}
+    var chart;
+    var chartProvider = [];
+    
+    $(document).ready(function() {
+        
+        $.ajax({processData : false,  url : "/_cluster/state", type: "GET", dataType: "json", success : configureIndices })
+    
+        $("div.data-select select[name=index]").on('change', function(evt) {
+            var index = $(evt.target).find("option:selected").val()
+            $(evt.target).parent().find("select[name=type] option").remove()
+            for ( var type in fields[index]  ) {
+                $(evt.target).parent().find("select[name=type]").append(new Option(type, type))
+                $(evt.target).parent().find("select[name=type]").trigger('change')
+            }
+        })
+      
+        $("div.data-select select[name=type]").on('change', function(evt) {
+            var type = $(evt.target).find("option:selected").val()
+            var index = $(evt.target).parent().find("select[name=index] option:selected").val()
+            $(evt.target).parent().find("select[name=date] option").remove()
+            $(evt.target).parent().find("select[name=date]").append(new Option(fields[index][type].date, fields[index][type].date))
+            $(evt.target).parent().find("select[name=strfield] option").remove()
+            for ( var i = 0; i < fields[index][type].strfields.length; i++ ) {
+                $(evt.target).parent().find("select[name=strfield]").append(new Option(fields[index][type].strfields[i], fields[index][type].strfields[i]))
+            }
+            $(evt.target).parent().find("select[name=numfield] option").remove()
+            for ( var i = 0; i < fields[index][type].numfields.length; i++ ) {
+                $(evt.target).parent().find("select[name=numfield]").append(new Option(fields[index][type].numfields[i], fields[index][type].numfields[i]))
+            }
+        })
+        
+        $("#graphform").submit(function(evt) {
+            evt.preventDefault();
+            chartData = []
+            executeRequest();
+        });
+    });
+    
+    function configureIndices(data) {
+        for ( var index in data.metadata.indices ) {
+            if ( fields[index] === undefined ) fields[index] = {}
+            for ( var type in data.metadata.indices[index].mappings ) {
+                if ( fields[index][type] === undefined ) fields[index][type] = {}
+                for ( var field in data.metadata.indices[index].mappings[type].properties ) {
+                    if ( fields[index][type].strfields === undefined ) fields[index][type].strfields = []
+                    if ( fields[index][type].numfields === undefined ) fields[index][type].numfields = []
+                    if ( data.metadata.indices[index].mappings[type].properties[field].properties ) {
+                        for ( var subfield in data.metadata.indices[index].mappings[type].properties[field].properties ) {
+                            if ( data.metadata.indices[index].mappings[type].properties[field].properties[subfield].type == 'string' ) {
+                                fields[index][type].strfields.push(subfield)
+                            } else {
+                                fields[index][type].numfields.push(subfield)
+                            }
+                        }
+                    } else {
+                        if ( data.metadata.indices[index].mappings[type].properties[field].type == 'date' ) {
+                            fields[index][type].date = field
+                        } else if ( data.metadata.indices[index].mappings[type].properties[field].type == 'string' ) {
+                            fields[index][type].strfields.push(field)
+                        } else {
+                            fields[index][type].numfields.push(field)
+                        }
+                    }
+                }
+            }
+            $("div.data-select select[name=index]").append(new Option(index, index))
+        }
+        $("div.data-select select[name=index]").trigger('change')
+    }
+    
+    function executeRequest() {
+       var interval = $('#graphform select[name=interval]').val()
+       var index = $('div.data-select select[name=index]').val()
+       var type = $('div.data-select select[name=type]').val()
+       var histo_field = $('div.data-select select[name=date]').val()
+       var value_field = $('div.data-select select[name=numfield]').val()
+       var terms_field = $('div.data-select select[name=strfield]').val()
+       var query = $('div.data-select input[name=query]').val()
+       var url = "/" + index + "/" + type +"/_search?size=0"
+       var filter = {}
+       filter[terms_field] = query
+       var jsondata = { "facets" : { "data" : { "date_histogram": { "value_field" : value_field, "key_field" : histo_field, "interval" : interval }, "facet_filter" : { "prefix" : filter } } } }
+       $.ajax({processData : false,  url : url, type: "POST", dataType: "json", data : JSON.stringify(jsondata), success : drawChart })
+    }
+    
+    
+    function drawChart(data) {
+        for ( var i =0; i < data.facets.data.entries.length; i++ ) {
+            var date = new Date(data.facets.data.entries[i].time)
+            var mean = data.facets.data.entries[i].mean * 1000;
+            chartProvider.push({ "date" : date, "mean" : mean, "count" : data.facets.data.entries[i].count })
+        }
+        createStockChart()
+    }
+    
+    function createStockChart() {
+        chart = new AmCharts.AmStockChart();
+        chart.pathToImages = "/images/";
+        var categoryAxesSettings = new AmCharts.CategoryAxesSettings();
+        categoryAxesSettings.parseDates = true;
+        categoryAxesSettings.minPeriod = "mm";
+        chart.categoryAxesSettings = categoryAxesSettings;
+        var dataSet = new AmCharts.DataSet();
+        dataSet.fieldMappings = [{
+          fromField : "count",
+          toField : "count",
+        }, {
+          fromField : "mean",
+          toField : "mean",
+        }];
+        dataSet.dataProvider = chartProvider;
+        dataSet.categoryField = "date";
+        chart.dataSets = [dataSet];
+    
+        var stockPanel1 = new AmCharts.StockPanel();
+        stockPanel1.percentHeight = 70;
+    
+        var valueAxis1 = new AmCharts.ValueAxis();
+        valueAxis1.position = "left";
+        valueAxis1.axisColor = "#999999";
+        stockPanel1.addValueAxis(valueAxis1);
+    
+        var graph1 = new AmCharts.StockGraph();
+        graph1.valueField = "mean";
+        graph1.title = "mean(ms)";
+        graph1.type = "smoothedLine";
+        graph1.lineColor = "#999999";
+        graph1.fillAlphas = 0.2;
+        graph1.useDataSetColors = false;
+        stockPanel1.addStockGraph(graph1);
+    
+        var stockLegend1 = new AmCharts.StockLegend();
+        stockPanel1.stockLegend = stockLegend1;
+        stockPanel1.drawingIconsEnabled = true;
+    
+        var stockPanel2 = new AmCharts.StockPanel();
+        stockPanel2.percentHeight = 30;
+        stockPanel2.marginTop = 1;
+        stockPanel2.categoryAxis.dashLength = 5;
+        stockPanel2.showCategoryAxis = false;
+    
+        valueAxis2 = new AmCharts.ValueAxis();
+        valueAxis2.dashLength = 5;
+        valueAxis2.gridAlpha = 0;
+        valueAxis2.axisThickness = 2;
+        stockPanel2.addValueAxis(valueAxis2);
+    
+        var graph2 = new AmCharts.StockGraph();
+        graph2.valueAxis = valueAxis2;
+        graph2.valueField = "count";
+        graph2.title = "count";
+        graph2.balloonText = "[[value]]%";
+        graph2.type = "column";
+        graph2.cornerRadiusTop = 4;
+        graph2.fillAlphas = 1;
+        graph2.lineColor = "#FCD202";
+        graph2.useDataSetColors = false;
+        stockPanel2.addStockGraph(graph2);
+    
+        var stockLegend2 = new AmCharts.StockLegend();
+        stockPanel2.stockLegend = stockLegend2;
+    
+        chart.panels = [stockPanel1, stockPanel2];
+    
+        var sbsettings = new AmCharts.ChartScrollbarSettings();
+        sbsettings.graph = graph2;
+        sbsettings.graphType = "line";
+        sbsettings.height = 30;
+        chart.chartScrollbarSettings = sbsettings;
+    
+        var cursorSettings = new AmCharts.ChartCursorSettings();
+        cursorSettings.valueBalloonsEnabled = true;
+        chart.chartCursorSettings = cursorSettings;
+    
+        $("#chartdiv").show();
+        chart.write("chartdiv");
+    };
+</script>
+
+<div class="container">
+    <form class="form-inline" id="graphform">
+        <div class="data-select">
+            <select name="interval" class="input-small">
+                <option>5m</option>
+                <option>15m</option>
+                <option>30m</option>
+                <option>1h</option>
+            </select>
+            <select name="index" class="input-medium"></select>
+            <select name="type" class="input-small"></select>
+            <select name="date" class="input-small"></select>
+            <select name="numfield" class="input-small"></select>
+            <select name="strfield" class="input-small"></select>
+            <input type="text" name="query" class="input-medium"></input>
+            <button type="submit" class="btn btn-primary">Graph</button>
+        </div>
+    </form>
+    <div id="chartdiv" class="span8 hide" style="height:500px"></div>
+</div>

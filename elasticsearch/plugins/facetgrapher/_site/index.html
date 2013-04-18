@@ -1,0 +1,242 @@
+<!doctype html>
+<html>
+<head>
+
+<title>Facetgrapher</title>
+
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/nv.d3.css" rel="stylesheet">
+
+<script src="js/jquery-1.8.2.min.js" type="text/javascript"></script>
+<script src="js/underscore-min.js" type="text/javascript"></script>
+<script src="js/moment.min.js" type="text/javascript"></script>
+<script src="js/d3.v2.min.js" type="text/javascript"></script>
+<script src="js/nv.d3.js" type="text/javascript"></script>
+<script src="js/bootstrap.min.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+// TODO: write all changes in the URL, so you can link to the graph :-)
+// TOOD: labels dependant on selected interval
+// TODO: use date time pickers (postponed, there is no nice bootstrap widget)
+
+var fields = {}
+var chartData = []
+	
+
+$(document).ready(function() {
+	
+  $.ajax({processData : false,  url : "/_cluster/state", type: "GET", dataType: "json", success : configureIndices })
+
+  // add listener to the index select forms (and to those which will be created)
+  $("div.data-select select[name=index]").on('change', function(evt) {
+  	var index = $(evt.target).find("option:selected").val()
+    $(evt.target).parent().find("select[name=type] option").remove()
+    _.each(_.keys(fields[index]), function(type) {
+      $(evt.target).parent().find("select[name=type]").append(new Option(type, type))
+      $(evt.target).parent().find("select[name=type]").trigger('change')
+    })
+  })
+  
+  // add listener to the type select forms
+  $("div.data-select select[name=type]").on('change', function(evt) {
+  	var type = $(evt.target).find("option:selected").val()
+  	var index = $(evt.target).parent().find("select[name=index] option:selected").val()
+    $(evt.target).parent().find("select[name=field] option").remove()
+    _.each(fields[index][type], function(field) {
+      $(evt.target).parent().find("select[name=field]").append(new Option(field, field))
+    })
+  })
+  
+  // add listener to the "add" button
+  $('.icon-plus-sign').on('click', function(evt) {
+    // chane class, remove all events and add the remove one
+    //$(evt.target).unbind().removeClass('icon-plus-sign').addClass('icon-minus-sign').on('click', removeDataSelector)
+    // copy element (including listeners)
+    var newDataSelect = $(".data-select-template").clone(true, true).removeClass('data-select-template').css('display', 'block')
+    // append after last element
+    $('#graphform .data-select').last().after(newDataSelect)
+  })
+
+  $('.icon-minus-sign').on('click', removeDataSelector)
+  
+  // add listener to the graph button
+  $("#graphform").submit(function(evt) {
+    evt.preventDefault();
+    chartData = []
+    nv.graphs = []
+    executeRequest();
+  });
+});
+
+function removeDataSelector(evt) {
+	if ($("#graphform .icon-minus-sign").size() > 1) {
+		$(evt.target).parent().remove()
+	}
+}
+
+function configureIndices(data) {
+	// create fields data structure
+	var indices = _.keys(data.metadata.indices)	
+	_.each(indices, function(idx) {
+		_.each(_.keys(data.metadata.indices[idx].mappings), function(key) {
+			_.each(data.metadata.indices[idx].mappings[key], function(mapping) {
+				_.each(_.keys(mapping), function(field) {
+					if (data.metadata.indices[idx].mappings[key].properties[field] && data.metadata.indices[idx].mappings[key].properties[field].type == 'date') {
+						if (_.isUndefined(fields[idx])) fields[idx] = {}						
+						if (_.isUndefined(fields[idx][key])) fields[idx][key] = []
+						fields[idx][key].push(field)
+					}
+				}) 
+			})
+		})
+	})
+	
+  // set default for the first select box
+  _.each(_.keys(fields), function(key) {
+  	$("div.data-select select[name=index]").append(new Option(key, key))
+  })
+  $("div.data-select select[name=index]").trigger('change')
+
+}
+
+function executeRequest() {
+   var interval = $('#graphform select[name=interval]').val()
+   var from = $('#graphform input[name=from]').val()
+   var to = $('#graphform input[name=to]').val()
+
+   $('#graphform div.data-select').each(function(element) {
+     var index = $(this).find('select[name=index]').val()
+     var type = $(this).find('select[name=type]').val()
+     var field = $(this).find('select[name=field]').val()
+     var color = $(this).find('input[name=color]').val()
+     var legend = $(this).find('input[name=legend]').val()
+     
+     var url = "/" + index + "/" + type +"/_search?size=0"
+     var facetFilter = {}
+     facetFilter[field] = { "from" : from, "to" : to }
+     $.ajax({processData : false,  url : url, type: "POST", dataType: "json", data : JSON.stringify({ "facets" : { "data" : { "date_histogram": { "field" : field, "interval" : interval }, "facet_filter" : { "range" : facetFilter } } } }), success : function(data) { drawChart(data, {color: color, legend: legend}) } })
+   })
+}
+
+
+function drawChart(data, cfg) {
+
+  var counts = _.map(data.facets.data.entries, function(entry){ return entry.count; });
+  var tooltips = _.map(data.facets.data.entries, function(entry){ return moment(new Date(entry.time)).format("DD.MM") + ": " + entry.count + " items"; });
+
+  //var labels = _.map(data.facets.data.entries, function(entry){ return moment(new Date(entry.time)).format("DD.MM") + ": " + entry.count + " items"; });
+  // var labelFunction = $('#graphform input[name=labelFunction]').val()
+  // console.log("LABEL FUNCTION: " + labelFunction);
+  //var labels = _.map(data.facets.data.entries, function(entry){ return eval(labelFunction) });
+
+  // has many {x:foo, y:bar} entries
+  var x = 0
+  var dataArray = _.map(data.facets.data.entries, function(entry){
+	return { 	x: x++,
+				y: entry.count,
+				label: d3.time.format('%x')(new Date(entry.time)) }
+  });
+
+  // has many { values: data, key: 'name', color: '#ff7f0e'} entries
+  chartData.push({values: dataArray, key: cfg.legend, color: cfg.color, area: true})
+
+  // do not graph until all ajax requests have returned
+  if (chartData.length != $('#graphform div.data-select').size()) {
+    return
+  }
+  
+  var labelYAxis = $('#graphform input[name=label-y-axis]').val()
+  var labelXAxis = $('#graphform input[name=label-x-axis]').val()
+  
+  nv.addGraph(function() {  
+    var chart = nv.models.lineChart();
+
+    chart.xAxis
+      .axisLabel(labelXAxis)
+      .tickFormat(function(d) {
+        if (d >= 0 && dataArray[d] != null) {
+          return dataArray[d].label
+        }
+        return d;
+      });
+
+   chart.yAxis
+     .axisLabel(labelYAxis)
+     .tickFormat(d3.format(',r'));
+
+    d3.select('#chart svg')
+      .datum(chartData)
+      .transition().duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+    //nv.utils.windowResize(function() { d3.select('#chart svg').call(chart) });
+
+    return chart;
+  });
+
+}
+
+</script>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>Facet grapher</h1>
+
+
+<form class="form-inline" id="graphform">
+   <input type="text" class="input-medium" name="from" value="2012-01-01T00:00:00">
+   <input type="text" class="input-medium" name="to" value="2012-01-31T23:59:59">
+   <select name="interval">
+     <option>day</option>
+     <option>minute</option>
+     <option>hour</option>
+     <option>week</option>
+     <option>month</option>
+     <option>quarter</option>
+     <option>year</option>
+   </select>
+   <br />
+   <input type="text" name="label-y-axis" placeholder="Y axis label" />
+   <input type="text" name="label-x-axis" placeholder="X axis label" />
+   <br />
+
+   <div class="data-select">
+     <select name="index" class="input-medium"></select>
+     <select name="type" class="input-medium"></select>
+     <select name="field" class="input-medium"></select>
+     <input type="text" name="legend" placeholder="legend" />
+     <input type="color" name="color" value="#ff7f0e" class="input-mini"></input>
+     <i class="icon-minus-sign" style="cursor: pointer"></i>
+     <i class="icon-plus-sign" style="cursor: pointer"></i>
+   </div>
+   
+   <div style="padding-top: 1em">
+   <button type="submit" class="btn btn-primary">Graph</button>
+   </div>
+   
+   <!-- <input type="text" class="input-xxlarge" name="labelFunction" value="return moment(new Date(entry.time)).format('DD.MM') + ': ' + entry.count + ' items';"> -->
+</form>
+
+
+<div id='chart'>
+  <svg style='height:500px'></svg>
+</div>
+
+<div class="data-select data-select-template" style="display : none">
+  <select name="index" class="input-medium"></select>
+  <select name="type" class="input-medium"></select>
+  <select name="field" class="input-medium"></select>
+  <input type="text" name="legend" placeholder="legend" />
+  <input type="color" name="color" value="#ff7f0e" class="input-mini"></input>
+  <i class="icon-minus-sign" style="cursor: pointer"></i>
+  <i class="icon-plus-sign" style="cursor: pointer"></i>
+</div>
+
+
+</div>
+</body>
+</html>
