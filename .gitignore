@@ -1,3 +1,4 @@
 elasticsearch/data
 elasticsearch/logs
 under_test
+elasticsearch/plugins__

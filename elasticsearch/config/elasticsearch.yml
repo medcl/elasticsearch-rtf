@@ -29,7 +29,7 @@
 # Cluster name identifies your cluster for auto-discovery. If you're running
 # multiple clusters on the same network, make sure you're using unique names.
 #
-#cluster.name: elasticsearch
+# cluster.name: elasticsearch
 
 
 #################################### Node #####################################
@@ -147,7 +147,7 @@
 # path.data: /path/to/data
 #
 # Can optionally include more than one location, causing data to be striped across
-# the locations (à la RAID 0) on a file level, favouring locations with most free
+# the locations (a la RAID 0) on a file level, favouring locations with most free
 # space on creation. For example:
 #
 # path.data: /path/to/data1,/path/to/data2
@@ -198,24 +198,24 @@
 
 # Set the bind address specifically (IPv4 or IPv6):
 #
-#network.bind_host: 127.0.0.1
+# network.bind_host: 192.168.0.1
 
 # Set the address other nodes will use to communicate with this node. If not
 # set, it is automatically derived. It must point to an actual IP address.
 #
-#network.publish_host: 127.0.0.1
+# network.publish_host: 192.168.0.1
 
 # Set both 'bind_host' and 'publish_host':
 #
-#network.host: 127.0.0.1
+# network.host: 192.168.0.1
 
 # Set a custom port for the node to node communication (9300 by default):
 #
-#transport.tcp.port: 9300
+# transport.tcp.port: 9300
 
 # Enable compression for all communication between nodes (disabled by default):
 #
-transport.tcp.compress: true
+# transport.tcp.compress: true
 
 # Set a custom port to listen for HTTP traffic:
 #
@@ -338,7 +338,6 @@ transport.tcp.compress: true
 
 # Shard level query and fetch threshold logging.
 
-#index.search.slowlog.level: TRACE
 #index.search.slowlog.threshold.query.warn: 10s
 #index.search.slowlog.threshold.query.info: 5s
 #index.search.slowlog.threshold.query.debug: 2s
@@ -348,6 +347,11 @@ transport.tcp.compress: true
 #index.search.slowlog.threshold.fetch.info: 800ms
 #index.search.slowlog.threshold.fetch.debug: 500ms
 #index.search.slowlog.threshold.fetch.trace: 200ms
+
+#index.indexing.slowlog.threshold.index.warn: 10s
+#index.indexing.slowlog.threshold.index.info: 5s
+#index.indexing.slowlog.threshold.index.debug: 2s
+#index.indexing.slowlog.threshold.index.trace: 500ms
 
 ################################## GC Logging ################################
 
@@ -540,4 +544,4 @@ index:
           alias: [ansj_analyzer]
           type: org.elasticsearch.index.analysis.AnsjAnalyzerProvider		  
 		  
-index.analysis.analyzer.default.type : "ik"
+index.analysis.analyzer.default.type : "mmseg"
