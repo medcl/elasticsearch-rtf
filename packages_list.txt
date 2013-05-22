@@ -12,6 +12,7 @@ medcl/elasticsearch-analysis-pinyin-1.2.0
 medcl/elasticsearch-analysis-paoding/1.2.0
 medcl/elasticsearch-analysis-stconvert/1.2.0
 medcl/elasticsearch-analysis-string2int/1.2.0
+laigood/elasticsearch-analysis-ansj/1.2.0
 
 
-
+medcl/elasticsearch-carrot2/1.2.0
