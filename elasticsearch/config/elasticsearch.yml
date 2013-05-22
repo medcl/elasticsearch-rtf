@@ -540,8 +540,8 @@ index:
           type: custom
           tokenizer: whitespace
           filter: [my_string2int,lowercase]  
-#      ansj:
-#          alias: [ansj_analyzer]
-#          type: org.elasticsearch.index.analysis.AnsjAnalyzerProvider		  
+      ansj:
+          alias: [ansj_analyzer]
+          type: org.elasticsearch.index.analysis.AnsjAnalyzerProvider		  
 		  
 index.analysis.analyzer.default.type : "mmseg"
