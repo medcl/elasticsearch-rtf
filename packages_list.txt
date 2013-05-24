@@ -16,3 +16,12 @@ laigood/elasticsearch-analysis-ansj/1.2.0
 
 
 medcl/elasticsearch-carrot2/1.2.0
+
+
+polyfractal/elasticsearch-segmentspy/0.2.0
+http://localhost:9200/_plugin/segmentspy
+
+royrusso/elasticsearch-HQ
+http://localhost:9200/_plugin/elasticsearch-hq
+
+
