@@ -507,9 +507,9 @@ index:
           type: custom
           tokenizer: pinyin_first_letter
           filter: [standard,lowercase] 
-      paoding:
-          alias: [paoding_analyzer]
-          type: org.elasticsearch.index.analysis.PaodingAnalyzerProvider 
+#      paoding:
+#          alias: [paoding_analyzer]
+#          type: org.elasticsearch.index.analysis.PaodingAnalyzerProvider 
       stconvert:
           alias: [st_analyzer]
           type: org.elasticsearch.index.analysis.STConvertAnalyzerProvider           
@@ -540,8 +540,8 @@ index:
           type: custom
           tokenizer: whitespace
           filter: [my_string2int,lowercase]  
-      ansj:
-          alias: [ansj_analyzer]
-          type: org.elasticsearch.index.analysis.AnsjAnalyzerProvider		  
+#      ansj:
+#          alias: [ansj_analyzer]
+#          type: org.elasticsearch.index.analysis.AnsjAnalyzerProvider		  
 		  
 index.analysis.analyzer.default.type : "mmseg"
