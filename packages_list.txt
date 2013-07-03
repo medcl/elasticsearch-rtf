@@ -1,4 +1,4 @@
-elasticsearch-0.90.2 (detail changes:http://www.elasticsearch.org/download/)
+elasticsearch-0.90.2 (http://www.elasticsearch.org/download/)
 
 elasticsearch-servicewrapper
 
