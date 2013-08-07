@@ -8,18 +8,15 @@ RTF是Ready To Fly的缩写，在航模里面，表示无需自己组装零件�
 JDK6以上，建议使用JDK7
 
 1.下载
-<pre>
-git clone git://github.com/medcl/elasticsearch-rtf.git --depth=1
-</pre>
+<pre>git clone git://github.com/medcl/elasticsearch-rtf.git --depth=1</pre>
 
 2.运行
 linux:
-<pre>
-cd elasticsearch/bin/service
+<pre>cd elasticsearch/bin/service
 ./elasticsearch console
 </pre>
+
 windows:
-<pre>
-cd elasticsearch/bin
+<pre>cd elasticsearch/bin
 elasticsearch.bat
 </pre>
