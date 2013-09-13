@@ -1,0 +1,58 @@
+{
+    "summary": {
+        "_all": {
+            "enabled": false,
+            "term_vector": "with_positions_offsets",
+            "analyzer": "mmseg"
+        },
+        "_source": {
+            "compress": true
+        },
+        "properties": {
+            "index": {
+                "type": "string"
+            },
+            "type": {
+                "type": "string"
+            },
+            "id": {
+                "type": "string"
+            },
+            "name": {
+                "type": "multi_field",
+                "fields": {
+                    "name": {
+                        "type": "string",
+                        "analyzer": "lowercase_keyword_without_standard"
+                    },
+                    "not_analyzed": {
+                        "type": "string",
+						"index": "not_analyzed"
+                    },
+                    "ngram": {
+                        "type": "string",
+                        "analyzer": "lowercase_keyword_ngram_min_size2",
+                        "term_vector": "with_positions_offsets"
+                    },
+                    "pinyin": {
+                        "type": "string",
+                        "analyzer": "pinyin_ngram_analyzer",
+                        "term_vector": "with_positions_offsets"
+                    },
+                    "pinyin_first_letter": {
+                        "type": "string",
+                        "analyzer": "pinyin_first_letter_analyzer",
+                        "term_vector": "with_positions_offsets"
+                    }
+                }
+            },
+            "summary": {
+                "type": "string",
+                "analyzer": "mmseg",
+                "store": "yes",
+                "term_vector": "with_positions_offsets",
+                "include_in_all": true
+            }
+        }
+    }
+}
