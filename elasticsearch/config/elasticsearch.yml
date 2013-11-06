@@ -544,4 +544,9 @@ index:
 #          alias: [ansj_analyzer]
 #          type: org.elasticsearch.index.analysis.AnsjAnalyzerProvider		  
 		  
-index.analysis.analyzer.default.type : "mmseg"
+index.analysis.analyzer.default.type : "keyword"
+
+
+
+#rtf.filter.redis.host: 127.0.0.1
+#rtf.filter.redis.port: 6379
