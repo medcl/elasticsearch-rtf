@@ -17,6 +17,6 @@ linux:
 </pre>
 
 windows:
-<pre>cd elasticsearch/bin
+<pre>cd elasticsearch/bin/service
 elasticsearch.bat
 </pre>

@@ -7,8 +7,8 @@ elasticsearch/elasticsearch-analysis-smartcn/1.4.0
 elasticsearch/elasticsearch-transport-thrift/1.5.0
 elasticsearch/elasticsearch-mapper-attachments/1.7.0
 
-medcl/elasticsearch-analysis-ik/1.2.3
-medcl/elasticsearch-analysis-mmseg/1.2.0
+medcl/elasticsearch-analysis-ik/1.2.4
+medcl/elasticsearch-analysis-mmseg/1.2.1
 medcl/elasticsearch-analysis-pinyin-1.2.1
 medcl/elasticsearch-analysis-paoding/1.2.0
 medcl/elasticsearch-analysis-stconvert/1.2.1
