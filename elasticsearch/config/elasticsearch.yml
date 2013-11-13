@@ -407,8 +407,20 @@ index:
           delimiter: ","
           keep_both: "true"
           convert_type: "t2s"
+      ngram_1_to_2:
+          type: "nGram"
+          min_gram: 1
+          max_gram: 2
+      ngram_1_to_3:
+          type: "nGram"
+          min_gram: 1
+          max_gram: 3
 		  
     filter:
+      ngram_min_3:
+          max_gram: 10
+          min_gram: 3
+          type: nGram
       ngram_min_2:
           max_gram: 10
           min_gram: 2
@@ -419,6 +431,10 @@ index:
           type: nGram      
       min2_length:
           min:  2
+          max:  4
+          type: length
+      min3_length:
+          min:  3
           max:  4
           type: length
       s2t_convert:
@@ -452,12 +468,16 @@ index:
           tokenizer: standard
       lowercase_keyword_ngram_min_size1:
           type: custom
-          filter: [ngram_min_1,standard,lowercase]
+          filter: [ngram_min_1,standard,lowercase,unique]
           tokenizer: nGram 
       lowercase_keyword_ngram_min_size2:
           type: custom
-          filter: [ngram_min_2,standard,lowercase,min2_length,stop]
+          filter: [ngram_min_2,standard,lowercase,min2_length,stop,unique]
           tokenizer: nGram 
+      lowercase_keyword_ngram_min_size3:
+          type: custom
+          filter: [ngram_min_3,standard,lowercase,min3_length,stop,unique]
+          tokenizer: ngram_1_to_3
       lowercase_keyword_ngram:
           type: custom
           filter: [ngram_min_1,standard,lowercase]
