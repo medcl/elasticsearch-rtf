@@ -530,7 +530,7 @@ index:
       pinyin_first_letter_analyzer_keyword:
           type: custom
           tokenizer: pinyin_first_letter
-          filter: [keyword,lowercase]
+          filter: [lowercase]
 #      paoding:
 #          alias: [paoding_analyzer]
 #          type: org.elasticsearch.index.analysis.PaodingAnalyzerProvider 
