@@ -527,6 +527,10 @@ index:
           type: custom
           tokenizer: pinyin_first_letter
           filter: [standard,lowercase] 
+      pinyin_first_letter_analyzer_keyword:
+          type: custom
+          tokenizer: pinyin_first_letter
+          filter: [keyword,lowercase]
 #      paoding:
 #          alias: [paoding_analyzer]
 #          type: org.elasticsearch.index.analysis.PaodingAnalyzerProvider 
@@ -560,6 +564,9 @@ index:
           type: custom
           tokenizer: whitespace
           filter: [my_string2int,lowercase]  
+      path_analyzer:
+          type: custom
+          tokenizer: path_hierarchy   
 #      ansj:
 #          alias: [ansj_analyzer]
 #          type: org.elasticsearch.index.analysis.AnsjAnalyzerProvider		  
