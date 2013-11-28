@@ -460,6 +460,9 @@ index:
           redis_server: "127.0.0.1"
           redis_port: 6379
           redis_key: "index1_type2_name2"
+      pinyin_first_letter:
+          type: pinyin
+          first_letter: "only"
 
     analyzer:      
       lowercase_keyword:
@@ -529,8 +532,8 @@ index:
           filter: [standard,lowercase] 
       pinyin_first_letter_analyzer_keyword:
           type: custom
-          tokenizer: pinyin_first_letter
-          filter: [lowercase]
+          tokenizer: keyword
+          filter: [pinyin_first_letter]
 #      paoding:
 #          alias: [paoding_analyzer]
 #          type: org.elasticsearch.index.analysis.PaodingAnalyzerProvider 
