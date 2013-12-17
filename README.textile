@@ -10,7 +10,15 @@ JDK6以上，建议使用JDK7
 1.下载
 <pre>git clone git://github.com/medcl/elasticsearch-rtf.git --depth=1</pre>
 
-2.运行
+2.配置
+elasticsearch-rtf / elasticsearch / bin / service / elasticsearch.conf 
+
+默认JAVA HEAP大小为1G，根据你的服务器环境，需要自行调整，一般设置为物理内存的50%.
+<pre>set.default.ES_HEAP_SIZE=1024
+</pre>
+
+
+3.运行
 linux:
 <pre>cd elasticsearch/bin/service
 ./elasticsearch console
