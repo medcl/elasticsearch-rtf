@@ -606,11 +606,44 @@ index:
       path_analyzer:
         type: custom
         tokenizer: path_hierarchy
-      # ansj:
-      #   alias:
-      #   - ansj_analyzer
-      #   type: org.elasticsearch.index.analysis.AnsjAnalyzerProvider
-index.analysis.analyzer.default.type: mmseg
+      index_ansj:
+        alias:
+        - ansj_index_analyzer
+        type: ansj_index
+        # user_path: ansj/user
+        # ambiguity: ansj/ambiguity.dic
+        # stop_path: ansj/stopLibrary.dic
+        is_name: false
+        # is_num: true 
+        # is_quantifier: true
+        redis:
+          pool:
+            maxactive: 20
+            maxidle: 10
+            maxwait: 100
+            testonborrow: true
+          ip: 127.0.0.1:6379
+          channel: ansj_term
+      query_ansj:
+        alias:
+        - ansj_query_analyzer
+        type: ansj_query
+        # user_path: ansj/user
+        # ambiguity: ansj/ambiguity.dic
+        # stop_path: ansj/stopLibrary.dic
+        is_name: false
+        # is_num: true
+        # is_quantifier: true
+        redis:
+          pool:
+            maxactive: 20
+            maxidle: 10
+            maxwait: 100
+            testonborrow: true
+          ip: 127.0.0.1:6379
+          channel: ansj_term
+
+index.analysis.analyzer.default.type: ansj_index
 
 # rtf.filter.redis.host: 127.0.0.1
 # rtf.filter.redis.port: 6379
