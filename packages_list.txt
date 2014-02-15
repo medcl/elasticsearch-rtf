@@ -14,6 +14,7 @@ medcl/elasticsearch-analysis-paoding/1.2.0
 medcl/elasticsearch-analysis-stconvert/1.2.1
 medcl/elasticsearch-analysis-string2int/1.2.1
 medcl/elasticsearch.partialupdate/1.2.0
+medcl/elasticsearch-river-email/0.2.0
 
 
 medcl/elasticsearch-carrot2/1.2.0
