@@ -20,8 +20,9 @@ medcl/elasticsearch-river-email/0.2.0
 medcl/elasticsearch-carrot2/1.2.0
 
 
-polyfractal/elasticsearch-segmentspy/0.2.0
-http://localhost:9200/_plugin/segmentspy
+4onni/elasticsearch-analysis-ansj/0.1
+
+
 
 
 
