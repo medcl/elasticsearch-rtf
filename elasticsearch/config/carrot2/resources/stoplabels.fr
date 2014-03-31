@@ -1,1 +1,0 @@
-(?i)(années?|deux|général(ement)?|accueil)
