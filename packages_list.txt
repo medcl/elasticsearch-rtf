@@ -10,20 +10,31 @@ elasticsearch/elasticsearch-mapper-attachments/2.0.0
 medcl/elasticsearch-analysis-ik/1.2.6
 medcl/elasticsearch-analysis-mmseg/1.2.2
 medcl/elasticsearch-analysis-pinyin-1.2.2
+
 medcl/elasticsearch.partialupdate/1.2.2
 
+4onni/elasticsearch-analysis-ansj/0.2
+
+
 #site plugins
+
+
 mobz/elasticsearch-head
+
+
 url:http://localhost:9200/_plugin/head/
 
+
+
 lukas-vlcek/bigdesk
+
 http://localhost:9200/_plugin/bigdesk
 
 
 #coming soon
 medcl/elasticsearch-carrot2/
 medcl/elasticsearch-river-email/
-4onni/elasticsearch-analysis-ansj/
+
 medcl/elasticsearch-analysis-paoding/
 medcl/elasticsearch-analysis-stconvert/
 medcl/elasticsearch-analysis-string2int/
