@@ -1,11 +1,11 @@
-elasticsearch/data
-elasticsearch/logs
+data
+logs
 under_test
-elasticsearch/plugins__
+plugins__
 
 wrapper.log
 
-elasticsearch/bin/service/elasticsearch.status
-elasticsearch/bin/service/elasticsearch.pid
-elasticsearch/bin/service/elasticsearch.java.status
+bin/service/elasticsearch.status
+bin/service/elasticsearch.pid
+bin/service/elasticsearch.java.status
 
