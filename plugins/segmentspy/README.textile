@@ -1,0 +1,42 @@
+h1. elasticsearch-segmentspy
+
+SegmentSpy is a tool to watch the segments in your indices. Segment graphs update in real-time, allowing you to watch as ElasticSearch (Lucene) merges your segments.
+
+|_. elasticsearch-segmentspy |_. ElasticSearch |
+| master | 0.17.0 -> 0.90.3 |
+
+*Note*: SegmentSpy has only been tested on 0.20.2 - 0.90.3, but should work all the way back to 0.17.0 when the Segments API was implemented
+
+h3. Installation
+
+To install SegmentSpy onto your node, run <code>bin/plugin -install polyfractal/elasticsearch-segmentspy</code>
+
+SegmentSpy automatically connects to the host specified in the URL used to display the plugin.  For example, if you are running a node on <code>localhost:9200</code>,  point your browser to <code>http://localhost:9200/_plugin/segmentspy/</code>.  The plugin will automatically connect to <code>localhost:9200</code> and begin parsing your cluster state.
+Alternatively, it's possible to set a target host and refreshInterval via url parameters, for example:
+<code>http://localhost:8000/_site/#/myindex/?host=my-es-host.com:9200&refreshInterval=500</code>
+
+!screenshot.png!
+
+
+h3. Usage
+
+Select your index from the dropdown box at the top of the page. A graph will be loaded for each shard on every node in your cluster, grouped by node. The refresh interval can be changed (default is 500ms) or paused completely.  That's it!  Fire up some inserts on your cluster to watch as ElasticSearch/Lucene creates new segments or merges away old ones.
+
+The graphs show the number of documents in each segment, plotted on a logarithmic scale.  Deleted docs are represented as a red, stacked bar.  If you hover over the blue "docs" bar, you can read the number of documents in that segment.  Unfortunately, Google Charts does not support logarithmic stacked charts, so the Deleted Docs bar is preprocessed to adjust it's size.  For this reason, the tooltip value of deleted docs is incorrect (but visually it is mostly accurate).
+
+
+
+h3. Background Information
+
+SegmentSpy utilizes the "Indices Segments API":http://www.elasticsearch.org/guide/reference/api/admin-indices-segments.html that ElasticSearch provides.
+
+This tool was inspired by the fantastic article and videos produced by Mike McCandless "Visualizing Lucene's Segment Merges":http://blog.mikemccandless.com/2011/02/visualizing-lucenes-segment-merges.html article. The visuals of this plugin aren't as sophisticated as Mike's yet, but most of the functionality should be possible using the API.
+
+Future versions will allow you to
+* Differentiate searchable vs unsearchable segments
+* Watch deletes accumulate in indices before merging out
+* Sort on factors other than doc size (doc number, deletes, etc)
+* More robust filtering of nodes/indices for large clusters
+* More?
+
+This plugin is functional...but messy underneath. Developers beware! If you feel like helping out, fork SegmentSpy and make some changes!

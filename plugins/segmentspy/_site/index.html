@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>SegmentSpy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+	<style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+	
+	<!--
+	<link rel="stylesheet" href="css/reset.css">
+	<link rel="stylesheet" href="css/960.css">
+	<link rel="stylesheet" href="css/text.css">
+	<link rel="stylesheet" href="css/style.css">
+	-->
+	<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script src="js/lib/bootstrap/bootstrap.min.js"></script>
+	
+	<script src="js/lib/handlebars/handlebars-1.0.0.beta.6.js"></script>
+	<script src="js/lib/handlebars/handlebars-helpers.js"></script>
+	<script src="js/lib/sammy/sammy-0.7.1.min.js"></script>
+	<script src="js/lib/sammy/plugins/sammy.handlebars-0.7.1.min.js"></script>
+	<script src="js/lib/sammy/plugins/sammy.json-0.7.1.min.js"></script>
+	<script type="text/javascript"
+  src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1","packages":["corechart"]}]}'>
+</script>
+	
+	<script src="js/graph.js"></script>
+	<script src="js/app.js"></script>
+	
+	<!--[if lt IE 9]>
+		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+	<script id="indices-template" type="text/x-handlebars-template">
+		{{#each this.indices}}
+			<li><a href="#/{{this}}/">{{this}}</a></li>
+		{{/each}}
+	</script>
+	
+	<script id="graph-template" type="text/x-handlebars-template">
+		{{#eachProperty this.nodes}}
+			<h2>Node: {{property}}</h2>
+			{{#each value}}
+				<div id="{{this.id}}" style="width:1000px; height:300px;"></div>
+			{{/each}}
+		{{/eachProperty}}
+	</script>
+	
+	<script id="home-template" type="text/x-handlebars-template">
+		<div style="width:700px; margin-left:auto; margin-right:auto">
+			<h1>SegmentSpy</h1>
+			<p>SegmentSpy is a tool to watch the segments in your indices.  Segment graphs update in real-time, allowing you to watch as ElasticSearch (Lucene) merges your segments.</p>
+			<h2>Instructions</h2>
+			<p>Select your index from the dropdown box above.  A graph will be loaded for each shard on every node in your cluster.  The refresh interval can be changed above (default is 500ms) or paused completely.</p>
+			<h2>Background Information</h2>
+			<p>SegmentSpy utilizes the <a href="http://www.elasticsearch.org/guide/reference/api/admin-indices-segments.html">Indices Segments API</a> that ElasticSearch provides.</p>
+			<p>This tool was inspired by the fantastic article and videos produced by Mike McCandless "<a href="http://blog.mikemccandless.com/2011/02/visualizing-lucenes-segment-merges.html">Visualizing Lucene's Segment Merges<a/>" article.  The visuals of this plugin aren't as sophisticated as Mike's yet, but most of the functionality should be possible using the API.</p>
+			<p>Future versions will allow you to 
+				<ul>
+					<li>Differentiate searchable vs unsearchable segments</li>
+					<li>Watch deletes accumulate in indices before merging out</li>
+					<li>Sort on factors other than doc size (doc number, deletes, etc)</li>
+					<li>More robust filtering of nodes/indices for large clusters</li>
+					<li>More?</li>
+				</ul>
+			</p>
+			<p>This plugin is functional...but messy underneath.  Developers beware!  If you feel like helping out, <a href="https://github.com/polyfractal/elasticsearch-segmentspy">fork SegmentSpy and make some changes!</a></p>
+		</div>
+	</script>
+	
+	
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container" style="margin-top:5px; width:1040px">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#/">SegmentSpy</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li style="margin-left:30px">
+                  <form class="form-inline">
+                      <input type="text" class="input-small" id="host" value="http://localhost:9200" style="margin-top:4px; width:150px"/>
+                      <button class="btn" type="button" id="changeHost">Change Host</button>
+                  </form>
+              </li>
+              <li style="margin-left:30px">
+				<div class="btn-group">
+				  <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+					Change Index
+					<span class="caret"></span>
+				  </a>
+				  <ul class="dropdown-menu" id="indices">
+				  </ul>
+				</div>
+			  </li>
+			  <li style="margin-left:30px">
+				<form class="form-inline">
+					<input type="text" class="input-small" id="refreshInterval" value="500" style="margin-top:4px; width:50px"/>
+					<button class="btn" type="button" id="changeRefresh">Change Refresh (ms)</button>
+				</form>
+			  </li>
+			  <li style="margin-left:30px"><button class="btn btn-danger" type="button" id="pause">Pause</button></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container" id="content" style="margin-top:20px">
+    </div> <!-- /container -->
+
+  </body>
+
+
+</html>

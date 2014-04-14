@@ -21,14 +21,18 @@ medcl/elasticsearch.partialupdate/1.2.2
 
 mobz/elasticsearch-head
 
-
 url:http://localhost:9200/_plugin/head/
 
 
 
 lukas-vlcek/bigdesk
 
-http://localhost:9200/_plugin/bigdesk
+url:http://localhost:9200/_plugin/bigdesk
+
+
+polyfractal/elasticsearch-segmentspy
+
+url:http://localhost:9200/_plugin/segmentspy/
 
 
 #coming soon
