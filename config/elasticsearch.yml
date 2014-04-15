@@ -409,3 +409,18 @@ index:
         alias:
         - mmseg_analyzer
         type: org.elasticsearch.index.analysis.MMsegAnalyzerProvider
+      mmseg_maxword:
+        type: custom
+        filter:
+        - lowercase
+        tokenizer: mmseg_maxword
+      mmseg_complex:
+        type: custom
+        filter:
+        - lowercase
+        tokenizer: mmseg_complex
+      mmseg_simple:
+        type: custom
+        filter:
+        - lowercase
+        tokenizer: mmseg_simple

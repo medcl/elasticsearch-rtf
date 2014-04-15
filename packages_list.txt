@@ -15,6 +15,8 @@ medcl/elasticsearch.partialupdate/1.2.2
 
 4onni/elasticsearch-analysis-ansj/0.2
 
+medcl/elasticsearch-river-email/0.3.0
+
 
 #site plugins
 
@@ -37,9 +39,7 @@ url:http://localhost:9200/_plugin/segmentspy/
 
 #coming soon
 medcl/elasticsearch-carrot2/
-medcl/elasticsearch-river-email/
 
-medcl/elasticsearch-analysis-paoding/
 medcl/elasticsearch-analysis-stconvert/
 medcl/elasticsearch-analysis-string2int/
 
