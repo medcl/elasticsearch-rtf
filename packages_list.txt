@@ -16,10 +16,13 @@ medcl/elasticsearch.partialupdate/1.2.2
 4onni/elasticsearch-analysis-ansj/0.2
 
 medcl/elasticsearch-river-email/0.3.0
+medcl/elasticsearch-analysis-stconvert/1.3.0
+medcl/elasticsearch-analysis-string2int/1.3.0
+
+
 
 
 #site plugins
-
 
 mobz/elasticsearch-head
 
@@ -37,11 +40,7 @@ polyfractal/elasticsearch-segmentspy
 url:http://localhost:9200/_plugin/segmentspy/
 
 
-#coming soon
-medcl/elasticsearch-carrot2/
 
-medcl/elasticsearch-analysis-stconvert/
-medcl/elasticsearch-analysis-string2int/
 
 
 
