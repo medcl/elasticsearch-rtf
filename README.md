@@ -12,6 +12,9 @@ b.系统可用内存>2G
 1.下载
 <pre>git clone git://github.com/medcl/elasticsearch-rtf.git -b master --depth 1</pre>
 
+百度云盘: 
+<pre>http://pan.baidu.com/s/1pJNkrUV</pre>
+
 2.配置
 elasticsearch-rtf / elasticsearch / bin / service / elasticsearch.conf 
 
