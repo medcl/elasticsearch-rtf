@@ -1,0 +1,1 @@
+define([],function(){return function(t){t.addEndpointDescription("_stats",{patterns:["_stats","{indices}/_stats"]}),t.addEndpointDescription("_cache/clear",{patterns:["_cache/clear","{indices}/_cache/clear"]}),t.addEndpointDescription("_status",{patterns:["_status","{indices}/_status"]})}});

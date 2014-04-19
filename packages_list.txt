@@ -39,8 +39,8 @@ polyfractal/elasticsearch-segmentspy
 
 url:http://localhost:9200/_plugin/segmentspy/
 
-
-
+elasticsearch/marvel
+http://localhost:9200/_plugin/marvel/
 
 
 

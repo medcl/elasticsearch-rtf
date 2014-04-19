@@ -1,0 +1,1 @@
+define([],function(){return function(n){n.addEndpointDescription("_cache/clear"),n.addEndpointDescription("_status")}});

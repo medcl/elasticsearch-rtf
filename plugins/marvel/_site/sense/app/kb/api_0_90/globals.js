@@ -1,0 +1,1 @@
+define([],function(){return function(e){e.addGlobalAutocompleteRules("highlight",{pre_tags:{},post_tags:{},tags_schema:{},fields:{$FIELD$:{fragment_size:20,number_of_fragments:3}}}),e.addGlobalAutocompleteRules("SCRIPT_ENV",{__template:{script:""},script:"",lang:"",params:{}})}});
