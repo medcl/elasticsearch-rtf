@@ -4,25 +4,26 @@ RTF是Ready To Fly的缩写，在航模里面，表示无需自己组装零件�
 
 如何使用？
 
-0.运行环境
+1.运行环境
+
 a.JDK7  
 b.系统可用内存>2G 
 
 
-1.下载
+2.下载
 <pre>git clone git://github.com/medcl/elasticsearch-rtf.git -b master --depth 1</pre>
 
 百度云盘: 
 <pre>http://pan.baidu.com/s/1pJNkrUV</pre>
 
-2.配置
+3.配置
 elasticsearch-rtf / elasticsearch / bin / service / elasticsearch.conf 
 
 默认JAVA HEAP大小为2G，根据你的服务器环境，需要自行调整，一般设置为物理内存的50%.
 <pre>set.default.ES_HEAP_SIZE=2048</pre>
 
 
-3.运行
+4.运行
 linux:
 <pre>cd elasticsearch/bin/service
 ./elasticsearch console</pre>
@@ -30,3 +31,7 @@ linux:
 windows:
 <pre>cd elasticsearch/bin/service
 elasticsearch.bat</pre>
+
+5.相关工具
+
+使用浏览器打开：http://localhost:9200/_plugin/rtf/
