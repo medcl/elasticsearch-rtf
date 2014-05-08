@@ -1,0 +1,84 @@
+.dropdown-menu {
+	margin-top: 0px;
+	margin-left: 25px;
+}
+
+.navbar-nav {
+	margin-top: 0px;
+	font-weight: 400;
+	font-size: 13px;
+}
+
+.navbar-collapse {
+	border-top: 0px;
+}
+
+.navbar-toggle {
+	padding: 6px 9px;
+	margin-right: 25px;
+}
+.navbar-toggle .icon-bar {
+	width: 10px;
+	height: 1px;
+}
+.navbar-toggle {
+	height: 22px;
+	width: 30px;
+}
+
+.navbar-fixed-top {
+	margin-right: 0px !important;
+}
+.navbar {
+	height: 38px !important;
+	min-height: 38px !important;
+}
+
+.navbar-logo {
+	font-size: 38px;
+	font-variant: small-caps;
+	line-height: 32px !important;
+	padding-top: 0px !important;
+	padding-bottom: 0px !important;
+	font-weight: 100;
+	vertical-align: middle;
+}
+.navbar-logo-action {
+	font-size: 24px;
+	font-weight: 100;
+	vertical-align: middle;
+	font-variant: normal;
+}
+.navbar-app-settings-select {
+	height: 25px;
+	width: 78px;
+	font-size: 10px;
+}
+.navbar-host-input {
+	padding-right: 25px;
+	width: 280px;
+	padding-top: 2px;
+	vertical-align: middle;
+}
+.navbar-menu-section {
+	vertical-align: middle;
+	padding-top: 4px;
+	padding-bottom: 4px;
+	min-width: 300px;
+}
+.navbar-nav > li {
+	height: 38px !important;
+}
+.navbar-nav > li > a {
+	height: 38px !important;
+	line-height: 36px;
+	padding-top: 0px;
+	padding-bottom:0px;
+	padding-left: 13px;
+	padding-right: 13px;
+}
+
+.nav-pills > li > a {
+	font-weight: 400;
+	font-size: 13px;
+}

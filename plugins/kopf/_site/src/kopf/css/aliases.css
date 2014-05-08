@@ -1,0 +1,23 @@
+.aliases-index-alias {
+	border: 1px solid;
+	border-radius: 2px 2px 2px 2px;
+	margin-left: 5px;
+	padding-left: 3px;
+	padding-right: 2px;
+	line-height: 14px;
+	margin-bottom: 2px;
+	height: 16px;
+}
+
+.aliases-alias-cell {
+	width: 200px;
+	max-width: 200px;
+	min-width: 200px;
+}
+.aliases-new-alias-input {
+	overflow: hidden;
+}
+.aliases-new-alias-input > a {
+	text-decoration: none;
+	color: inherit;
+}

@@ -25,24 +25,19 @@ medcl/elasticsearch-analysis-string2int/1.3.0
 #site plugins
 
 mobz/elasticsearch-head
-
-url:http://localhost:9200/_plugin/head/
-
-
+http://localhost:9200/_plugin/head/
 
 lukas-vlcek/bigdesk
-
-url:http://localhost:9200/_plugin/bigdesk
-
+http://localhost:9200/_plugin/bigdesk
 
 polyfractal/elasticsearch-segmentspy
-
-url:http://localhost:9200/_plugin/segmentspy/
+http://localhost:9200/_plugin/segmentspy/
 
 elasticsearch/marvel
 http://localhost:9200/_plugin/marvel/
 
-
+lmenezes/elasticsearch-kopf
+http://localhost:9200/_plugin/kopf
 
 
 

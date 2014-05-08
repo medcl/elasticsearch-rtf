@@ -1,0 +1,6 @@
+<div class="cluster-map-shards">
+	<span id="{{shard.id}}" ng-switch on="shard.primary" class="normal-action" ng-click="displayInfo('shard info',shard.info)" ng-repeat="shard in index(position).shards[node.id]">
+		<span ng-switch-when="true" class="shard shard-primary" ng-class="{STARTED:'shard-started', INITIALIZING:'shard-initializing', 'RELOCATED':'shard-relocated', 	'RECOVERING':'shard-recovering','CLOSED':'shard-closed'}[shard.state]">{{shard.shard}}</span>
+		<span ng-switch-default class="shard" ng-class="{STARTED:'shard-started', INITIALIZING:'shard-initializing', 'RELOCATED':'shard-relocated', 	'RECOVERING':'shard-recovering','CLOSED':'shard-closed'}[shard.state]">{{shard.shard}}</span>
+	</span>
+</div>

@@ -1,0 +1,66 @@
+<div class="row">
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">node_initial_primaries_recoveries</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Allow to control specifically the number of initial recoveries of primaries that are allowed per node. " data-original-title="node_initial_primaries_recoveries" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<input type="text" class="form-control input-sm" ng-model="settings[active_settings]['cluster.routing.allocation.node_initial_primaries_recoveries']" placeholder="">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">cluster_concurrent_rebalance</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Allow to control how many concurrent rebalancing of shards are allowed cluster wide, and default it to 2." data-original-title="cluster_concurrent_rebalance" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<input type="text" class="form-control input-sm" ng-model="settings[active_settings]['cluster.routing.allocation.cluster_concurrent_rebalance']" placeholder="">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">awareness.attributes</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Cluster allocation awareness allows to configure shard and replicas allocation across generic attributes associated the nodes." data-original-title="awareness.attributes" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<input type="text" class="form-control input-sm" ng-model="settings[active_settings]['cluster.routing.allocation.awareness.attributes']" placeholder="">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">node_concurrent_recoveries</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="How many concurrent recoveries are allowed to happen on a node. Defaults to 2." data-original-title="node_concurrent_recoveries" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<input type="text" class="form-control input-sm" ng-model="settings[active_settings]['cluster.routing.allocation.node_concurrent_recoveries']" placeholder="">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">disable_allocation</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Allows to disable primary allocation" data-original-title="disable_allocation" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<BR>
+			<label class="cluster-map-node-type">
+				<!-- input type checkbox margin-top -5px -->
+				<input type="checkbox" ng-model="settings[active_settings]['cluster.routing.allocation.disable_allocation']"  ng-true-value="true"  class=""> True
+				<input type="checkbox" ng-model="settings[active_settings]['cluster.routing.allocation.disable_allocation']"  ng-true-value="false"  class=""> False
+			</label>			
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">disable_replica_allocation</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Allows to disable replica allocation" data-original-title="disable_replica_allocation" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<BR>
+			<label class="cluster-map-node-type">
+				<!-- input type checkbox margin-top -5px -->
+				<input type="checkbox" ng-model="settings[active_settings]['cluster.routing.allocation.disable_replica_allocation']" ng-true-value="true"  class=""> True
+				<input type="checkbox" ng-model="settings[active_settings]['cluster.routing.allocation.disable_replica_allocation']" ng-true-value="false"  class=""> False
+			</label>			
+		</div>
+	</div>
+</div>

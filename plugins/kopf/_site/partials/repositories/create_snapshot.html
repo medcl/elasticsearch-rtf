@@ -1,0 +1,71 @@
+<div class="panel-group" id="#createSnapshotAccordion">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h4 class="panel-title">
+				<a data-toggle="collapse" data-parent="#createSnapshotAccordion" href="#newSnapshot">
+					create snapshot
+				</a>
+			</h4>
+		</div>
+		<div id="newSnapshot" class="panel-collapse collapse">
+			<div class="panel-body">
+				<div class="row">
+					<div class="form-group col-sm-6">
+						<label class="form-label">snapshot name</label>
+						<input ng-model="new_snap.name" class="form-control input-sm" placeholder="snapshot name">
+					</div>
+					<div class="form-group col-sm-6">
+						<label class="form-label">repository</label>
+						<select class="form-control input-sm" ng-model="new_snap.repository" ng-options="r.name as r.value for r in repositories_names">
+							<option value="">select repository</option>
+						</select>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-xs-6">
+						<label class="form-label">ignore_unavailable</label>
+						<div class="row">
+							<div class="col-xs-12">
+								<label class="cluster-map-node-type">
+									<!-- input type checkbox margin-top -5px -->
+									<input type="checkbox" ng-model="new_snap.ignore_unavailable" ng-true-value="true"  class=""> True
+								</label>
+								<label class="cluster-map-node-type">
+									<input type="checkbox" ng-model="new_snap.ignore_unavailable" ng-true-value="false"  class=""> False
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="form-group col-xs-6">
+						<label class="form-label">include_global_state</label>
+						<div class="row">
+							<div class="col-xs-12">
+								<label class="cluster-map-node-type">
+									<input type="checkbox" ng-model="new_snap.include_global_state" ng-true-value="true" > True
+								</label>
+								<label class="cluster-map-node-type">
+									<input type="checkbox" ng-model="new_snap.include_global_state" ng-true-value="false" > False
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-xs-12">
+						<label class="form-label">indices (default is all)</label>
+						<select multiple="multiple" ng-model="new_snap.indices" ng-options="i.name as i.name for i in indices" class="form-control input-sm-twoxheight">
+							<option value="">Default is All</option>
+						</select>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<button type="submit" class="btn btn-primary rest-client-execute input-sm pull-right" ng-click="createSnapshot()">
+							<i class="icon-file-alt"></i> create
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
