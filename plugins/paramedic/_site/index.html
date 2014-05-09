@@ -1,0 +1,214 @@
+<!doctype html>
+<html>
+<head>
+  <title>Paramedic</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/libs/style.css">
+  <link rel="stylesheet" href="css/libs/cubism.css">
+  <link rel="stylesheet" href="css/app.css">
+  <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+</head>
+<body>
+  <header class="clearfix">
+    <script type="text/x-handlebars">
+    {{#with App.cluster}}
+
+    <section {{bindAttr class=":cluster_name status"}}>
+      <span class="label">Cluster Name</span>
+      <h1>{{cluster_name}}</h1>
+
+      <p>
+        <span class="label">Status</span>
+          <span {{bindAttr class=":status status"}}>{{status}}</span>
+         <span class="label">Nodes</span>
+          {{number_of_nodes}}
+         <span class="label">Docs</span>
+          {{#bind docs_count}}{{number_with_delimiter docs_count}}{{/bind}}
+      </p>
+    </section>
+
+    <section class="shards">
+      <p><span class="label">Shards</span></p>
+      <p><span class="label darker">Primary</span>
+         {{active_primary_shards}}</p>
+      <p><span class="label darker">Relocating</span>
+         {{relocating_shards}}</p>
+    </section>
+
+    <section class="shards">
+      <p><span class="label">&nbsp;</span></p>
+      <p><span class="label darker">Initializing</span>
+         {{initializing_shards}}</p>
+      <p><span class="label darker">Unassigned</span>
+         {{unassigned_shards}}</p>
+    </section>
+
+    {{#with App }}
+    <section {{bindAttr class=":endpoint refresh_allowed:polling-active refreshing:polling-in-progress"}}>
+    {{/with}}
+      <p title="Change ElasticSearch URL">
+        <span class="label">URL</span>
+        {{view Ember.TextField valueBinding="App.elasticsearch_url" id="elasticsearch_url"}}
+      </p>
+
+      <p class="refresh">
+        <span class="icon-refresh"></span>
+        <span class="refresh-label">Refresh every</span>
+        <span class="refresh-controls">
+          {{view Ember.Select
+                 contentBinding="App.refresh_intervals"
+                 selectionBinding="App.refresh_interval"
+                 optionLabelPath="content.label"
+                 optionValuePath="content.value"}}
+          <button {{action "toggle" target="App.toggleRefreshAllowedButton"}}>{{App.toggleRefreshAllowedButton.text}}</button>
+        </span>
+      </p>
+      <p class="alerts">
+        {{view Ember.Checkbox id="sound-enabled" checkedBinding="App.sounds_enabled"}}
+        <label for="sound-enabled" class="dimmed">Sounds?</label>
+      </p>
+    </section>
+
+
+    {{/with}}
+    </script>
+  </header>
+
+  <section id="cubism">
+    <script type="text/x-handlebars">
+    <h2 class="label clear">
+      Stats
+      <small><a {{action "toggle" target="App.toggleChart"}}>{{App.toggleChart.text}}</a></small>
+    </h2>
+    </script>
+    <div id="chart"></div>
+  </section>
+
+  <section id="nodes-wrapper">
+    <script type="text/x-handlebars">
+        <h2 class="label clear">
+          Nodes
+          <small><a {{action "toggle" target="App.toggleNodes"}}>{{App.toggleNodes.text}}</a></small>
+        </h2>
+      </script>
+    <script type="text/x-handlebars">
+      {{#unless App.nodes.hidden}}
+      <div id="nodes" class="clearfix">
+      {{#each App.nodes}}
+        <div {{bindAttr class=":node master"}}>
+        <h3><span {{bindAttr class="master:icon-star"}}></span> {{name}}</h3>
+        <div class="meta">
+          <p><span class="label">ID: </span>{{id}}</p>
+          <p><span class="label">IP: </span>{{http_address}}</p>
+          <p><span class="label">Host: </span>{{hostname}}</p>
+          <p><span class="label">Load: </span>{{load}}</p>
+          <p><span class="label">Size: </span>{{disk}}</p>
+          <p><span class="label">Docs: </span>{{#bind docs}}{{number_with_delimiter docs}}{{/bind}}</p>
+          <p><span class="label">Heap: </span>{{jvm_heap_used}}
+          <small class="dimmed" title="Heap max">/{{jvm_heap_max}}</small></p>
+        </div>
+        </div>
+      {{/each}}
+      </div>
+      {{/unless}}
+    </script>
+    <br>
+  </section>
+
+  <section id="indices-wrapper">
+    <script type="text/x-handlebars">
+      <h2 class="label clear">
+        Indices
+        <small><a {{action "toggle" target="App.toggleIndices"}}>{{App.toggleIndices.text}}</a></small>
+      </h2>
+    </script>
+    <script type="text/x-handlebars">
+      {{#unless App.indices.hidden}}
+      <div id="indices">
+      {{#each index in App.indices.sorted}}
+      {{#with index}}
+        <div {{bindAttr class=":index :clearfix state show_detail:expanded"}}>
+          <div class="basic-info clearfix">
+            <h3><a {{bindAttr href="url"}} title="Browse Index">{{name}}</a></h3>
+
+            <div class="buttons">
+              {{#unless closed}}
+              <button {{action "showDetail" target="App.indices"}}>
+                {{#if show_detail}}Hide details{{else}}Show details{{/if}}
+              </button>
+              {{/unless}}
+            </div>
+
+            <div class="shards">
+              {{#each shards}}
+              <div {{bindAttr class=":shard primary state recovery.stage" title="state"}}>
+                {{name}}
+              </div>
+              {{/each}}
+            </div>
+
+            <div class="meta">
+              <p>
+                {{settings.number_of_shards}} shards /
+                {{settings.number_of_replicas}} replicas /
+                {{#bind docs}}{{number_with_delimiter docs}}{{/bind}} docs /
+                {{size}} /
+                {{indexing.index_time}} indexing /
+                {{search.query_time}} querying /
+                {{state}}
+              </p>
+            </div>
+          </div>
+
+          <!-- Shard Allocation -->
+          {{#if show_detail}}
+            <div class="extra-info shards clearfix">
+              {{#unless show_detail_loaded}}
+              <div class="loading">Waiting for data...</div>
+              {{/unless}}
+              {{#each nodes}}
+              <div class="node">
+                <h3>{{name}} <small>{{hostname}}</small></h3>
+                <div class="clearfix">
+                  {{#each shards}}
+                  <div {{bindAttr class=":shard primary state recovery.stage" title="state"}}>
+                      <h3>{{name}}</h3>
+                      <div class="meta">
+                        <p>{{state}}/{{recovery.stage}}</p>
+                        <p>
+                          {{recovery.time}}
+                          {{recovery.size}}
+                        </p>
+                      </div>
+                   </div>
+                  {{/each}}
+                </div>
+              </div>
+              {{/each}}
+            </div>
+          {{/if}}
+        </div>
+      {{/with}}
+      {{/each}}
+      </div>
+      {{/unless}}
+    </script>
+  </section>
+
+  <audio id="alert-green"  src="audio/alert-green.mp3"></audio>
+  <audio id="alert-yellow" src="audio/alert-yellow.mp3"></audio>
+  <audio id="alert-red"    src="audio/alert-red.mp3"></audio>
+
+  <script src="js/libs/jquery-1.7.2.min.js"></script>
+  <!-- <script src="js/libs/ember-0.9.8.min.js"></script> -->
+  <script src="js/libs/ember-0.9.8.js"></script>
+  <script src="js/libs/colorbrewer.min.js"></script>
+  <script src="js/libs/d3.v2.min.js"></script>
+  <script src="js/libs/cubism.v1.js"></script>
+  <script src="js/libs/cubism.elasticsearch.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/cubism.js"></script>
+</body>
+</html>

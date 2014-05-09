@@ -39,7 +39,8 @@ http://localhost:9200/_plugin/marvel/
 lmenezes/elasticsearch-kopf
 http://localhost:9200/_plugin/kopf
 
-
+karmi/elasticsearch-paramedic
+http://localhost:9200/_plugin/paramedic/
 
 
 
