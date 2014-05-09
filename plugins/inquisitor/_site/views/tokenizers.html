@@ -1,0 +1,35 @@
+<div class="container-fluid" id="content" style="margin-top:20px" ng-controller="TokenizerCtrl">
+    <div class="row-fluid">
+        <div class="span8 offset2">
+            <form>
+                <fieldset >
+                    <textarea rows="2" ng-model="tokenizer.query">{{tokenizer.query}}</textarea><br/>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    <div class="row-fluid">
+        <div class="span10 offset1">
+            <table class="table table-bordered" style="width:100%">
+                <thead>
+                <tr>
+                    <td style="width:100px">Analyzer</td>
+                    <td>Tokenized Text</td>
+                </tr>
+                </thead>
+                <tbody >
+                <tr ng-repeat="t in tokenizer.tokenizers">
+                    <td>{{t}}</td>
+                    <td>
+                        <div class="label" style="margin-right: 0.25em;" ng-repeat="token in tokenizer.ttext[t]">
+                            <div style="display:inline-block; margin-right: 0.25em">
+                                <span ng-bind-html-unsafe="token.token"></span>&nbsp;<span style="color:lightgray">{{token.position}}</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
