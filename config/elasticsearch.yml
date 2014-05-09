@@ -465,44 +465,42 @@ index:
       lowercase_keyword:
         type: custom
         filter:
-        - standard
         - lowercase
         tokenizer: standard
       lowercase_keyword_ngram_min_size1:
         type: custom
         filter:
-        - ngram_min_1
-        - standard
         - lowercase
+        - stop
+        - trim
         - unique
         tokenizer: nGram
       lowercase_keyword_ngram_min_size2:
         type: custom
         filter:
-        - ngram_min_2
-        - standard
         - lowercase
         - min2_length
         - stop
+        - trim
         - unique
         tokenizer: nGram
       lowercase_keyword_ngram_min_size3:
         type: custom
         filter:
-        - ngram_min_3
-        - standard
         - lowercase
         - min3_length
         - stop
+        - trim
         - unique
         tokenizer: ngram_1_to_3
       lowercase_keyword_ngram:
         type: custom
         filter:
-        - ngram_min_1
-        - standard
-        - lowercase
-        tokenizer: nGram
+        - lowercase        
+        - stop
+        - trim
+        - unique
+        tokenizer: ngram_1_to_3
       lowercase_keyword_without_standard:
         type: custom
         filter:
@@ -567,9 +565,10 @@ index:
         type: custom
         tokenizer: my_pinyin
         filter:
-        - standard
         - lowercase
         - nGram
+        - trim
+        - unique
       pinyin_first_letter_analyzer:
         type: custom
         tokenizer: pinyin_first_letter
@@ -621,9 +620,45 @@ index:
         filter:
         - my_string2int
         - lowercase
-      path_analyzer:
+      path_analyzer: #used for tokenize :/something/something/else
         type: custom
         tokenizer: path_hierarchy
+      index_ansj:
+        alias:
+        - ansj_index_analyzer
+        type: ansj_index
+        # user_path: ansj/user
+        # ambiguity: ansj/ambiguity.dic
+        # stop_path: ansj/stopLibrary.dic
+        is_name: false
+        # is_num: true 
+        # is_quantifier: true
+        redis:
+          pool:
+            maxactive: 20
+            maxidle: 10
+            maxwait: 100
+            testonborrow: true
+          ip: 127.0.0.1:6379
+          channel: ansj_term
+      query_ansj:
+        alias:
+        - ansj_query_analyzer
+        type: ansj_query
+        # user_path: ansj/user
+        # ambiguity: ansj/ambiguity.dic
+        # stop_path: ansj/stopLibrary.dic
+        is_name: false
+        # is_num: true
+        # is_quantifier: true
+        redis:
+          pool:
+            maxactive: 20
+            maxidle: 10
+            maxwait: 100
+            testonborrow: true
+          ip: 127.0.0.1:6379
+          channel: ansj_term
 
 #index.analysis.analyzer.default.type: mmseg
 index.analysis.analyzer.default.type: keyword

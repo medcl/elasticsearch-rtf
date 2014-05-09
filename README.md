@@ -22,8 +22,9 @@ elasticsearch-rtf / elasticsearch / bin / service / elasticsearch.conf
 默认JAVA HEAP大小为2G，根据你的服务器环境，需要自行调整，一般设置为物理内存的50%.
 <pre>set.default.ES_HEAP_SIZE=2048</pre>
 
+4.启动Redis，供插件使用(ansj,string2int)
 
-4.运行
+5.运行
 linux:
 <pre>cd elasticsearch/bin/service
 ./elasticsearch console</pre>
@@ -32,6 +33,6 @@ windows:
 <pre>cd elasticsearch/bin/service
 elasticsearch.bat</pre>
 
-5.相关工具
+6.工具
 
 使用浏览器打开：http://localhost:9200/_plugin/rtf/
