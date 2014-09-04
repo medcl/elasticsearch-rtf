@@ -224,7 +224,7 @@ function AnalyzerCtrl($scope, $http, Analyzer, Data){
 
     $scope.analyzeStandard = function(analyzer) {
 
-        var path = $scope.data.host + "/rtf/_analyze?analyzer=" + analyzer;
+        var path = $scope.data.host + "/_analyze?analyzer=" + analyzer;
 
         $http.post(path, $scope.analyzer.query)
             .success(function(response){

@@ -36,6 +36,11 @@ function notEmpty(value) {
 	return isDefined(value) && value.toString().trim().length > 0;
 }
 
+function isNumber(value) {
+	var exp = /\d+/;
+	return exp.test(value);
+}
+
 // Returns the given date as a String formatted as hh:MM:ss
 function getTimeString(date) {
 	return ('0' + date.getHours()).slice(-2) + ":" + ('0' + date.getMinutes()).slice(-2) + ":" + ('0' + date.getSeconds()).slice(-2);

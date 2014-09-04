@@ -1,3 +1,24 @@
+TABLE.table {
+	border-collapse: collapse;
+}
+
+
+TABLE.table TH {
+	font-weight: normal;
+	text-align: left;
+	vertical-align: middle;
+}
+
+TABLE.table TBODY.striped TR:nth-child(odd) {
+	background: #eee;
+}
+
+TABLE.table H3 {
+	margin: 0;
+	font-weight: bold;
+	font-size: 140%;
+}
+
 .require { color: #a00; }
 
 .uiButton {
@@ -113,6 +134,14 @@
 	padding: 5px 20px 5px 0;
 }
 
+.uiToolbar .uiTextField {
+	display: inline-block;
+}
+
+.uiToolbar .uiTextField INPUT {
+	padding-top: 2px;
+	padding-bottom: 5px;
+}
 #uiModal {
 	background: black;
 }
@@ -517,18 +546,10 @@ SPAN.uiJsonPretty-boolean { color: purple; }
 	overflow-y: auto;
 }
 
-.uiNodesView {
-	border-collapse: collapse;
-}
 .uiNodesView TH,
 .uiNodesView TD {
 	vertical-align: top;
 	padding: 2px 20px;
-}
-
-.uiNodesView TH {
-	font-weight: normal;
-	text-align: left;
 }
 
 .uiNodesView TH.close,
@@ -551,11 +572,6 @@ SPAN.uiJsonPretty-boolean { color: purple; }
 
 .uiNodesView .uiMenuButton .uiButton-label {
 	padding: 0px 17px 0px 7px;
-}
-
-.uiNodesView-title {
-	font-weight: bold;
-	font-size: 140%;
 }
 
 .uiNodesView-hasAlias {
@@ -590,20 +606,24 @@ SPAN.uiJsonPretty-boolean { color: purple; }
 
 .uiNodesView-nullReplica,
 .uiNodesView-replica {
+	box-sizing: border-box;
 	cursor: pointer;
 	float: left;
 	height: 40px;
-	width: 31px;
+	width: 35px;
 	margin: 4px;
 	border: 2px solid #444;
+	padding: 2px;
 	font-size: 32px;
+	line-height: 32px;
 	text-align: center;
 	letter-spacing: -5px;
 	text-indent: -7px;
 }
+
 .uiNodesView-replica.primary {
 	border-width: 4px;
-	margin: 2px;
+	line-height: 29px;
 }
 
 .uiNodesView-nullReplica {
@@ -615,12 +635,6 @@ SPAN.uiJsonPretty-boolean { color: purple; }
 .uiNodesView-replica.state-STARTED { background: #99dd88; }
 .uiNodesView-replica.state-RELOCATING { background: #dc88dd; }
 
-
-.uiClusterConnect-name, .uiClusterConnect-status {
-	font-size: 1.2em;
-	font-weight: bold;
-	padding: 0 10px;
-}
 
 .uiClusterConnect-uri {
 	width: 280px;
@@ -647,6 +661,13 @@ SPAN.uiJsonPretty-boolean { color: purple; }
 .uiHeader {
 	padding: 3px 10px;
 }
+
+.uiHeader-name, .uiHeader-status {
+	font-size: 1.2em;
+	font-weight: bold;
+	padding: 0 10px;
+}
+
 
 .uiApp-header {
 	background: #eee;

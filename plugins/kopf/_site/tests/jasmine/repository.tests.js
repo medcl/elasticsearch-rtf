@@ -6,22 +6,16 @@ describe('RepositoryController', function(){
     beforeEach(angular.mock.module('kopf'));
     
     beforeEach(angular.mock.inject(function($rootScope, $controller, $injector){
-        //create an empty scope
         this.scope = $rootScope.$new();
-        this.scope.client = {}         //set fake client
-        var $q = $injector.get('$q');
-        this._q = $q
+        this.ElasticService = $injector.get('ElasticService');
+        this.ElasticService.client = {};
         this._rootScope = $rootScope;
-        var $timeout = $injector.get('$timeout');
-        var $location = $injector.get('$location');
         this.ConfirmDialogService = $injector.get('ConfirmDialogService');
         var AlertService = $injector.get('AlertService');
         this.AlertService = AlertService;
-        var AceEditorService = $injector.get('AceEditorService');
-        this.AceEditorService = AceEditorService;
 
         this.createController = function() {
-            return $controller('RepositoryController', {$scope: this.scope}, $location, $timeout, this.ConfirmDialogService, AlertService, AceEditorService);
+            return $controller('RepositoryController', {$scope: this.scope}, this.ConfirmDialogService, AlertService);
         };
 
         this._controller = this.createController();
@@ -29,25 +23,26 @@ describe('RepositoryController', function(){
 
     //TESTS
     it('init : values are set', function(){
-        expect(this.scope.dialog_service).not.toBe(null);
         expect(this.scope.repositories).toEqual([]);
-        expect(this.scope.repositories_names).toEqual([]);
         expect(this.scope.snapshots).toEqual([]);
         expect(this.scope.indices).toEqual([]);
-        expect(this.scope.new_repo).toEqual({});
-        expect(this.scope.editor).toEqual(undefined);
+        expect(this.scope.snapshot).toEqual(null)
+        expect(this.scope.snapshot_repository).toEqual('');;
+        expect(this.scope.restorable_indices).toEqual([]);
+        expect(this.scope.repository_form.name).toEqual('');
+        expect(this.scope.repository_form.settings).toEqual({});
+        expect(this.scope.repository_form.type).toEqual('');
         expect(this.scope.new_snap).toEqual({});
+        expect(this.scope.restore_snap).toEqual({});
+        expect(this.scope.editor).toEqual(undefined);
     });
 
-    it('on : makes calls reload and initEditor', function() {
+    it('on : makes calls reload and sets snapshot to null', function() {
         spyOn(this.scope, 'reload').andReturn(true);
-        spyOn(this.scope, 'initEditor').andCallThrough();
-        spyOn(this.AceEditorService, 'init').andReturn("fakeaceeditor");
+        this.scope.snapshot = "not_null";
         this.scope.$emit("loadRepositoryEvent");
         expect(this.scope.reload).toHaveBeenCalled();
-        expect(this.scope.initEditor).toHaveBeenCalled();
-        expect(this.AceEditorService.init).toHaveBeenCalledWith('repository-settings-editor');
-        expect(this.scope.editor).toEqual("fakeaceeditor");
+        expect(this.scope.snapshot).toEqual(null);
     });
 
     it('loadIndices : assigns a value to indices from cluster.indices', function() {
@@ -57,29 +52,26 @@ describe('RepositoryController', function(){
         expect(this.scope.indices).toEqual(["chicken", "kale", "potatoes"]);
     });
 
-    it('reload : calls loadRepositories, allSnapshots, and loadIndices', function() {
-        var deferred = this._q.defer();
-        deferred.resolve(true);
-        spyOn(this.scope, 'loadRepositories').andReturn(deferred.promise);
-        spyOn(this.scope, 'allSnapshots').andReturn(true);
+    it('reload : calls loadRepositories and loadIndices if not snapshot_repository', function() {
+        spyOn(this.scope, 'loadRepositories').andReturn(true);
+        spyOn(this.scope, 'fetchSnapshots').andReturn(true);
         spyOn(this.scope, 'loadIndices').andReturn(true);
         this.scope.reload();
         this._rootScope.$apply();  //force cycle so promise gets resolved
         expect(this.scope.loadRepositories).toHaveBeenCalled();
-        expect(this.scope.allSnapshots).toHaveBeenCalled();
+        expect(this.scope.fetchSnapshots).not.toHaveBeenCalled();
         expect(this.scope.loadIndices).toHaveBeenCalled();
     });
 
-    it('reload : calls loadRepositories and loadIndices (failed promise)', function() {
-        var deferred = this._q.defer();
-        deferred.reject(true);
-        spyOn(this.scope, 'loadRepositories').andReturn(deferred.promise);
-        spyOn(this.scope, 'allSnapshots').andReturn(true);
+    it('reload : calls loadRepositories and loadIndices', function() {
+        spyOn(this.scope, 'loadRepositories').andReturn(true);
+        spyOn(this.scope, 'fetchSnapshots').andReturn(true);
         spyOn(this.scope, 'loadIndices').andReturn(true);
+        this.scope.snapshot_repository = 'whatever';
         this.scope.reload();
         this._rootScope.$apply();  //force cycle so promise gets resolved
         expect(this.scope.loadRepositories).toHaveBeenCalled();
-        expect(this.scope.allSnapshots).not.toHaveBeenCalled();
+        expect(this.scope.fetchSnapshots).toHaveBeenCalled();
         expect(this.scope.loadIndices).toHaveBeenCalled();
     });
 
@@ -101,7 +93,9 @@ describe('RepositoryController', function(){
     });
 
     it('restoreSnapshot : calls client.restorSnapshot : missing optionals', function () {
-        this.scope.client.restoreSnapshot = function(){};
+        this.ElasticService.client.restoreSnapshot = function(){};
+        this.scope.snapshot_repository = 'my_repo';
+        this.scope.snapshot = { "name":"my_snap" };
         this.scope.restore_snap = {
                                     "snapshot": {
                                                 "snapshot":"my_snap",
@@ -109,10 +103,10 @@ describe('RepositoryController', function(){
                                                 }
                                   };
         var expected = {};
-        spyOn(this.scope.client, "restoreSnapshot").andReturn(true);
+        spyOn(this.ElasticService.client, "restoreSnapshot").andReturn(true);
 
         this.scope.restoreSnapshot();
-        expect(this.scope.client.restoreSnapshot).toHaveBeenCalledWith("my_repo",
+        expect(this.ElasticService.client.restoreSnapshot).toHaveBeenCalledWith("my_repo",
                                                                        "my_snap",
                                                                        JSON.stringify(expected),
                                                                        jasmine.any(Function),
@@ -120,17 +114,16 @@ describe('RepositoryController', function(){
     });
 
     it('restoreSnapshot : calls client.restorSnapshot : all params', function () {
-        this.scope.client.restoreSnapshot = function(){};
+        this.ElasticService.client.restoreSnapshot = function(repo, name, body, success, failure){ success(); };
+        this.scope.snapshot_repository = 'my_repo';
+        this.scope.snapshot = { "name":"my_snap" };
         this.scope.restore_snap = {
                                     "indices":["idx-20140107","idx-20140108"],
                                     "ignore_unavailable": false,
                                     "include_global_state":false,
                                     "rename_replacement": "-chicken-",
                                     "rename_pattern":"-",
-                                    "snapshot": {
-                                                "snapshot":"my_snap",
-                                                "repository":"my_repo"
-                                                }
+                                    "snapshot": { "snapshot":"my_snap", "repository":"my_repo" }
                                   };
 
         var expected = {
@@ -140,87 +133,109 @@ describe('RepositoryController', function(){
                         "rename_replacement":"-chicken-",
                         "rename_pattern":"-"
                         };
-        spyOn(this.scope.client, "restoreSnapshot").andReturn(true);
-
+        spyOn(this.ElasticService.client, "restoreSnapshot").andCallThrough(true);
+        spyOn(this.scope, "reload").andReturn(true);
+        spyOn(this.AlertService, "success").andReturn(true);
         this.scope.restoreSnapshot();
-        expect(this.scope.client.restoreSnapshot).toHaveBeenCalledWith("my_repo",
+        expect(this.ElasticService.client.restoreSnapshot).toHaveBeenCalledWith("my_repo",
                                                                        "my_snap",
                                                                        JSON.stringify(expected),
                                                                        jasmine.any(Function),
                                                                        jasmine.any(Function));
+        expect(this.scope.reload).toHaveBeenCalled();
+        expect(this.AlertService.success).toHaveBeenCalled();
     });
 
-    it('createRepository : calls client.createRepository', function(){
-        this.scope.client.createRepository = function(){};
-        spyOn(this.scope.client, "createRepository").andReturn(true);
+    it('restoreSnapshot : calls client.restorSnapshot fails', function () {
+        this.ElasticService.client.restoreSnapshot = function(repo, name, body, success, failure){ failure(); };
+        this.scope.snapshot_repository = 'my_repo';
+        this.scope.snapshot = { "name":"my_snap" };
+        this.scope.restore_snap = {
+                                    "indices":["idx-20140107","idx-20140108"],
+                                    "ignore_unavailable": false,
+                                    "include_global_state":false,
+                                    "rename_replacement": "-chicken-",
+                                    "rename_pattern":"-",
+                                    "snapshot": { "snapshot":"my_snap", "repository":"my_repo" }
+                                  };
 
-        this.scope.new_repo = {
-                                name:"my_repo",
-                                type:"o positive",
-                              };
-        this.scope.editor = {
-                            error: null,
-                            format:function(){return "{\"settings_key\":\"settings_value\"}";}
-                            };
-        var expected = {type: "o positive", settings: {"settings_key":"settings_value"}};
+        var expected = {
+                        "indices":"idx-20140107,idx-20140108",
+                        "include_global_state":false,
+                        "ignore_unavailable":false,
+                        "rename_replacement":"-chicken-",
+                        "rename_pattern":"-"
+                        };
+        spyOn(this.ElasticService.client, "restoreSnapshot").andCallThrough(true);
+        spyOn(this.AlertService, "error").andReturn(true);
+        this.scope.restoreSnapshot();
+        expect(this.ElasticService.client.restoreSnapshot).toHaveBeenCalledWith("my_repo",
+                                                                       "my_snap",
+                                                                       JSON.stringify(expected),
+                                                                       jasmine.any(Function),
+                                                                       jasmine.any(Function));
+        expect(this.AlertService.error).toHaveBeenCalled();
+    });
+
+    it('createRepository : if success calls client.createRepository and reload repositories', function(){
+        this.ElasticService.client.createRepository = function(name, body, success, failure){ success(); };
+        spyOn(this.ElasticService.client, "createRepository").andCallThrough();
+        spyOn(this.scope, "loadRepositories").andReturn(true);
+        spyOn(this.AlertService, "success");
+        this.scope.repository_form = new Repository("url_repo", {type:"url", settings: {url:"settings_value"} });
+        var expected = { type: "url", settings: { url: "settings_value"}};
         this.scope.createRepository();
-        expect(this.scope.client.createRepository).toHaveBeenCalledWith("my_repo",
+        expect(this.ElasticService.client.createRepository).toHaveBeenCalledWith("url_repo",
                                                                         JSON.stringify(expected),
                                                                         jasmine.any(Function),
                                                                         jasmine.any(Function));
+        expect(this.scope.loadRepositories).toHaveBeenCalled();
+        expect(this.AlertService.success).toHaveBeenCalled();
 
     });
 
-    it('createRepository : does NOT call client.createRepository if editor error', function(){
-        this.scope.client.createRepository = function(){};
-        spyOn(this.scope.client, "createRepository").andReturn(true);
-        this.scope.editor = {
-                            error: "yep this is an error",
-                            format:function(){return "{\"settings_key\":\"settings_value\"}";}
-                            };
+    it('createRepository : if fails calls client.createRepository and reload repositories', function(){
+        this.ElasticService.client.createRepository = function(name, body, success, failure){ failure(); };
+        spyOn(this.ElasticService.client, "createRepository").andCallThrough();
+        spyOn(this.AlertService, "error");
+        this.scope.repository_form = new Repository("fs_repo", { "type":"fs", "settings": { "location": "setting_value"} });
+        var expected = {type: "fs", settings: { location:"setting_value"} };
         this.scope.createRepository();
-        expect(this.scope.client.createRepository).not.toHaveBeenCalled();
+        expect(this.ElasticService.client.createRepository).toHaveBeenCalledWith("fs_repo", JSON.stringify(expected), jasmine.any(Function),jasmine.any(Function));
+        expect(this.AlertService.error).toHaveBeenCalled();
     });
 
-    it('_parseRepositories : calls updateModel and deferred.resolve', function() {
-        var fakedeferred = {resolve : function(){}}
-        this.scope.updateModel = function(){};
-        spyOn(this.scope, "updateModel");
-        spyOn(fakedeferred, "resolve");
-        this.scope._parseRepositories("chicken", fakedeferred);
-        expect(this.scope.updateModel).toHaveBeenCalled();
-        expect(fakedeferred.resolve).toHaveBeenCalled();
+    it('createRepository : does NOT call client.createRepository if validation error', function(){
+        this.ElasticService.client.createRepository = function(){};
+        spyOn(this.AlertService, "error");
+        spyOn(this.ElasticService.client, "createRepository").andReturn(true);
+        this.scope.createRepository();
+        expect(this.ElasticService.client.createRepository).not.toHaveBeenCalled();
+        expect(this.AlertService.error).toHaveBeenCalled();
     });
 
-    it('_parseRepositories : sets repository names for dropdown', function() {
-        var fakedeferred = {resolve : function(){}}
-
-        // fake version of updateModel, to test logic in the function we will pass it
-        this.scope.updateModel=function(action) {
-            action();
+    it('loadRepositories : if success calls client.getRepositories and sets repositories', function() {
+        var repos = [ new Repository('a', { 'type': 'test', 'settings': {} } ) ];
+        this.ElasticService.client.getRepositories = function(success, failure) {
+          success(repos);
         };
 
-        var repositories = {"repo1":{"r1k1":"r1v1"}}
-        spyOn(this.scope, "updateModel").andCallThrough();
-        spyOn(fakedeferred, "resolve");
-
-        this.scope._parseRepositories(repositories, fakedeferred);
-        expect(this.scope.updateModel).toHaveBeenCalled();
-        expect(fakedeferred.resolve).toHaveBeenCalled();
-        expect(this.scope.repositories_names).toEqual([{"name":"repo1", "value":"repo1"}]);
-        expect(this.scope.repositories).toEqual(repositories);
+        this.scope.loadRepositories();
+        expect(this.scope.repositories).toEqual(repos);
     });
 
-    it('loadRepositories : calls client.getRepositories', function() {
-        this.scope.client.getRepositories = function(){};
-        spyOn(this.scope.client, "getRepositories").andReturn(true);
-
+    it('loadRepositories : if fails calls Alert service and sets repositories to ][]', function() {
+        this.ElasticService.client.getRepositories = function(success, failure) {
+          failure("error message");
+        };
+        spyOn(this.AlertService, "error");
         this.scope.loadRepositories();
-        expect(this.scope.client.getRepositories).toHaveBeenCalledWith(jasmine.any(Function), jasmine.any(Function));
+        expect(this.scope.repositories).toEqual([]);
+        expect(this.AlertService.error).toHaveBeenCalled();
     });
 
     it('createSnapshot : repository is required', function() {
-        this.scope.client.createSnapshot = function(){};
+        this.ElasticService.client.createSnapshot = function(){};
         spyOn(this.AlertService, "warn");
         this.scope.new_snap = {};
 
@@ -229,7 +244,7 @@ describe('RepositoryController', function(){
     });
 
     it('createSnapshot : snapshot name is required', function() {
-        this.scope.client.createSnapshot = function(){};
+        this.ElasticService.client.createSnapshot = function(){};
         spyOn(this.AlertService, "warn");
         this.scope.new_snap = {"repository":"yep"};
 
@@ -238,14 +253,14 @@ describe('RepositoryController', function(){
     });
 
     it('createSnapshot : calls client.createSnapshot', function() {
-        this.scope.client.createSnapshot = function(){};
-        spyOn(this.scope.client, "createSnapshot").andReturn(true);
-        this.scope.new_snap = {"repository":"my_repo",
+        this.ElasticService.client.createSnapshot = function(){};
+        spyOn(this.ElasticService.client, "createSnapshot").andReturn(true);
+        this.scope.new_snap = {"repository": new Repository("my_repo", {}),
                                 "name":"my_snap"
                             };
 
         this.scope.createSnapshot();
-        expect(this.scope.client.createSnapshot).toHaveBeenCalledWith("my_repo",
+        expect(this.ElasticService.client.createSnapshot).toHaveBeenCalledWith("my_repo",
                                                                         "my_snap",
                                                                         JSON.stringify({}),
                                                                         jasmine.any(Function),
@@ -253,12 +268,12 @@ describe('RepositoryController', function(){
     });
 
     it('createSnapshot : calls client.createSnapshot - sets optional', function() {
-        this.scope.client.createSnapshot = function(){};
-        spyOn(this.scope.client, "createSnapshot").andReturn(true);
-        this.scope.new_snap = {"repository":"my_repo",
+        this.ElasticService.client.createSnapshot = function(){};
+        spyOn(this.ElasticService.client, "createSnapshot").andReturn(true);
+        this.scope.new_snap = {"repository": new Repository("my_repo", {}),
                                 "name":"my_snap",
                                 "indices":["one","two"],
-                                "include_global_state":"true",
+                                "include_global_state":true,
                                 "ignore_unavailable":true
                             };
 
@@ -269,7 +284,7 @@ describe('RepositoryController', function(){
                         };
 
         this.scope.createSnapshot();
-        expect(this.scope.client.createSnapshot).toHaveBeenCalledWith("my_repo",
+        expect(this.ElasticService.client.createSnapshot).toHaveBeenCalledWith("my_repo",
                                                                         "my_snap",
                                                                         JSON.stringify(expected),
                                                                         jasmine.any(Function),
@@ -282,77 +297,68 @@ describe('RepositoryController', function(){
         expect(this.ConfirmDialogService.open).toHaveBeenCalled();
     });
 
-    it('allSnapshots : creates list of all snapshots', function() {
-        var repositories = {
-                            "repo_1": {"fake_key":"fake_value"}
-                        };
-
-        var snapshots = [{"snapshot": "my_snapshot_1"}, {"snapshot": "my_snapshot_2"}];
-        var deferred = this._q.defer();
-        
-        deferred.resolve(snapshots);
-        
-        spyOn(this.scope, 'loadRepositories').andReturn();
-        
-        this.scope.snapshots = [{"snapshot":"existing"}];
-        spyOn(this.scope, "fetchSnapshots").andReturn(deferred.promise);
-        this.scope.allSnapshots(repositories);
-        this._rootScope.$apply();
-        expect(this.scope.snapshots).toEqual([{"snapshot": "my_snapshot_1"},
-                                            {"snapshot": "my_snapshot_2"}]);
-    });
-
-    it('allSnapshots : creates list of all snapshots - fail', function() {
-        var repositories = {
-                            "repo_1": {"fake_key":"fake_value"}
-                        };
-        var deferred = this._q.defer();
-        deferred.reject(true);
-        
-        spyOn(this.scope, 'loadRepositories').andReturn();
-        
-        this.scope.snapshots = [{"snapshot":"existing"}];
-        spyOn(this.scope, "fetchSnapshots").andReturn(deferred.promise);
-        this.scope.allSnapshots(repositories);
-        this._rootScope.$apply();
-        expect(this.scope.snapshots).toEqual([]);
-    });
-
-    it('_parseSnapshots : adds repo name to each snapshot', function() {
-        var fakedeferred = {resolve : function(){} };
-        var response = {
-                        "snapshots":[{"s1":{"name":"tylerdyrden"}}]
-        };
-
-        var expected = [{"s1":{"name":"tylerdyrden"}, "repository":"chicken"}];
-        spyOn(fakedeferred, "resolve");
-
-        this.scope._parseSnapshots("chicken", response, fakedeferred);
-        expect(fakedeferred.resolve).toHaveBeenCalledWith(expected);
-    });
-
-    it('_parseSnapshots : adds nothing if snapshots not array', function() {
-        var fakedeferred = {resolve : function(){} };
-        var response = {
-                        "snapshots":{"s1":{"name":"tylerdyrden"}}
-        };
-
-        var expected = {"s1":{"name":"tylerdyrden"}};
-        spyOn(fakedeferred, "resolve");
-
-        this.scope._parseSnapshots("chicken", response, fakedeferred);
-        expect(fakedeferred.resolve).toHaveBeenCalledWith(expected);
-    });
-
     it('fetchSnapshots : calls getSnapshots', function() {
-        this.scope.client.getSnapshots = function(){};
-        spyOn(this.scope.client, "getSnapshots").andReturn(true);
+        this.ElasticService.client.getSnapshots = function(){};
+        spyOn(this.ElasticService.client, "getSnapshots").andReturn(true);
         this.scope.fetchSnapshots("chicken");
-        expect(this.scope.client.getSnapshots).toHaveBeenCalledWith(
+        expect(this.ElasticService.client.getSnapshots).toHaveBeenCalledWith(
             "chicken",
             jasmine.any(Function),
             jasmine.any(Function));
-
     });
+
+    it('fetchSnapshots : when successful sets snapshots to fetched values', function() {
+        var snapshots = [ new Snapshot({ "name":"fetched_snapshot"}) ];
+        this.ElasticService.client.getSnapshots = function(repo, success, failed){ success(snapshots); };
+        this.scope.fetchSnapshots("chicken");
+        expect(this.scope.paginator.getCollection()).toEqual(snapshots);
+    });
+
+    it('fetchSnapshots : when failed sets snapshots to [] and calls alert service', function() {
+        this.ElasticService.client.getSnapshots = function(repo, success, failed){ failed("failed"); };
+        spyOn(this.AlertService, "error").andReturn(true);
+        this.scope.fetchSnapshots("chicken");
+        expect(this.AlertService.error).toHaveBeenCalled();
+        expect(this.scope.snapshots).toEqual([]);
+    });
+
+    it('selectRepository should set given repository and fetch snapshots for it', function() {
+        spyOn(this.scope, "fetchSnapshots").andReturn(true);
+        this.scope.selectRepository("repo_name");
+        expect(this.scope.snapshot_repository).toEqual("repo_name");
+        expect(this.scope.fetchSnapshots).toHaveBeenCalledWith("repo_name");
+    });
+
+    it('selectSnapshot should set snapshot to given value', function() {
+        this.scope.selectSnapshot("new_snapshot");
+        expect(this.scope.snapshot).toEqual("new_snapshot");
+    });
+
+    it('unselectSnapshot should set given selected snapshot to null', function() {
+        this.scope.snapshot = "set_snapshot";
+        this.scope.unselectSnapshot();
+        expect(this.scope.snapshot).toEqual(null);
+    });
+
+    it('clears selected repository on snapshot listings if repository is deleted', function() {
+        this.scope.snapshot_repository = "will_be_deleted";
+        var repository = new Repository("will_be_deleted", { "type":"fs", "settings": { "location": "setting_value"} });
+        this.ElasticService.client.deleteRepository =  function(repo, success, failed){ success("") };
+        spyOn(this.scope, "reload").andReturn(true);
+        this.scope.executeDeleteRepository(repository);
+        expect(this.scope.snapshot_repository).toEqual('');
+        expect(this.scope.reload).toHaveBeenCalled();
+    });
+
+    it('doesnt clear selected repository on snapshot listings if another repository is deleted', function() {
+        this.scope.snapshot_repository = "wont_be_deleted";
+        var repository = new Repository("will_be_deleted", { "type":"fs", "settings": { "location": "setting_value"} });
+        this.ElasticService.client.deleteRepository =  function(repo, success, failed){ success("") };
+        spyOn(this.scope, "reload").andReturn(true);
+        this.scope.executeDeleteRepository(repository);
+        expect(this.scope.snapshot_repository).toEqual('wont_be_deleted');
+        expect(this.scope.reload).toHaveBeenCalled();
+    });
+
 
 });

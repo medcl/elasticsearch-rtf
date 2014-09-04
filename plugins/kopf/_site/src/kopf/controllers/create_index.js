@@ -1,4 +1,4 @@
-function CreateIndexController($scope, $location, $timeout, AlertService) {
+kopf.controller('CreateIndexController', ['$scope', '$location', '$timeout', 'AlertService', 'ElasticService', function($scope, $location, $timeout, AlertService, ElasticService) {
 	$scope.settings = '';
 	$scope.shards = '';
 	$scope.replicas = '';
@@ -42,13 +42,11 @@ function CreateIndexController($scope, $location, $timeout, AlertService) {
 			if ($scope.replicas.trim().length > 0) {
 				index_settings.number_of_replicas = $scope.replicas;
 			}
-			$scope.client.createIndex($scope.name, JSON.stringify(settings, undefined, ""), 
+			ElasticService.client.createIndex($scope.name, JSON.stringify(settings, undefined, ""), 
 				function(response) {
 					$scope.refreshClusterState();
 				}, function(error) { 
-					$scope.updateModel(function() {
-						AlertService.error("Error while creating index", error);
-					});
+                    AlertService.error("Error while creating index", error);
 				}
 			);
 		}
@@ -62,4 +60,4 @@ function CreateIndexController($scope, $location, $timeout, AlertService) {
 		$scope.name = '';
 		$scope.replicas = '';
 	};
-}
+}]);

@@ -1,10 +1,8 @@
-function GlobalController($scope, $location, $timeout, $sce, ConfirmDialogService, AlertService, SettingsService, ThemeService) {
-	$scope.dialog = ConfirmDialogService;
-	$scope.version = "0.5.8";
-	$scope.username = null;
-	$scope.password = null;
+kopf.controller('GlobalController', ['$scope', '$location', '$timeout', '$http', '$q', '$sce', '$window', 'ConfirmDialogService', 'AlertService', 'SettingsService', 'ThemeService', 'ElasticService', function($scope, $location, $timeout, $http, $q, $sce, $window, ConfirmDialogService, AlertService, SettingsService, ThemeService, ElasticService) {
+	$scope.version = "1.3.0-SNAPSHOT";
 	$scope.alert_service = AlertService;
-	
+    $scope.modal = new ModalControls();
+
 	$scope.home_screen=function() {
 		$('#cluster_option a').tab('show');
 	};
@@ -12,61 +10,36 @@ function GlobalController($scope, $location, $timeout, $sce, ConfirmDialogServic
 	$scope.getTheme=function() {
 		return ThemeService.getTheme();
 	};
-	
-	$scope.setConnected=function(status) {
-		if (!status) {
-			$scope.cluster = null;
-			$scope.cluster_health = null;
-		}
-		$scope.is_connected = status;
-	};
 
 	$scope.broadcastMessage=function(message,args) {
 		$scope.$broadcast(message,args);
 	};
 	
 	$scope.readParameter=function(name){
-		var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
+		var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec($window.location.href);
 		return isDefined(results) ? results[1] : null;
 	};
-	
-	$scope.setHost=function(url) {
-		if (url.indexOf("http://") !== 0 && url.indexOf("https://") !== 0) {
-			url = "http://" + url;
-		}
-		$scope.connection = new ESConnection(url);
-		$scope.setConnected(false);
-		try {
-			$scope.client = new ElasticClient($scope.connection);
-			$scope.home_screen();
-		} catch (error) {
-			$scope.client = null;
-			AlertService.error(error.message, error.body);
-		}
-	};
-	
-	$scope.connect=function() {
-		// when opening from filesystem, just try default ES location
-		if ($location.host() === "") {
-			$scope.setHost("http://localhost:9200");
-		} else {
-			var location = $scope.readParameter('location');
-			// reads ES location from url parameter
-			if (isDefined(location)) {
-				$scope.setHost(location);
-			} else { // uses current location as ES location
-				var absUrl = $location.absUrl();
-				var cutIndex = absUrl.indexOf("/_plugin/kopf");
-				$scope.setHost(absUrl.substring(0,cutIndex));
-			}
-		}		
-	};
-	
-	$scope.connect();
 
-	$scope.modal = new ModalControls();
-	$scope.alert = null;
-	$scope.is_connected = false;
+    $scope.connect=function() {
+        try {
+            var host = "http://localhost:9200"; // default
+            if ($location.host() !== "") { // not opening from fs
+                var location = $scope.readParameter('location');
+                if (isDefined(location)) {
+                    host = location;
+                } else {
+                    var url = $location.absUrl();
+                    host = url.substring(0, url.indexOf("/_plugin/kopf"));
+                }
+            }
+            ElasticService.connect(host);
+            this.home_screen(); // FIXME: not even sure why this is here
+        } catch(error) {
+            AlertService.error(error.message, error.body);
+        }
+    };
+
+	$scope.connect();
 
 	$scope.alertClusterChanges=function() {
 		if (isDefined($scope.cluster)) {
@@ -93,40 +66,30 @@ function GlobalController($scope, $location, $timeout, $sce, ConfirmDialogServic
 	};
 		
 	$scope.refreshClusterState=function() {
-		if (isDefined($scope.client)) {
-			$timeout(function() { 
-				$scope.client.getClusterDetail(
+		if (ElasticService.isConnected()) {
+			$timeout(function() {
+				ElasticService.client.getClusterDetail(
 					function(cluster) {
-						$scope.updateModel(function() { 
-							cluster.computeChanges($scope.cluster);
-							$scope.cluster = cluster;
-							$scope.alertClusterChanges();
-						});
+                        cluster.computeChanges($scope.cluster);
+                        $scope.cluster = cluster;
+                        $scope.alertClusterChanges();
 					},
 					function(error) {
-						$scope.updateModel(function() { 
-							AlertService.error("Error while retrieving cluster information", error);
-							$scope.cluster = null; 
-						});
+                        AlertService.error("Error while retrieving cluster information", error);
+                        $scope.cluster = null;
 					}
 				);
-			
-				$scope.client.getClusterHealth( 
+
+				ElasticService.client.getClusterHealth(
 					function(cluster) {
-						$scope.updateModel(function() { 
-							$scope.cluster_health = cluster;
-							$scope.setConnected(true);
-						});
+                        $scope.cluster_health = cluster;
 					},
 					function(error) {
-						$scope.updateModel(function() {
-							$scope.cluster_health = null;
-							$scope.setConnected(false);
-							AlertService.error("Error connecting to [" + $scope.host + "]",error);						
-						});
+                        $scope.cluster_health = null;
+                        AlertService.error("Error connecting to [" + $scope.host + "]",error);
 					}
 				);
-			}, 100);			
+			}, 100);
 		}
 	};
 
@@ -138,7 +101,7 @@ function GlobalController($scope, $location, $timeout, $sce, ConfirmDialogServic
 	$scope.autoRefreshCluster();
 
 	$scope.hasConnection=function() {
-		return $scope.is_connected;
+		return isDefined($scope.cluster_health);
 	};
 	
 	$scope.isActive=function(tab) {
@@ -166,4 +129,4 @@ function GlobalController($scope, $location, $timeout, $sce, ConfirmDialogServic
 		$scope.$apply(action);
 	};
 
-}
+}]);

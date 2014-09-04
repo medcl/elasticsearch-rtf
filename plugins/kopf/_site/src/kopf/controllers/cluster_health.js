@@ -1,4 +1,4 @@
-function ClusterHealthController($scope,$location,$timeout,$sce, AlertService, ConfirmDialogService) {
+kopf.controller('ClusterHealthController', ['$scope', '$location', '$timeout', '$sce', 'AlertService', 'ConfirmDialogService', 'ElasticService', function($scope,$location,$timeout,$sce, AlertService, ConfirmDialogService, ElasticService) {
 	$scope.shared_url = '';
 	$scope.results = null;
 	
@@ -31,7 +31,7 @@ function ClusterHealthController($scope,$location,$timeout,$sce, AlertService, C
 		var results = {};
 		$scope.results = null;
 		var info_id = AlertService.info("Loading cluster health state. This could take a few moments.",{},30000);
-		$scope.client.getClusterDiagnosis($scope.retrieveHealth, $scope.retrieveState, $scope.retrieveStats, $scope.retrieveHotThreads,
+		ElasticService.client.getClusterDiagnosis($scope.retrieveHealth, $scope.retrieveState, $scope.retrieveStats, $scope.retrieveHotThreads,
 			function(responses) {
 				$scope.state = '';
 				if (!(responses[0] instanceof Array)) {
@@ -127,4 +127,4 @@ function ClusterHealthController($scope,$location,$timeout,$sce, AlertService, C
 	
 	$scope.gist_history = $scope.loadHistory();
 
-}
+}]);

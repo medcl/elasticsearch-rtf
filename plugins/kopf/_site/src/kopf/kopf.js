@@ -1,7 +1,14 @@
 var kopf = angular.module('kopf', []);
 
 kopf.factory('IndexSettingsService', function() {
-	return {index: null};
+
+    this.loadSettings=function(index, settings) {
+        this.index = index;
+        this.settings = settings;
+        this.editable_settings = new EditableIndexSettings(settings);
+    };
+
+    return this;
 });
 
 // manages behavior of confirmation dialog

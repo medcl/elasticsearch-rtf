@@ -1,0 +1,210 @@
+<div ng-controller="BenchmarkController" ng-show="hasConnection()">
+	<div class="row">
+		<div class="col-md-6 content-panel">
+			<div class="panel-group" id="#runBenchmarkAccordion">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h4 class="panel-title">
+							<a data-toggle="collapse" data-parent="#runBenchmarkAccordion" href="#runBenchmark">run benchmark</a>
+						</h4>
+					</div>
+					<div id="runBenchmark" class="panel-collapse collapse in">
+						<div class="panel-body">
+							<div class="row">
+								<div class="col-xs-6">
+									<div class="form-group">
+										<label class="form-label">benchmark name</label>
+										<input type="text" class="form-control input-sm" placeholder="unique name for this benchmark" ng-model="bench.name">
+									</div>
+								</div>
+								<div class="col-xs-6">
+									<div class="form-group">
+										<label class="form-label">percentiles</label>
+										<input type="text" class="form-control input-sm" ng-model="bench.percentiles">
+									</div>
+								</div>
+							</div>
+							<!-- competitors -->
+							<div class="row">
+								<div class="col-xs-12">
+									<label class="form-label">benchmark competitors</label>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-6">
+									<div class="row">
+										<div class="col-xs-12">
+											<div class="form-group">
+												<label class="form-label">name</label>
+												<input type="text" class="form-control input-sm" placeholder="competitor name" ng-model="competitor.name">
+											</div>
+										</div>
+										<div class="col-xs-12">
+											<div class="form-group">
+												<label class="form-label">search type</label>
+												<select ng-model="competitor.search_type" class="form-control input-sm" ng-options="t as t for t in ['query_then_fetch','dfs_query_then_fetch', 'count']">
+												</select>
+											</div>
+										</div>
+										<div class="col-xs-12">
+											<div class="form-group">
+												<label class="form-label">indices</label>
+												<input type="text" class="form-control input-sm" placeholder="index1, index2, index3" ng-model="competitor.indices">
+											</div>
+										</div>
+										<div class="col-xs-12">
+											<div class="form-group">
+												<label class="form-label">types</label>
+												<input type="text" class="form-control input-sm" placeholder="type1, type2, type3" ng-model="competitor.types">
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-xs-6">
+									<div class="row">
+										<div class="col-xs-12">
+											<label class="form-label">requests</label>
+											<textarea class="form-control input-sm" rows="12" ng-model="competitor.requests"></textarea>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-12">
+									<div class="panel-group" id="#competitorDetailsAccordion">
+										<a data-toggle="collapse" data-parent="#competitorDetailsAccordion" href="#competitorDetails">more options <i class="fa fa-expand"></i></a>
+										<div id="competitorDetails" class="panel-collapse collapse">
+											<div class="panel-body">
+												<div class="row">
+													<div class="col-xs-3">
+														<div class="form-group">
+															<label class="form-label">iterations</label>
+															<input type="text" class="form-control input-sm" placeholder="defaults to 5" ng-model="competitor.iterations">
+														</div>
+													</div>
+													<div class="col-xs-3">
+														<div class="form-group">
+															<label class="form-label">multiplier</label>
+															<input type="text" class="form-control input-sm" placeholder="defaults to 1000" ng-model="competitor.multiplier">
+														</div>
+													</div>
+													<div class="col-xs-3">
+														<div class="form-group">
+															<label class="form-label">concurrency</label>
+															<input type="text" class="form-control input-sm" placeholder="defaults to 5" ng-model="competitor.concurrency">
+														</div>
+													</div>
+													<div class="col-xs-3">
+														<div class="form-group">
+															<label class="form-label">num slowest</label>
+															<input type="text" class="form-control input-sm" placeholder="defaults to 1" ng-model="competitor.num_slowest">
+														</div>
+													</div>
+												</div>
+												<div class="row">
+													<div class="col-xs-12">
+														<label class="form-label">clear caches</label>
+													</div>
+													<div class="form-group col-xs-3">
+														<input type="checkbox" ng-model="competitor.filter_cache"> clear filter cache
+													</div>
+													<div class="form-group col-xs-3">
+														<input type="checkbox" ng-model="competitor.field_data"> clear field data
+													</div>
+													<div class="form-group col-xs-3">
+														<input type="checkbox" ng-model="competitor.id_cache"> clear id cache
+													</div>
+													<div class="form-group col-xs-3">
+														<input type="checkbox" ng-model="competitor.recycler_cache"> clear recycler cache
+													</div>
+													<div class="col-xs-6">
+														<div class="form-group">
+															<label class="form-label">fields to clear</label>
+															<input type="text" class="form-control input-sm" placeholder="field1, field2, field3" ng-model="competitor.cache_fields">
+														</div>
+													</div>
+													<div class="col-xs-6">
+														<div class="form-group">
+															<label class="form-label">filter keys to clear</label>
+															<input type="text" class="form-control input-sm" placeholder="key1, key2, key3" ng-model="competitor.cache_keys">
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-12 content-panel action-buttons">
+									<button type="submit" class="btn btn-primary input-sm" ng-click="addCompetitor()">
+										<i class="fa fa-plus-circle"></i> add
+									</button>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-12 content-panel">
+									<table class="table table-striped table-bordered table-condensed">
+										<tr class="header-row">
+											<td class="">competitor name</td>
+											<td>indices</td>
+											<td>types</td>
+											<td>search type</td>
+										</tr>
+										<tr ng-repeat="competitor in bench.competitors">
+											<td>
+												<span class="">
+													{{competitor.name}} 
+													<i class="fa fa-pencil normal-action" ng-click="editCompetitor($index)"></i>
+													<i class="fa fa-times danger-action normal-action" ng-click="removeCompetitor($index)"></i>
+												</span>
+											</td>
+											<td>
+												<span class="" ng-show="competitor.indices.trim().length > 0">{{competitor.indices}}</span>
+												<span class="" ng-show="competitor.indices.trim().length == 0">ALL</span>
+											</td>
+											<td>
+												<span class="" ng-show="competitor.types.trim().length > 0">{{competitor.types}}</span>
+												<span class="" ng-show="competitor.types.trim().length == 0">ALL</span>
+											</td>
+											<td>
+												<span class="">{{competitor.search_type}}</span>
+											</td>
+										</tr>
+									</table>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-12 content-panel action-buttons">
+									<button type="submit" class="btn btn-danger input-sm" ng-click="runBenchmark()">
+										<i class="fa fa-bolt"></i> run
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6 content-panel">
+			<div class="panel-group" id="#benchmarkResultAccordion">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h4 class="panel-title">
+							<a data-toggle="collapse" data-parent="#benchmarkResultAccordion" href="#benchmarkResult">benchmark {{bench.name}} results</a>
+						</h4>
+					</div>
+					<div id="benchmarkResult" class="panel-collapse collapse in">
+						<div class="panel-body">
+							<div class="row">
+								<div class="col-xs-12">
+									<div id="benchmark-result" style="min-height: 614px"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

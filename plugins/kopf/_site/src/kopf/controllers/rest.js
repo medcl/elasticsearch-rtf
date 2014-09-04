@@ -1,6 +1,6 @@
-function RestController($scope, $location, $timeout, AlertService, AceEditorService) {
-	
-	$scope.request = new Request($scope.connection.host + "/_search","GET","{}");
+kopf.controller('RestController', ['$scope', '$location', '$timeout', 'AlertService', 'AceEditorService', 'ElasticService', function($scope, $location, $timeout, AlertService, AceEditorService, ElasticService) {
+
+	$scope.request = new Request(ElasticService.connection.host + "/_search","GET","{}");
 	$scope.validation_error = null;
 
 	$scope.loadHistory=function() {
@@ -55,11 +55,14 @@ function RestController($scope, $location, $timeout, AlertService, AceEditorServ
 		$scope.request.body = $scope.editor.format();
 		$('#rest-client-response').html('');
 		if (notEmpty($scope.request.url)) {
-			// TODO: deal with basic auth here
+			var a = document.createElement('a');
+			a.href = $scope.request.url;
+			var username = a.username || null;
+			var password = a.password || null;
 			if ($scope.request.method == 'GET' && '{}' !== $scope.request.body) {
 				AlertService.info("You are executing a GET request with body content. Maybe you meant to use POST or PUT?");
 			}
-			$scope.client.executeRequest($scope.request.method,$scope.request.url,null,null,$scope.request.body,
+			ElasticService.client.executeRequest($scope.request.method,$scope.request.url,username,password,$scope.request.body,
 				function(response) {
 					var content = response;
 					try {
@@ -68,26 +71,21 @@ function RestController($scope, $location, $timeout, AlertService, AceEditorServ
 						// nothing to do
 					}
 					$('#rest-client-response').html(content);
-					$scope.updateModel(function() {
-						$scope.addToHistory(new Request($scope.request.url,$scope.request.method,$scope.request.body));
-					});
-
+					$scope.addToHistory(new Request($scope.request.url,$scope.request.method,$scope.request.body));
 				},
-				function(error) {
-					$scope.updateModel(function() {
-						if (error.status !== 0) {
-							AlertService.error("Request was not successful: " + error.statusText);
-						} else {
-							AlertService.error($scope.request.url + " is unreachable");
-						}
-					});
-					try {
-						$('#rest-client-response').html(JSONTree.create(JSON.parse(error.responseText)));
-					} catch (invalid_json) {
-						$('#rest-client-response').html(error.responseText);
+				function(error, status) {
+					if (status !== 0) {
+						AlertService.error("Request was not successful");
+                        try {
+                            $('#rest-client-response').html(JSONTree.create(error));
+                        } catch (invalid_json) {
+                            $('#rest-client-response').html(error);
+                        }
+					} else {
+						AlertService.error($scope.request.url + " is unreachable");
 					}
 				}
 			);
 		}
 	};
-}
+}]);

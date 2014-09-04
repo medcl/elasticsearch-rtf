@@ -20,8 +20,12 @@ Live charts and statistics for Elasticsearch cluster.
     <th>Elasticsearch</th>
   </tr>
   <tr>
-    <td>2.4.0</td>
-    <td>1.0.0.RC1 ... 1.1.x</td>
+    <td>2.5.0</td>
+    <td>1.3.0 ... 1.3.x</td>
+  </tr>
+  <tr>
+    <td>2.4.1 (2.4.0)</td>
+    <td>1.0.0.RC1 ... 1.2.x</td>
   </tr>
   <tr>
     <td>n/a</td>
@@ -32,11 +36,7 @@ Live charts and statistics for Elasticsearch cluster.
     <td>0.90.10 ... 0.90.x</td>
   </tr>
   <tr>
-    <td>2.2.2</td>
-    <td>0.90.0 ... 0.90.9</td>
-  </tr>
-  <tr>
-    <td>2.2.1</td>
+    <td>2.2.2 (2.2.1)</td>
     <td>0.90.0 ... 0.90.9</td>
   </tr>
   <tr>
@@ -55,16 +55,26 @@ Live charts and statistics for Elasticsearch cluster.
 
 ## Release Notes
 
+#### 2.5.0 (09-08-2014)
+
+- Support for Elasticsearch `1.3.x` and later by switching from JSONP to XHR (thanks to [@hmarcelino](https://github.com/hmarcelino)).
+
+#### 2.4.1 (09-08-2014)
+
+- Improvements to charting: namely added tick format to `y-axis` (thanks to [@slingler](https://github.com/slingler))
+  and increased size of the cluster diagram (thanks to [@tylerlong](https://github.com/tylerlong)).
+
 #### 2.4.0 (21-02-2014)
 
-- Support for Elasticsearch 1.0.0.RC1 and above.
+- Support for Elasticsearch `1.0.0.RC1` and later.
 - Added ID cache series into Indices Cache Size chart.
 - Fixed display of hostname.
-- There is no Bigdesk release with support for Elasticsearch 1.0.0.Beta1 and 1.0.0.Beta2 for now. We can add support later if there is urgent need. This is the reason why release number 2.3.0 is skipped.
+- There is no Bigdesk release with support for Elasticsearch `1.0.0.Beta1` and `1.0.0.Beta2` for now.
+  We can add support later if there is urgent need. This is the reason why release number 2.3.0 is skipped.
 
 #### 2.2.3 (14-02-2014)
 
-- Support for Elasticsearch 0.90.10 and above in 0.90.x. (Main changes introduced in [#4661](https://github.com/elasticsearch/elasticsearch/issues/4661))
+- Support for Elasticsearch `0.90.10` and above in `0.90.x`. (Main changes introduced in [#4661](https://github.com/elasticsearch/elasticsearch/issues/4661))
 - JVM GC (Garbage Collection) Chart shows separated series for Young and Old generations.
 - Fixed node get stats retrieval.
 
@@ -84,11 +94,11 @@ Reducing the amount of data pulled over HTTP and kept in the memory.
 
 #### 2.2.0 (24-04-2013)
 
-- Upgrade to Elasticsearch 0.90.0 and higher (kudos to [@mrflip](https://github.com/mrflip) and [@hustonhoburg](https://github.com/hustonhoburg))
+- Upgrade to Elasticsearch `0.90.0` and later (kudos to [@mrflip](https://github.com/mrflip) and [@hustonhoburg](https://github.com/hustonhoburg))
 
 #### 2.1.0
 
-- Added threadpool row to the metrics for Elasticsearch 0.20.0 and higher (kudos to [@jgagnon1](https://github.com/jgagnon1))
+- Added threadpool row to the metrics for Elasticsearch `0.20.0` and higher (kudos to [@jgagnon1](https://github.com/jgagnon1))
 
 #### 2.0.0
 
@@ -124,7 +134,7 @@ Elasticsearch plugin manager then downloads and install Bigdesk sources:
 	Installed lukas-vlcek/bigdesk/2.4.0 into /Users/lukas/projects/elasticsearch-1.0.0/plugins/bigdesk
 	Identified as a _site plugin, moving to _site structure ...
 
-Then you can open web browser and navigate to `http://localhost:9200/_plugin/bigdesk` it will open installed Bigdesk
+Then you can open web browser and navigate to `http://localhost:9200/_plugin/bigdesk/` it will open installed Bigdesk
 and automatically auto-connect to local node.
 
 #### 2) Clone Bigdesk repo into local filesystem and checkout specific tag

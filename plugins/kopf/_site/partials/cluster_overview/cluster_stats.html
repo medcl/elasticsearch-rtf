@@ -38,8 +38,8 @@
 							<span class="cluster-map-stat-number">{{cluster.num_docs}}</span>
 							<span class="cluster-map-stat-description">docs</span>	
 							<span ng-show="cluster.changes.getDocDelta() != 0">
-								<i ng-show="cluster.changes.getDocDelta() > 0" class="icon-arrow-up"></i>
-								<i ng-show="cluster.changes.getDocDelta() < 0" class="icon-arrow-down"></i>
+								<i ng-show="cluster.changes.getDocDelta() > 0" class="fa fa-arrow-up"></i>
+								<i ng-show="cluster.changes.getDocDelta() < 0" class="fa fa-arrow-down"></i>
 								{{cluster.changes.absDocDelta()}}
 							</span>
 						</div>
@@ -50,8 +50,8 @@
 						<div class="cluster-stat-detail">
 							<span class="cluster-map-stat-number">{{cluster.total_size}}</span>
 							<span ng-show="cluster.changes.getDataDelta() != 0">
-								<i ng-show="cluster.changes.getDataDelta() > 0" class="icon-arrow-up"></i>
-								<i ng-show="cluster.changes.getDataDelta() < 0" class="icon-arrow-down"></i>
+								<i ng-show="cluster.changes.getDataDelta() > 0" class="fa fa-arrow-up"></i>
+								<i ng-show="cluster.changes.getDataDelta() < 0" class="fa fa-arrow-down"></i>
 								{{cluster.changes.absDataDelta()}}
 							</span>
 						</div>

@@ -11,7 +11,7 @@
 								</a>
 							</h4>
 						</div>
-						<div id="newPercolatorQuery" class="panel-collapse collapse in" style="height: 600px">
+						<div id="newPercolatorQuery" class="panel-collapse collapse in" style="height: 540px">
 							<div class="panel-body">
 								<div class="row">
 									<div class="col-sm-6 form-group">
@@ -26,12 +26,6 @@
 								</div>
 								<div class="row">
 									<div class="col-xs-12 form-group">
-										<label class="form-label">filter</label>
-										<input ng-model="filter" class="form-control input-sm" placeholder='filter(e.g.: {"color":"blue"})'>
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-xs-12 form-group">
 										<label class="form-label">query</label>
 										<div id="percolator-query-editor" style="height: 370px" class="kopf-ace-editor"></div>
 									</div>
@@ -40,10 +34,10 @@
 									<div class="col-xs-12 action-buttons">
 										<span class="validation-error">{{validation_error}}</span>
 										<button type="submit" class="btn btn-default input-sm" ng-click="editor.format()">
-											<i class="icon-align-left"></i> format
+											<i class="fa fa-align-left"></i> format
 										</button>
 										<button type="submit" class="btn btn-danger input-sm" ng-click="createNewQuery()">
-											<i class="icon-save"></i> create
+											<i class="fa fa-save"></i> create
 										</button>
 									</div>
 								</div>
@@ -64,7 +58,7 @@
 								</a>
 							</h4>
 						</div>
-						<div id="percolatorQueries" class="panel-collapse collapse in" style="height: 600px">
+						<div id="percolatorQueries" class="panel-collapse collapse in" style="height: 540px">
 							<div class="panel-body">
 								<div class="row">
 									<div class="form-group col-md-6">
@@ -86,7 +80,7 @@
 								<div class="row">
 									<div class="col-xs-12 action-buttons">
 										<button type="submit" class="btn btn-primary rest-client-execute input-sm" ng-click="searchPercolatorQueries()">
-											<i class="icon-filter"></i> filter
+											<i class="fa fa-filter"></i> filter
 										</button>
 									</div>
 								</div>
@@ -94,14 +88,14 @@
 									<div class="row">
 										<div class="col-lg-12">
 											<div class="pagination-block">
-												<span ng-switch on="hasPreviousPage()">
-													<i class="icon-double-angle-left" ng-click="previousPage()" ng-switch-when="true"></i>
-													<i class="icon-double-angle-left inactive-action" ng-switch-when="false"></i>
+												<span ng-switch on="pagination.hasPreviousPage()">
+													<i class="fa fa-angle-double-left normal-action" ng-click="previousPage()" ng-switch-when="true"></i>
+													<i class="fa fa-angle-double-left inactive-action" ng-switch-when="false"></i>
 												</span>
-												{{firstResult()}}-{{lastResult()}} of {{total}}
-												<span ng-switch on="hasNextPage()">
-													<i class="icon-double-angle-right" ng-click="nextPage()" ng-switch-when="true"></i>
-													<i class="icon-double-angle-right inactive-action" ng-switch-when="false"></i>
+												{{pagination.firstResult()}}-{{pagination.lastResult()}} of {{pagination.total()}}
+												<span ng-switch on="pagination.hasNextPage()">
+													<i class="fa fa-angle-double-right normal-action" ng-click="nextPage()" ng-switch-when="true"></i>
+													<i class="fa fa-angle-double-right inactive-action" ng-switch-when="false"></i>
 												</span>
 											</div>
 										</div>
@@ -113,11 +107,11 @@
 													<td>id</td>
 													<td>source</td>
 												</tr>
-												<tr ng-repeat="q in queries">
+												<tr ng-repeat="q in pagination.getPage()">
 													<td>{{q.id}}</td>
 													<td>{{q.source}}
 														<a data-toggle="modal" href="#confirm_dialog"	class="remove-icon" data-backdrop="static" data-keyboard="false">
-															<i class="icon-remove remove-icon" ng-click="deletePercolatorQuery(q)"></i>
+															<i class="fa fa-times remove-icon" ng-click="deletePercolatorQuery(q)"></i>
 														</a>
 													</td>
 												</tr>

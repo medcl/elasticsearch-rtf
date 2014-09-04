@@ -1,10 +1,17 @@
-function AliasesController($scope, $location, $timeout, AlertService, AceEditorService) {
-	$scope.aliases = null;
-	$scope.new_index = {};
-	$scope.pagination= new AliasesPagination(1, []);
+kopf.controller('AliasesController', ['$scope', 'AlertService', 'AceEditorService', 'ElasticService', function($scope, AlertService, AceEditorService, ElasticService) {
+	$scope.paginator = new Paginator(1,10, [], new AliasFilter("",""));
+    $scope.page = $scope.paginator.getPage();
+    $scope.original = [];
 	$scope.editor = undefined;
-	
-	$scope.viewDetails=function(alias) {
+    $scope.new_alias = new Alias("", "", "", "", "");
+
+    $scope.aliases = [];
+
+    $scope.$watch('paginator', function(filter, previous) {
+        $scope.page = $scope.paginator.getPage();
+    }, true);
+
+    $scope.viewDetails=function(alias) {
 		$scope.details = alias;
 	};
 
@@ -19,20 +26,25 @@ function AliasesController($scope, $location, $timeout, AlertService, AceEditorS
 		if (!isDefined($scope.editor.error)) {
 			try {
 				$scope.new_alias.validate();
+                var index_name = $scope.new_alias.index;
+                var alias_name = $scope.new_alias.alias;
 				// if alias already exists, check if its already associated with index
-				if (isDefined($scope.aliases.info[$scope.new_alias.alias])) {
-					var aliases = $scope.aliases.info[$scope.new_alias.alias];
-					$.each(aliases,function(i, alias) {
-						if (alias.index === $scope.new_alias.index) {
-							throw "Alias is already associated with this index";
-						}
-					});
-				} else {
-					$scope.aliases.info[$scope.new_alias.alias] = [];
-				}
-				$scope.aliases.info[$scope.new_alias.alias].push($scope.new_alias);
+                var collection = $scope.paginator.getCollection();
+				var indices = collection.filter(function(a) { return a.index == index_name; });
+                if (indices.length === 0) {
+                    collection.push(new IndexAliases(index_name, [ $scope.new_alias ]));
+                } else {
+                    var index_aliases = indices[0];
+                    var aliases = index_aliases.aliases.filter(function(a) { return alias_name == a.alias;  });
+                    if (aliases.length > 0) {
+                        throw "Alias is already associated with this index";
+                    } else {
+                        index_aliases.aliases.push($scope.new_alias);
+                    }
+                }
 				$scope.new_alias = new Alias();
-				$scope.pagination.setResults($scope.aliases.info);
+				$scope.paginator.setCollection(collection);
+                $scope.page = $scope.paginator.getPage();
 				AlertService.success("Alias successfully added. Note that changes made will only be persisted after saving changes");
 			} catch (error) {
 				AlertService.error(error ,null);
@@ -42,106 +54,77 @@ function AliasesController($scope, $location, $timeout, AlertService, AceEditorS
 		}
 	};
 	
-	$scope.removeAlias=function(alias) {
-		delete $scope.aliases.info[alias];
-		$scope.pagination.setResults($scope.aliases.info);
-		AlertService.success("Alias successfully removed. Note that changes made will only be persisted after saving changes");
+	$scope.removeIndexAliases=function(index) {
+        var collection = $scope.paginator.getCollection();
+        for (var position = 0; position < collection.length; position++) {
+            if (index == collection[position].index) {
+                collection.splice(position, 1);
+                break;
+            }
+        }
+        $scope.paginator.setCollection(collection);
+        $scope.page = $scope.paginator.getPage();
+		AlertService.success("All aliases were removed for " + index);
 	};
 	
-	$scope.removeAliasFromIndex=function(index, alias_name) {
-		var aliases = $scope.aliases.info[alias_name];
-		for (var i = 0; i < aliases.length; i++) {
-			if (alias_name === aliases[i].alias && index === aliases[i].index) {
-				$scope.aliases.info[alias_name].splice(i,1);
-				AlertService.success("Alias successfully dissociated from index. Note that changes made will only be persisted after saving changes");
-			}
-		}
+	$scope.removeIndexAlias=function(index, alias) {
+        var index_position = 0;
+        var collection = $scope.paginator.getCollection();
+        for (; index_position < collection.length; index_position++) {
+            if (index == collection[index_position].index) {
+                break;
+            }
+        }
+        var index_aliases = collection[index_position];
+        for (var alias_position = 0; alias_position < index_aliases.aliases.length; alias_position++) {
+            if (alias == index_aliases.aliases[alias_position].alias) {
+                index_aliases.aliases.splice(alias_position, 1);
+                if (index_aliases.aliases.length === 0) {
+                    collection.splice(index_position, 1);
+                }
+                break;
+            }
+        }
+        $scope.paginator.setCollection(collection);
+        $scope.page = $scope.paginator.getPage();
+        AlertService.success("Alias successfully dissociated from index. Note that changes made will only be persisted after saving changes");
 	};
 	
 	$scope.mergeAliases=function() {
-		var deletes = [];
-		var adds = [];
-		Object.keys($scope.aliases.info).forEach(function(alias_name) {
-			var aliases = $scope.aliases.info[alias_name];
-			aliases.forEach(function(alias) {
-				// if alias didnt exist, just add it
-				if (!isDefined($scope.originalAliases.info[alias_name])) {
-					adds.push(alias);
-				} else {
-					var originalAliases = $scope.originalAliases.info[alias_name];
-					var addAlias = true;
-					for (var i = 0; i < originalAliases.length; i++) {
-						if (originalAliases[i].equals(alias)) {
-							addAlias = false;
-							break;
-						}
-					}
-					if (addAlias) {
-						adds.push(alias);
-					}
-				}
-			});
-		});
-		Object.keys($scope.originalAliases.info).forEach(function(alias_name) {
-			var aliases = $scope.originalAliases.info[alias_name];
-			aliases.forEach(function(alias) {
-				if (!isDefined($scope.aliases.info[alias.alias])) {
-					deletes.push(alias);
-				} else {
-					var newAliases = $scope.aliases.info[alias_name];
-					var removeAlias = true;
-					for (var i = 0; i < newAliases.length; i++) {
-						if (alias.index === newAliases[i].index && alias.equals(newAliases[i])) {
-							removeAlias = false;
-							break;
-						}
-					}
-					if (removeAlias) {
-						deletes.push(alias);
-					}
-				}
-			});
-		});
-		$scope.client.updateAliases(adds,deletes,
-			function(response) {
-				$scope.updateModel(function() {
-					AlertService.success("Aliases were successfully updated",response);
-				});
-				$scope.loadAliases();
-			},
-			function(error) {
-				$scope.updateModel(function() {
-					AlertService.error("Error while updating aliases",error);
-				});
-			}
-		);
-	};
-	
-	$scope._parseAliases = function(aliases) {
-		$scope.originalAliases = aliases;
-		$scope.aliases = jQuery.extend(true, {}, $scope.originalAliases);
-		$scope.pagination.setResults($scope.aliases.info);
+		var collection = $scope.paginator.getCollection();
+        var deletes = IndexAliases.diff(collection, $scope.original);
+		var adds = IndexAliases.diff($scope.original, collection);
+        if (adds.length === 0 && deletes.length === 0) {
+            AlertService.warn("No changes were made: nothing to save");
+        } else {
+            ElasticService.client.updateAliases(adds,deletes,
+                function(response) {
+                    AlertService.success("Aliases were successfully updated",response);
+                    $scope.loadAliases();
+                },
+                function(error) {
+                    AlertService.error("Error while updating aliases",error);
+                }
+            );
+        }
 	};
 
 	$scope.loadAliases=function() {
-		$scope.new_alias = new Alias();
-		$scope.client.fetchAliases(
-			function(aliases) {
-				$scope.updateModel(function() {
-					$scope._parseAliases(aliases);
-				});
+		ElasticService.client.fetchAliases(
+			function(index_aliases) {
+                $scope.original = index_aliases.map(function(ia) { return ia.clone(); });
+                $scope.paginator.setCollection(index_aliases);
+                $scope.page = $scope.paginator.getPage();
 			},
 			function(error) {
-				$scope.updateModel(function() {
-					AlertService.error("Error while fetching aliases",error);
-				});
+                AlertService.error("Error while fetching aliases",error);
 			}
 		);
 	};
 	
     $scope.$on('loadAliasesEvent', function() {
-		$scope.loadAliases();
+        $scope.indices = $scope.cluster.indices;
+        $scope.loadAliases();
 		$scope.initEditor();
     });
-
-}
+}]);

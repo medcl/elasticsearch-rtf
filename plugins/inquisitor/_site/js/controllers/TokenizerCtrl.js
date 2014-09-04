@@ -11,7 +11,7 @@ function TokenizerCtrl($scope, $http, Tokenizer, Data){
     });
 
     $scope.analyze = function(tokenizer) {
-        var path = $scope.data.host + "/rtf/_analyze?tokenizer=" + tokenizer;
+        var path = $scope.data.host + "/_analyze?tokenizer=" + tokenizer;
 
         $http.post(path, $scope.tokenizer.query)
             .success(function(response){

@@ -1,6 +1,6 @@
 {
   "name": "elasticsearch-kopf",
-  "version": "0.5.8",
+  "version": "1.3.0-SNAPSHOT",
   "description": "kopf - simple web administration tool for ElasticSearch",
   "main": "index.html",
   "scripts": {

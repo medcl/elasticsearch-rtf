@@ -1,5 +1,6 @@
 exports.vendorJs = [
 	'src/vendor/jquery/jquery.js',
+	'src/vendor/joey/joey.js',
 	'src/vendor/nohtml/jquery-nohtml.js',
 	'src/vendor/graphael/g.raphael.standalone.js',
 	'src/vendor/dateRangeParser/date-range-parser.js'
@@ -10,11 +11,12 @@ exports.vendorCss = [
 ];
 
 exports.srcJs = [
-	'src/app/core/boot.js',
+	'src/app/base/boot.js',
 
 	'src/app/ux/class.js',
 	'src/app/ux/templates/templates.js',
 	'src/app/ux/observable.js',
+	'src/app/ux/singleton.js',
 	'src/app/ux/dragdrop.js',
 	'src/app/ux/fieldCollection.js',
 
@@ -28,7 +30,7 @@ exports.srcJs = [
 	'src/app/data/boolQuery.js',
 
 	'src/app/services/storage.js',
-	'src/app/services/cluster.js',
+	'src/app/services/cluster/cluster.js',
 	'src/app/services/clusterState/clusterState.js',
 
 	'src/app/ui/abstractWidget/abstractWidget.js',
@@ -38,6 +40,7 @@ exports.srcJs = [
 	'src/app/ui/button/button.js',
 	'src/app/ui/menuButton/menuButton.js',
 	'src/app/ui/splitButton/splitButton.js',
+	'src/app/ui/refreshButton/refreshButton.js',
 	'src/app/ui/toolbar/toolbar.js',
 	'src/app/ui/abstractPanel/abstractPanel.js',
 	'src/app/ui/draggablePanel/draggablePanel.js',
@@ -65,11 +68,13 @@ exports.srcJs = [
 	'src/app/ui/filterBrowser/filterBrowser.js',
 	'src/app/ui/indexSelector/indexSelector.js',
 	'src/app/ui/header/header.js',
+	'src/app/ui/indexOverview/indexOverview.js',
 
 	'src/app/app.js'
 ];
 
 exports.srcCss = [
+	'src/app/ux/table.css',
 	'src/app/ui/abstractField/abstractField.css',
 	'src/app/ui/button/button.css',
 	'src/app/ui/menuButton/menuButton.css',

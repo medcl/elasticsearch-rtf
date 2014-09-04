@@ -24,14 +24,14 @@
 									<div class="col-sm-4">
 									  <div class="form-group">
 									    <label class="form-label">type</label>
-											<select class="form-control input-sm" ng-model="field_type" ng-options="type for type in field_index.getTypes(field_index)">
+											<select class="form-control input-sm" ng-model="field_type" ng-options="type for type in field_index_metadata.getTypes(field_index)">
 											</select>
 									  </div>
 									</div>
 									<div class="col-sm-4">
 									  <div class="form-group">
 									    <label class="form-label">field name</label>
-											<select class="form-control input-sm" ng-model="field_field" ng-options="field for field in field_index.getFields(field_type)">
+											<select class="form-control input-sm" ng-model="field_field" ng-options="field for field in field_index_metadata.getFields(field_type)">
 											</select>
 									  </div>
 									</div>
@@ -47,7 +47,7 @@
 								<div class="row">
 									<div class="col-xs-12 action-buttons">
 										<button type="submit" class="btn btn-primary btn-sm input-sm" ng-click="analyzeByField()">
-											<i class="icon-bolt"></i> analyze
+											<i class="fa fa-bolt"></i> analyze
 										</button>
 									</div>
 								</div>
@@ -87,7 +87,7 @@
 									<div class="col-sm-4">
 									  <div class="form-group">
 									    <label class="form-label">analyzer name</label>
-											<select class="form-control input-sm" ng-model="analyzer_analyzer" ng-options="analyzer for analyzer in analyzer_index.getAnalyzers()">
+											<select class="form-control input-sm" ng-model="analyzer_analyzer" ng-options="analyzer for analyzer in analyzer_index_metadata.getAnalyzers()">
 											</select>
 									  </div>
 									</div>
@@ -104,7 +104,7 @@
 								<div class="row">
 									<div class="col-xs-12 action-buttons">
 										<button type="submit" class="btn btn-primary input-sm" ng-click="analyzeByAnalyzer()">
-											<i class="icon-bolt"></i> analyze
+											<i class="fa fa-bolt"></i> analyze
 										</button>
 									</div>
 								</div>

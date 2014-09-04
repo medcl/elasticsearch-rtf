@@ -111,3 +111,6 @@ a.setting-info:hover {
 .action-buttons {
 	text-align: right;
 }
+textarea {
+    resize: none;
+}

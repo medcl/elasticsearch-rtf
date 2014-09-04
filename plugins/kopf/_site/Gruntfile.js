@@ -11,9 +11,9 @@ module.exports = function(grunt) {
 					files: ['src/kopf/**/*.*','src/kopf/*.*'],
 					tasks: ['build'],
 					options: {
-					spawn: false,
-				},
-			},
+					spawn: false
+				}
+			}
 		},
 		copy: {
 			main: {
@@ -22,7 +22,7 @@ module.exports = function(grunt) {
 					{expand: true, flatten: true, src: ['src/lib/ace/worker-json.js'], dest: './'},
 					{expand: true, flatten: true, src: ['src/kopf/theme-kopf.js'], dest: './'},
 					{expand: true, flatten: true, src: ['src/kopf/css/dark_style.css'], dest: './dist/'},
-					{expand: true, flatten: true, src: ['src/kopf/css/default_style.css'], dest: './dist/'}
+					{expand: true, flatten: true, src: ['src/kopf/css/light_style.css'], dest: './dist/'}
 				]
 			}
 		},
@@ -46,7 +46,6 @@ module.exports = function(grunt) {
 			appjs: {
 				src: [
 					'src/kopf/elastic/alias.js',
-					'src/kopf/elastic/aliases.js',
 					'src/kopf/elastic/cluster_changes.js',
 					'src/kopf/elastic/cluster_health.js',
 					'src/kopf/elastic/cluster_settings.js',
@@ -58,8 +57,12 @@ module.exports = function(grunt) {
 					'src/kopf/elastic/node.js',
 					'src/kopf/elastic/shard.js',
 					'src/kopf/elastic/token.js',
+					'src/kopf/elastic/repository.js',
+					'src/kopf/elastic/snapshot.js',
+                    'src/kopf/elastic/warmer.js',
+                    'src/kopf/elastic/percolator.js',
+                    'src/kopf/elastic/index_metadata.js',
 					// CONTROLLERS
-					'src/kopf/controllers.js',
 					'src/kopf/kopf.js',
 					'src/kopf/controllers/aliases.js',
 					'src/kopf/controllers/analysis.js',
@@ -75,15 +78,26 @@ module.exports = function(grunt) {
 					'src/kopf/controllers/repository.js',
 					'src/kopf/controllers/confirm_dialog.js',
 					'src/kopf/controllers/warmup.js',
+					'src/kopf/controllers/benchmark.js',
 					// SERVICES
 					'src/kopf/services/alerts.js',
 					'src/kopf/services/settings.js',
 					'src/kopf/services/aceeditor.js',
 					'src/kopf/services/theme.js',
+                    'src/kopf/services/elastic.js',
 					// MODELS
 					'src/kopf/models/ace_editor.js',
 					'src/kopf/models/gist.js',
-					'src/kopf/models/warmers_pagination.js',
+					'src/kopf/models/benchmark.js',
+                    'src/kopf/models/request.js',
+                    'src/kopf/models/cluster_navigation.js',
+                    'src/kopf/models/modal_controls.js',
+                    'src/kopf/models/paginator.js',
+                    'src/kopf/models/alias_filter.js',
+                    'src/kopf/models/snapshot_filter.js',
+                    'src/kopf/models/warmer_filter.js',
+                    'src/kopf/models/index_filter.js',
+                    'src/kopf/models/node_filter.js',
 					// UTIL
 					'src/kopf/util.js'
 				],
@@ -106,7 +120,7 @@ module.exports = function(grunt) {
 					'src/kopf/css/repository.css'
 				],
 				dest: 'dist/kopf.css'
-			},
+			}
 			
 		},
 		connect: {
@@ -122,17 +136,23 @@ module.exports = function(grunt) {
 			kopf: {
 				src: [
 					'src/kopf/elastic/alias.js',
-					'src/kopf/elastic/aliases.js',
 					'src/kopf/elastic/cluster_changes.js',
 					'src/kopf/elastic/cluster_health.js',
+					'src/kopf/elastic/cluster_settings.js',
 					'src/kopf/elastic/cluster.js',
 					'src/kopf/elastic/elastic_client.js',
+					'src/kopf/elastic/es_connection.js',
 					'src/kopf/elastic/index.js',
+					'src/kopf/elastic/editable_index_settings.js',
 					'src/kopf/elastic/node.js',
 					'src/kopf/elastic/shard.js',
 					'src/kopf/elastic/token.js',
+					'src/kopf/elastic/repository.js',
+					'src/kopf/elastic/snapshot.js',
+                    'src/kopf/elastic/warmer.js',
+                    'src/kopf/elastic/percolator.js',
+                    'src/kopf/elastic/index_metadata.js',
 					// CONTROLLERS
-					'src/kopf/controllers.js',
 					'src/kopf/kopf.js',
 					'src/kopf/controllers/aliases.js',
 					'src/kopf/controllers/analysis.js',
@@ -145,15 +165,29 @@ module.exports = function(grunt) {
 					'src/kopf/controllers/navbar.js',
 					'src/kopf/controllers/rest.js',
 					'src/kopf/controllers/percolator.js',
+					'src/kopf/controllers/repository.js',
 					'src/kopf/controllers/confirm_dialog.js',
 					'src/kopf/controllers/warmup.js',
+					'src/kopf/controllers/benchmark.js',
 					// SERVICES
 					'src/kopf/services/alerts.js',
 					'src/kopf/services/settings.js',
+					'src/kopf/services/aceeditor.js',
+					'src/kopf/services/theme.js',
+                    'src/kopf/services/elastic.js',
 					// MODELS
 					'src/kopf/models/ace_editor.js',
 					'src/kopf/models/gist.js',
-					'src/kopf/models/searchable_list.js',
+					'src/kopf/models/benchmark.js',
+                    'src/kopf/models/request.js',
+                    'src/kopf/models/cluster_navigation.js',
+                    'src/kopf/models/modal_controls.js',
+                    'src/kopf/models/paginator.js',
+                    'src/kopf/models/alias_filter.js',
+                    'src/kopf/models/snapshot_filter.js',
+                    'src/kopf/models/warmer_filter.js',
+                    'src/kopf/models/index_filter.js',
+                    'src/kopf/models/node_filter.js',
 					// UTIL
 					'src/kopf/util.js'
 				]
@@ -163,8 +197,8 @@ module.exports = function(grunt) {
 			all: ['tests/all.html']
 		},
 		karma: {
-			unit: { configFile: 'tests/karma.config.js', keepalive: true },
-		},
+			unit: { configFile: 'tests/karma.config.js', keepalive: true }
+		}
 	});
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-concat');

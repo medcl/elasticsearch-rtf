@@ -1,4 +1,4 @@
-function ConfirmDialogController($scope, $location, $timeout, ConfirmDialogService) {
+kopf.controller('ConfirmDialogController', ['$scope', '$location', '$timeout', 'ConfirmDialogService', function($scope, $location, $timeout, ConfirmDialogService) {
 
 	$scope.dialog_service = ConfirmDialogService;
 	
@@ -10,4 +10,4 @@ function ConfirmDialogController($scope, $location, $timeout, ConfirmDialogServi
 		$scope.dialog_service.confirm();
 	};
 	
-}
+}]);

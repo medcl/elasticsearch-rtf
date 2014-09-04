@@ -1,4 +1,4 @@
-/*   
+/*
    Copyright 2011-2014 Lukas Vlcek
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@
 Backbone.Model = Backbone.Model.extend({
     sync: function(method, model, options) {
 //    options.timeout = 10000; // required, or the application won't pick up on 404 responses
-        options.dataType = 'jsonp';
+        //options.dataType = 'jsonp';
         options.url = this.getBaseUrl() + this.url();
         return Backbone.sync(method, model, options);
     },
@@ -39,7 +39,7 @@ Backbone.Model = Backbone.Model.extend({
 
 Backbone.Collection = Backbone.Collection.extend({
     sync: function(method, model, options) {
-        options.dataType = 'jsonp';
+        //options.dataType = 'jsonp';
         options.url = this.getBaseUrl() + this.url();
         return Backbone.sync(method, model, options);
     },

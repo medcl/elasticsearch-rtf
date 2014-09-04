@@ -1,7 +1,7 @@
 <div class="alert-block" id="{{a.id}}" ng-repeat="a in alert_service.alerts">
 	<div class="alert" ng-class="a.class">
 		<span class="pull-right normal-action" ng-click='alert_service.remove(a.id)'>
-			<i class="icon-remove-sign"></i>
+			<i class="fa fa-times-circle"></i>
 		</span>
 		<i ng-class="a.icon" class="big-icon">&nbsp;</i>
 		<a ng-class="a.class" data-toggle="collapse" data-parent="#alert_box_{{a.id}}" href="#alert_details_{{a.id}}" ng-show="a.hasResponse()">

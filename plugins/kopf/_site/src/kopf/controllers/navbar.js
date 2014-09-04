@@ -1,4 +1,4 @@
-function NavbarController($scope, $location, $timeout, AlertService, SettingsService, ThemeService) {
+kopf.controller('NavbarController', ['$scope', '$location', '$timeout', 'AlertService', 'SettingsService', 'ThemeService', function($scope, $location, $timeout, AlertService, SettingsService, ThemeService) {
 	$scope.settings_service = SettingsService;
 	$scope.new_refresh = $scope.settings_service.getRefreshInterval();
 	$scope.theme = ThemeService.getTheme();
@@ -20,4 +20,4 @@ function NavbarController($scope, $location, $timeout, AlertService, SettingsSer
 		ThemeService.setTheme($scope.theme);
 	};
 
-}
+}]);

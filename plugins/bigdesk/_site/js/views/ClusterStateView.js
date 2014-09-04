@@ -107,8 +107,8 @@ var ClusterStateView = Backbone.View.extend({
 
 //                console.log("pack", packData);
 
-                var width = 400,
-                    height = 400,
+                var width = 600,
+                    height = 600,
                     format = d3.format(",d"),
                     span = 5;
 

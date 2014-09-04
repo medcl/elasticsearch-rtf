@@ -1,9 +1,44 @@
+function IndexAliases(index, aliases) {
+    this.index = index;
+    this.aliases = aliases;
+
+    this.clone=function() {
+        var cloned = new IndexAliases(this.index, []);
+        cloned.aliases = this.aliases.map(function(alias) { return alias.clone(); });
+        return cloned;
+    };
+}
+
+IndexAliases.diff=function(original, modified) {
+    var differences = [];
+    modified.forEach(function(ia) {
+        var is_new = true;
+        original.forEach(function(orig_ia) {
+            if (ia.index == orig_ia.index) {
+                is_new = false;
+                ia.aliases.forEach(function(alias) {
+                    var original_aliases = orig_ia.aliases.filter(function(original_alias) {
+                        return alias.equals(original_alias);
+                    });
+                    if (original_aliases.length === 0) {
+                        differences.push(alias);
+                    }
+                });
+            }
+        });
+        if (is_new) {
+            ia.aliases.forEach(function(alias) { differences.push(alias); });
+        }
+    });
+    return differences;
+};
+
 function Alias(alias, index, filter, index_routing, search_routing) {
 	this.alias = isDefined(alias) ? alias.toLowerCase() : "";
 	this.index = isDefined(index) ? index.toLowerCase() : "";
-	this.filter = filter;
-	this.index_routing = index_routing;
-	this.search_routing = search_routing;
+	this.filter = isDefined(filter) ? filter : "";
+	this.index_routing = isDefined(index_routing) ? index_routing : "";
+	this.search_routing = isDefined(search_routing) ? search_routing : "";
 
 	this.validate=function() {
 		if (!notEmpty(this.alias)) {
@@ -44,25 +79,11 @@ function Alias(alias, index, filter, index_routing, search_routing) {
 		}
 		return info; 
 	};
-}
-function Aliases(aliases_info) {
-	var indices  = [];
-	var aliases_map = {};
-	Object.keys(aliases_info).forEach(function(index) {
-		indices.push(index); // fills list of available indices
-		var indexAliases = aliases_info[index].aliases;
-		Object.keys(indexAliases).forEach(function(alias) { // group aliases per alias name
-			if (!isDefined(aliases_map[alias])) {
-				aliases_map[alias] = [];
-			}
-			var alias_instance = new Alias(alias, index, indexAliases[alias].filter, indexAliases[alias].index_routing,indexAliases[alias].search_routing);
-			aliases_map[alias].push(alias_instance);
-		});
-	});
-	this.indices = indices.sort(function(a,b) { return a.localeCompare(b); });
-	this.info = aliases_map;
-}
 
+    this.clone=function() {
+        return new Alias(this.alias, this.index, this.filter, this.index_routing, this.search_routing);
+    };
+}
 function ClusterChanges() {
 
 	this.nodeJoins = null;
@@ -199,180 +220,181 @@ function ClusterSettings(settings) {
 		});		
 	});
 }
-function Cluster(state,status,nodes,settings) {
+function Cluster(state,status,nodes,settings, aliases) {
 	this.created_at = new Date().getTime();
-	if (isDefined(state) && isDefined(status) && isDefined(nodes) && isDefined(settings)) {
-		this.disableAllocation = false;
-		if (isDefined(settings.persistent) && isDefined(settings.persistent.disable_allocation)) {
-			this.disableAllocation = settings.persistent.disable_allocation;
-		}
-		// FIXME: 0.90/1.0 check
-		if (isDefined(settings.transient) && isDefined(settings.transient['cluster.routing.allocation.disable_allocation'])) {
-			this.disableAllocation = settings.transient['cluster.routing.allocation.disable_allocation'];
-		} else {
-			this.disableAllocation = getProperty(settings,'transient.cluster.routing.allocation.disable_allocation', "false");
-		}
-		this.settings = settings;
-		this.master_node = state.master_node;
-		var num_nodes = 0;
-		this.nodes = Object.keys(state.nodes).map(function(x) { 
-			var node = new Node(x,state.nodes[x],nodes.nodes[x]);
-			num_nodes += 1;
-			if (node.id === state.master_node) {
-				node.setCurrentMaster();
-			}
-			return node;
-		}).sort(function(a,b) { return a.compare(b); });
-		this.number_of_nodes = num_nodes;
-		var iMetadata = state.metadata.indices;
-		var iRoutingTable = state.routing_table.indices;
-		var iStatus = status.indices;
-		var count = 0;
-		var unassigned_shards = 0;
-		var total_size = 0;
-		var num_docs = 0;
-		var special_indices = 0;
-		this.indices = Object.keys(iMetadata).map(
-			function(x) { 
-				var index = new Index(x,iRoutingTable[x], iMetadata[x], iStatus[x]);
-				if (index.isSpecial()) {
-					special_indices++;
-				}
-				unassigned_shards += index.unassigned.length;
-				total_size += parseInt(index.total_size);
-				num_docs += index.num_docs;
-				return index;
-			}
-		).sort(function(a,b) { return a.compare(b); });
-		this.special_indices = special_indices;
-		this.num_docs = num_docs;
-		this.unassigned_shards = unassigned_shards;
-		this.total_indices = this.indices.length;
-		this.shards = status._shards.total;
-		this.failed_shards = status._shards.failed;
-		this.successful_shards = status._shards.successful;
-		this.total_size = readablizeBytes(total_size);
-		this.total_size_in_bytes = total_size;
-		this.getNodes=function(name, data, master, client) { 
-			return $.map(this.nodes,function(node) {
-				return node.matches(name, data, master, client) ? node : null;
-			});
-		};
-		
-		this.changes = null;
 
-		this.computeChanges=function(old_cluster) {
-			var nodes = this.nodes;
-			var indices = this.indices;
-			var changes = new ClusterChanges();
-			if (isDefined(old_cluster)) {
-				// checks for node differences
-				old_cluster.nodes.forEach(function(node) {
-					for (var i = 0; i < nodes.length; i++) {
-						if (nodes[i].equals(node)) {
-							node = null;
-							break;
-						}
-					}
-					if (isDefined(node)) {
-						changes.addLeavingNode(node);
-					}
-				});
-				
-				if (old_cluster.nodes.length != nodes.length || !changes.hasJoins()) {
-						nodes.forEach(function(node) {
-							for (var i = 0; i < old_cluster.nodes.length; i++) {
-								if (old_cluster.nodes[i].equals(node)) {
-									node = null;
-									break;
-								}
-							}	
-						if (isDefined(node)) {
-							changes.addJoiningNode(node);	
-						}
-					});
-				}
-			
-				// checks for indices differences
-				old_cluster.indices.forEach(function(index) {
-					for (var i = 0; i < indices.length; i++) {
-						if (indices[i].equals(index)) {
-							index = null;
-							break;
-						}
-					}
-					if (isDefined(index)) {
-						changes.addDeletedIndex(index);
-					}
-				});
-				
-				if (old_cluster.indices.length != indices.length || !changes.hasCreatedIndices()) {
-						indices.forEach(function(index) {
-							for (var i = 0; i < old_cluster.indices.length; i++) {
-								if (old_cluster.indices[i].equals(index)) {
-									index = null;
-									break;
-								}
-							}	
-						if (isDefined(index)) {
-							changes.addCreatedIndex(index);	
-						}
-					});
-				}
-				
-				var docDelta = this.num_docs - old_cluster.num_docs;
-				// var docRate = docDelta / ((this.created_at - old_cluster.created_at) / 1000);
-				changes.setDocDelta(docDelta);
-				
-				var dataDelta = this.total_size_in_bytes - old_cluster.total_size_in_bytes;
-				changes.setDataDelta(dataDelta);
-			
+    this.disableAllocation = "false";
+    var persistentAllocation = getProperty(settings, 'persistent.cluster.routing.allocation.enable', "all");
+    var transientAllocation = getProperty(settings, 'transient.cluster.routing.allocation.enable', "");
+    if (transientAllocation !== "") {
+        this.disableAllocation = transientAllocation == "all" ? "false" : "true";
+    } else {
+        if (persistentAllocation != "all") {
+            this.disableAllocation = "true";
+        }
+    }
+
+	this.settings = settings;
+	this.master_node = state.master_node;
+	var num_nodes = 0;
+    var total_size = 0;
+    var num_docs = 0;
+
+	this.nodes = Object.keys(state.nodes).map(function(x) {
+		var node = new Node(x,state.nodes[x],nodes.nodes[x]);
+        total_size += parseInt(node.size_in_bytes);
+        num_docs += node.docs;
+		num_nodes += 1;
+		if (node.id === state.master_node) {
+			node.setCurrentMaster();
+		}
+		return node;
+	}).sort(function(a,b) { return a.compare(b); });
+	this.number_of_nodes = num_nodes;
+	var iRoutingTable = state.routing_table.indices;
+	var iStatus = status.indices;
+
+	var special_indices = 0;
+	this.indices = Object.keys(iRoutingTable).map(
+		function(x) {
+			var index = new Index(x, state, iRoutingTable[x], iStatus[x], aliases[x]);
+			if (index.special) {
+				special_indices++;
 			}
-			this.changes = changes;
-		};
-		
-		this.open_indices=function() {
-			return $.map(this.indices, function(index) {
-				if (index.state == 'open') {
-					return index;
-				} else {
-					return null;
+			return index;
+		}
+	);
+    if (isDefined(state.blocks.indices)) {
+        var indices = this.indices;
+        Object.keys(state.blocks.indices).forEach(function(index) {
+            indices.push(new Index(index));
+        });
+    }
+    this.indices = this.indices.sort(function(a,b) { return a.compare(b); });
+
+    this.special_indices = special_indices;
+	this.num_docs = num_docs;
+	this.total_indices = this.indices.length;
+
+    this.shards = status._shards.total;
+	this.failed_shards = status._shards.failed;
+	this.successful_shards = status._shards.successful;
+    this.unassigned_shards = state.routing_nodes.unassigned.length;
+
+    this.total_size = readablizeBytes(total_size);
+	this.total_size_in_bytes = total_size;
+	this.changes = null;
+
+	this.computeChanges=function(old_cluster) {
+		var nodes = this.nodes;
+		var indices = this.indices;
+		var changes = new ClusterChanges();
+		if (isDefined(old_cluster)) {
+			// checks for node differences
+			old_cluster.nodes.forEach(function(node) {
+				for (var i = 0; i < nodes.length; i++) {
+					if (nodes[i].equals(node)) {
+						node = null;
+						break;
+					}
+				}
+				if (isDefined(node)) {
+					changes.addLeavingNode(node);
 				}
 			});
-		};
-	}
+
+			if (old_cluster.nodes.length != nodes.length || !changes.hasJoins()) {
+					nodes.forEach(function(node) {
+						for (var i = 0; i < old_cluster.nodes.length; i++) {
+							if (old_cluster.nodes[i].equals(node)) {
+								node = null;
+								break;
+							}
+						}
+					if (isDefined(node)) {
+						changes.addJoiningNode(node);
+					}
+				});
+			}
+
+			// checks for indices differences
+			old_cluster.indices.forEach(function(index) {
+				for (var i = 0; i < indices.length; i++) {
+					if (indices[i].equals(index)) {
+						index = null;
+						break;
+					}
+				}
+				if (isDefined(index)) {
+					changes.addDeletedIndex(index);
+				}
+			});
+
+			if (old_cluster.indices.length != indices.length || !changes.hasCreatedIndices()) {
+					indices.forEach(function(index) {
+						for (var i = 0; i < old_cluster.indices.length; i++) {
+							if (old_cluster.indices[i].equals(index)) {
+								index = null;
+								break;
+							}
+						}
+					if (isDefined(index)) {
+						changes.addCreatedIndex(index);
+					}
+				});
+			}
+            var docDelta = this.num_docs - old_cluster.num_docs;
+			// var docRate = docDelta / ((this.created_at - old_cluster.created_at) / 1000);
+			changes.setDocDelta(docDelta);
+			var dataDelta = this.total_size_in_bytes - old_cluster.total_size_in_bytes;
+			changes.setDataDelta(dataDelta);
+		}
+		this.changes = changes;
+	};
+
+	this.open_indices=function() {
+		return $.map(this.indices, function(index) {
+			if (index.state == 'open') {
+				return index;
+			} else {
+				return null;
+			}
+		});
+	};
+
 }
-function ElasticClient(connection) {
+function ElasticClient(connection, http_service, q) {
 	this.host = connection.host;
 	this.username = connection.username;
 	this.password = connection.password;
-	
+
 	this.createAuthToken=function(username,password) {
-		var auth = null;
-		if (isDefined(username) && isDefined(password)) {
-			auth = "Basic " + window.btoa(username + ":" + password);
-		}
-		return auth;
+		var hasAuth = isDefined(username) && isDefined(password);
+        return hasAuth ? "Basic " + window.btoa(username + ":" + password) : null;
 	};
 	
-	var auth = this.createAuthToken(connection.username, connection.password);
+	var auth = this.createAuthToken(this.username, this.password);
 	var fetch_version = $.ajax({
 		type: 'GET',
 		url: connection.host + "/",
-		beforeSend: function(xhr) { 
+		beforeSend: function(xhr) {
 			if (isDefined(auth)) {
 				xhr.setRequestHeader("Authorization", auth);
 			} 
 		},
-		data: {},
 		async: false
 	});
 	
 	var client = this;
 	fetch_version.done(function(response) {
 		try {
-			client.version = response.version.number;	
-		} catch (error) {
+			var version = response.version.number;
+            client.version = { 'str': version };
+            var parts = version.split('.');
+            client.version.major = parseInt(parts[0]);
+            client.version.minor = parseInt(parts[1]);
+            client.version.build = parseInt(parts[2]);
+        } catch (error) {
 			throw { message: "Version property could not bet read. Are you sure there is an ElasticSearch runnning at [" + connection.host + "]?", body: response };
 		}
 	});
@@ -381,80 +403,86 @@ function ElasticClient(connection) {
 		throw error.statusText;
 	});
 
-	this.is1=function() {
-		return (this.version.substring(0, 2) == "1.");
-	};
+    this.versionCheck=function(version) {
+        var parts = version.split('.');
+        var mjr = parseInt(parts[0]);
+        var mnr = parseInt(parts[1]);
+        var bld = parseInt(parts[2]);
+        var v = this.version;
+        return (v.major > mjr || v.major == mjr && v.minor > mnr || v.major == mjr && v.minor == mnr && v.build >= bld);
+    };
 
 	this.createIndex=function(name, settings, callback_success, callback_error) {
-		this.executeElasticRequest('POST', "/" + name, settings, callback_success, callback_error);
+		this.executeClusterRequest('POST', "/" + name, settings, callback_success, callback_error);
 	};
 
 	this.enableShardAllocation=function(callback_success, callback_error) {
-		var new_settings = {"transient":{ "cluster.routing.allocation.disable_allocation":false }};
-		this.executeElasticRequest('PUT', "/_cluster/settings",JSON.stringify(new_settings, undefined, ""), callback_success, callback_error);
+		var new_settings = { "transient":{ "cluster.routing.allocation": { "enable": 'all', "disable_allocation": false } } };
+		this.executeClusterRequest('PUT', "/_cluster/settings",JSON.stringify(new_settings, undefined, ""), callback_success, callback_error);
 	};
 
 	this.disableShardAllocation=function(callback_success, callback_error) {
-		var new_settings = {"transient":{ "cluster.routing.allocation.disable_allocation":true }};
-		this.executeElasticRequest('PUT', "/_cluster/settings",JSON.stringify(new_settings, undefined, ""), callback_success, callback_error);
-	};
-
-	this.getClusterState=function(callback_success, callback_error) {
-		this.executeElasticRequest('GET', "/_cluster/state",{}, callback_success, callback_error);
+		var new_settings = { "transient":{ "cluster.routing.allocation": { "enable": 'none', "disable_allocation": true } } };
+		this.executeClusterRequest('PUT', "/_cluster/settings",JSON.stringify(new_settings, undefined, ""), callback_success, callback_error);
 	};
 
 	this.shutdownNode=function(node_id, callback_success, callback_error) {
-		this.executeElasticRequest('POST', "/_cluster/nodes/" + node_id + "/_shutdown", {}, callback_success, callback_error);
+		this.executeClusterRequest('POST', "/_cluster/nodes/" + node_id + "/_shutdown", {}, callback_success, callback_error);
 	};
 
 	this.openIndex=function(index, callback_success, callback_error) {
-		this.executeElasticRequest('POST', "/" + index + "/_open", {}, callback_success, callback_error);
+		this.executeClusterRequest('POST', "/" + index + "/_open", {}, callback_success, callback_error);
 	};
 
 	this.optimizeIndex=function(index, callback_success, callback_error) {
-		this.executeElasticRequest('POST', "/" + index + "/_optimize", {}, callback_success, callback_error);
+		this.executeClusterRequest('POST', "/" + index + "/_optimize", {}, callback_success, callback_error);
 	};
 
 	this.clearCache=function(index, callback_success, callback_error) {
-		this.executeElasticRequest('POST', "/" + index + "/_cache/clear", {}, callback_success, callback_error);
+		this.executeClusterRequest('POST', "/" + index + "/_cache/clear", {}, callback_success, callback_error);
 	};
 
 	this.closeIndex=function(index, callback_success, callback_error) {
-		this.executeElasticRequest('POST', "/" + index + "/_close", {}, callback_success, callback_error);
+        this.executeClusterRequest('POST', "/" + index + "/_close", {}, callback_success, callback_error);
 	};
 
 	this.refreshIndex=function(index, callback_success, callback_error) {
-		this.executeElasticRequest('POST', "/" + index + "/_refresh", {}, callback_success, callback_error);
+		this.executeClusterRequest('POST', "/" + index + "/_refresh", {}, callback_success, callback_error);
 	};
 
 	this.deleteIndex=function(name, callback_success, callback_error) {
-		this.executeElasticRequest('DELETE', "/" + name, {}, callback_success, callback_error);
+		this.executeClusterRequest('DELETE', "/" + name, {}, callback_success, callback_error);
 	};
 
 	this.updateIndexSettings=function(name, settings, callback_success, callback_error) {
-		this.executeElasticRequest('PUT', "/" + name + "/_settings", settings, callback_success, callback_error);
+		this.executeClusterRequest('PUT', "/" + name + "/_settings", settings, callback_success, callback_error);
 	};
 
 	this.updateClusterSettings=function(settings, callback_success, callback_error) {
-		this.executeElasticRequest('PUT', "/_cluster/settings", settings, callback_success, callback_error);
+		this.executeClusterRequest('PUT', "/_cluster/settings", settings, callback_success, callback_error);
 	};
 
-	this.getNodes=function(callback_success, callback_error) {
-		var nodes = [];
-		var createNodes = function(response) {
-			Object.keys(response.response.nodes).forEach(function(node_id) {
-				nodes.push(new Node(node_id,response.response.nodes[node_id]));
-			});
-			callback_success(nodes);
-		};
-		this.executeElasticRequest('GET', "/_cluster/state", {}, createNodes, callback_error);
-	};
+    this.getIndexMetadata=function(name, callback_success, callback_error) {
+        var transformed = function(response) { callback_success(new IndexMetadata(name, response.metadata.indices[name])); };
+        this.executeClusterRequest('GET', "/_cluster/state/metadata/" + name, {}, transformed, callback_error);
+    };
 
 	this.fetchAliases=function(callback_success, callback_error) {
 		var createAliases=function(response) {
-			callback_success(new Aliases(response));
+            var indices = Object.keys(response);
+            var index_aliases = [];
+            indices.forEach(function(index) {
+                if (Object.keys(response[index].aliases).length > 0) {
+                    var aliases = Object.keys(response[index].aliases).map(function(alias) {
+                        var info = response[index].aliases[alias];
+                        return new Alias(alias, index, info.filter, info.index_routing, info.search_routing);
+                    });
+                    index_aliases.push(new IndexAliases(index, aliases));
+                }
+            });
+			callback_success(index_aliases);
 		};
-		this.executeElasticRequest('GET', "/_aliases",{},createAliases, callback_error);
+		this.executeClusterRequest('GET', "/_aliases",{}, createAliases, callback_error);
 	};
 
 	this.analyzeByField=function(index, type, field, text, callback_success, callback_error) {
@@ -464,7 +492,7 @@ function ElasticClient(connection) {
 			});
 			callback_success(tokens);
 		};
-		this.executeElasticRequest('GET', "/" + index + "/_analyze?field=" + type +"."+field,{'text':text}, buildTokens, callback_error);
+		this.executeClusterRequest('GET', "/" + index + "/_analyze?field=" + type +"."+field,{'text':text}, buildTokens, callback_error);
 	};
 
 	this.analyzeByAnalyzer=function(index, analyzer, text, callback_success, callback_error) {
@@ -474,135 +502,139 @@ function ElasticClient(connection) {
 			});
 			callback_success(tokens);
 		};
-		this.executeElasticRequest('GET', "/" + index + "/_analyze?analyzer=" + analyzer,{'text':text}, buildTokens, callback_error);
+		this.executeClusterRequest('GET', "/" + index + "/_analyze?analyzer=" + analyzer,{'text':text}, buildTokens, callback_error);
 	};
 
 	this.updateAliases=function(add_aliases,remove_aliases, callback_success, callback_error) {
-		var data = {};
-		if (add_aliases.length === 0 && remove_aliases.length === 0) {
-			throw "No changes were made: nothing to save";
-		}
-		data.actions = [];
-		remove_aliases.forEach(function(alias) {
-			data.actions.push({'remove':alias.info()});
-		});
-		add_aliases.forEach(function(alias) {
-			data.actions.push({'add':alias.info()});
-		});
-		this.executeElasticRequest('POST', "/_aliases",JSON.stringify(data, undefined, ""), callback_success, callback_error);
+		var data = { actions: [] };
+		remove_aliases.forEach(function(alias) { data.actions.push({'remove':alias.info()}); });
+		add_aliases.forEach(function(alias) { data.actions.push({'add':alias.info()}); });
+		this.executeClusterRequest('POST', "/_aliases",JSON.stringify(data), callback_success, callback_error);
 	};
 
-	this.getNodesStats=function(callback_success, callback_error) {
-		this.executeElasticRequest('GET', "/_nodes/stats?all=true",{},callback_success, callback_error);
-	};
-	
 	this.getIndexWarmers=function(index, warmer, callback_success, callback_error) {
 		var path = "/" + index + "/_warmer/" + warmer.trim();
-		this.executeElasticRequest('GET', path ,{},callback_success, callback_error);
+        var parseWarmers = function(response) {
+            var warmers = [];
+            Object.keys(response).forEach(function(i) {
+                var index = i;
+                var index_warmers = response[index].warmers;
+                Object.keys(index_warmers).forEach(function(warmer_id) {
+                    warmers.push(new Warmer(warmer_id, index, index_warmers[warmer_id]));
+                });
+            });
+            callback_success(warmers);
+        };
+		this.executeClusterRequest('GET', path ,{}, parseWarmers, callback_error);
 	};
 	
-	this.deleteWarmupQuery=function(index, warmer, callback_success, callback_error) {
-		var path = "/" + index + "/_warmer/" + warmer;
-		this.executeElasticRequest('DELETE', path, {},callback_success, callback_error);
+	this.deleteWarmupQuery=function(warmer, callback_success, callback_error) {
+		var path = "/" + warmer.index + "/_warmer/" + warmer.id;
+		this.executeClusterRequest('DELETE', path, {},callback_success, callback_error);
 	};
 	
-	this.registerWarmupQuery=function(index, types, warmer_id, source, callback_success, callback_error) {
-		var path = "/" + index + "/";
-		if (notEmpty(types)) {
-			path += types + "/";
+	this.registerWarmupQuery=function(warmer, callback_success, callback_error) {
+		var path = "/" + warmer.index + "/";
+		if (notEmpty(warmer.types)) {
+			path += warmer.types + "/";
 		}
-		path += "/_warmer/" + warmer_id.trim();
-		this.executeElasticRequest('PUT', path ,source,callback_success, callback_error);
+		path += "/_warmer/" + warmer.id.trim();
+		this.executeClusterRequest('PUT', path ,warmer.source, callback_success, callback_error);
 	};
 	
 	this.fetchPercolateQueries=function(index, body, callback_success, callback_error) {
-		// FIXME: 0.90/1.0 check
-		var path = isDefined(index) ? "/_percolator/" + index + "/_search" : "/_percolator/_search";
-		if (this.is1()) {
-			path = "/" + index + "/.percolator/_search";	
-		} 
-		this.executeElasticRequest('POST', path , body,callback_success, callback_error);
+		var path = "/" + index + "/.percolator/_search";
+        var parsePercolators = function(response) {
+            var collection = response.hits.hits.map(function(q) { return new PercolateQuery(q); });
+            var percolators = new PercolatorsPage(body.from, body.size, response.hits.total, collection);
+            callback_success(percolators);
+        };
+        this.executeClusterRequest('POST', path , JSON.stringify(body), parsePercolators, callback_error);
 	};
 	
 	this.deletePercolatorQuery=function(index, id, callback_success, callback_error) {
-		// FIXME: 0.90/1.0 check
-		var path = "/_percolator/" + index + "/" + id;
-		if (this.is1()) {
-			path = "/" + index + "/.percolator/" + id;
-		}
-		this.executeElasticRequest('DELETE', path, {}, callback_success, callback_error);
+		var path = "/" + index + "/.percolator/" + id;
+		this.executeClusterRequest('DELETE', path, {}, callback_success, callback_error);
 	};
 	
-	this.createPercolatorQuery=function(index, id, body, callback_success, callback_error) {
-		// FIXME: 0.90/1.0 check
-		var path = "/_percolator/" + index + "/" + id;
-		if (this.is1()) {
-			path = "/" + index + "/.percolator/" + id;
-		}
-		this.executeElasticRequest('PUT', path, body, callback_success, callback_error);
+	this.createPercolatorQuery=function(percolator, callback_success, callback_error) {
+		var path = "/" + percolator.index + "/.percolator/" + percolator.id;
+		this.executeClusterRequest('PUT', path, percolator.source, callback_success, callback_error);
 	};
 	
 	this.getRepositories=function(callback_success, callback_error) {
-		this.executeElasticRequest('GET', "/_snapshot/_all", {}, callback_success, callback_error);
+		var parse_repositories = function(response) {
+			var repositories = Object.keys(response).map(function(repository) {
+				return new Repository(repository, response[repository]);
+			});
+			callback_success(repositories);
+		};
+		this.executeClusterRequest('GET', "/_snapshot/_all", {}, parse_repositories, callback_error);
 	};
 
 	this.createRepository=function(repository, body, callback_success, callback_error) {
-		this.executeElasticRequest('POST', "/_snapshot/" + repository, body, callback_success, callback_error);
+		this.executeClusterRequest('POST', "/_snapshot/" + repository, body, callback_success, callback_error);
 	};
 
 	this.deleteRepository=function(repository, callback_success, callback_error) {
-		this.executeElasticRequest('DELETE', "/_snapshot/" + repository, {}, callback_success, callback_error);
+		this.executeClusterRequest('DELETE', "/_snapshot/" + repository, {}, callback_success, callback_error);
 	};
 
 	this.getSnapshots=function(repository, callback_success, callback_error){
 		var path = "/_snapshot/" + repository + "/_all";
-		this.executeElasticRequest('GET', path, {}, callback_success, callback_error);
+		var parseSnapshots = function(response) {
+			var snapshots = response.snapshots.map(function(snapshot) { return new Snapshot(snapshot); } );
+			callback_success(snapshots);
+		};
+		this.executeClusterRequest('GET', path, {}, parseSnapshots, callback_error);
 	};
 
 	this.deleteSnapshot=function(repository, snapshot, callback_success, callback_error){
-		this.executeElasticRequest('DELETE', "/_snapshot/" + repository + "/" +snapshot, {}, callback_success, callback_error);
+		this.executeClusterRequest('DELETE', "/_snapshot/" + repository + "/" +snapshot, {}, callback_success, callback_error);
 	};
 
 	this.restoreSnapshot=function(repository, snapshot, body, callback_success, callback_error){
-		this.executeElasticRequest('POST', "/_snapshot/" + repository + "/" +snapshot + "/_restore", body, callback_success, callback_error);
+		this.executeClusterRequest('POST', "/_snapshot/" + repository + "/" +snapshot + "/_restore", body, callback_success, callback_error);
 	};
 
 	this.createSnapshot=function(repository, snapshot, body, callback_success, callback_error){
-		this.executeElasticRequest('PUT', "/_snapshot/" + repository + "/" +snapshot, body, callback_success, callback_error );
-	};
-
-	this.executeElasticRequest=function(method, path, data, callback_success, callback_error) {
-		var url = this.host + path;
-		this.executeRequest(method,url,this.username,this.password, data, callback_success, callback_error);
+		this.executeClusterRequest('PUT', "/_snapshot/" + repository + "/" +snapshot, body, callback_success, callback_error );
 	};
 	
+	this.executeBenchmark=function(body, callback_success, callback_error){
+		this.executeClusterRequest('PUT', "/_bench", body, callback_success, callback_error );
+	};
+
+    this.executeClusterRequest=function(method, path, data, callback_success, callback_error) {
+        var params = {
+            method: method,
+            url: this.host + path,
+            data: data,
+            withCredentials: auth !== null,
+            headers: { Authorization: auth}
+        };
+        http_service(params).
+            success(function(data, status, headers, config) { callback_success(data); }).
+            error(function(data, status, headers, config) { callback_error(data); });
+    };
+	
 	this.executeRequest=function(method, url, username, password, data, callback_success, callback_error) {
-		var auth = this.createAuthToken(username,password);
-		$.when(
-			$.ajax({
-				type: method,
-				url: url,
-				beforeSend: function(xhr) {
-					if (isDefined(auth)) {
-						xhr.setRequestHeader("Authorization", auth);
-					}
-				},
-				data: data
-		})).then(
-			function(r) {
-				callback_success(r);
-			},
-			function(error) {
-				callback_error(error);
-			}
-		);
+        var params = {
+            method: method,
+            url: url,
+            data: data,
+            withCredentials: auth !== null,
+            headers: { Authorization: auth}
+        };
+        http_service(params).
+            success(function(data, status, headers, config) { callback_success(data); }).
+            error(function(data, status, headers, config) { callback_error(data, status); });
 	};
 
 	/** ####### END OF REFACTORED AREA ####### **/
 
 	this.getClusterHealth=function(callback_success, callback_error) {
 		var url = this.host + "/_cluster/health";
-		var auth = this.createAuthToken(this.username,this.password);
 		$.when(
 			$.ajax({
 				type: 'GET',
@@ -613,7 +645,7 @@ function ElasticClient(connection) {
 					if (isDefined(auth)) {
 						xhr.setRequestHeader("Authorization", auth);
 					}
-				},
+				}
 			})).then(
 				function(cluster_health) {
 					callback_success(new ClusterHealth(cluster_health));
@@ -626,60 +658,21 @@ function ElasticClient(connection) {
 
 	this.getClusterDetail=function(callback_success, callback_error) {
 		var host = this.host;
-		var auth = this.createAuthToken(this.username,this.password);
-		$.when(
-			$.ajax({ 
-				type: 'GET', 
-				url: host+"/_cluster/state", 
-				dataType: 'json', 
-				data: {},
-				beforeSend: function(xhr) { 
-					if (isDefined(auth)) {
-						xhr.setRequestHeader("Authorization", auth);
-					} 
-				}
-			}),
-			$.ajax({
-				type: 'GET',
-				url: host+"/_nodes/stats?all=true", 
-				dataType: 'json', 
-				data: {}, 
-				beforeSend: function(xhr) { 
-					if (isDefined(auth)) {
-						xhr.setRequestHeader("Authorization", auth);
-					} 
-				}
-			}),
-			$.ajax({
-				type: 'GET',
-				url: host+"/_status", 
-				dataType: 'json', 
-				data: {}, 
-				beforeSend: function(xhr) { 
-					if (isDefined(auth)) {
-						xhr.setRequestHeader("Authorization", auth);
-					}
-				}
-			}),
-			$.ajax({
-				type: 'GET',
-				url: host+"/_cluster/settings", 
-				dataType: 'json', 
-				data: {}, 
-				beforeSend: function(xhr) { 
-					if (isDefined(auth)) {
-						xhr.setRequestHeader("Authorization", auth);
-					} 
-				}
-			})
-		).then(
-			function(cluster_state,nodes_stats,cluster_status,settings) {
-				callback_success(new Cluster(cluster_state[0],cluster_status[0],nodes_stats[0],settings[0]));
-			},
-			function(error) {
-				callback_error(error);
-			}
-		);
+		var auth = this.auth;
+        var params = { withCredentials: auth !== null, headers: { Authorization: auth } };
+        q.all([
+            http_service.get(host+"/_cluster/state/master_node,nodes,routing_table,blocks/", params),
+            http_service.get(host+"/_status", params),
+            http_service.get(host+"/_nodes/stats?all=true", params),
+            http_service.get(host+"/_cluster/settings", params),
+            http_service.get(host+"/_aliases", params)
+        ]).then(function(responses) {
+                callback_success(new Cluster(responses[0].data,responses[1].data,responses[2].data,responses[3].data,responses[4].data));
+            },
+            function(error) {
+                callback_error(error);
+            }
+        );
 	};
 
 	this.getClusterDiagnosis=function(health, state, stats, hotthreads, callback_success,callback_error) {
@@ -787,155 +780,105 @@ function ESConnection(url) {
 		}		
 	}
 }
-function Index(index_name,index_info, index_metadata, index_status) {
+function Index(index_name, cluster_state, index_info, index_status, aliases) {
 	this.name = index_name;
-	var index_shards = {};
-	this.shards = index_shards;
+	this.shards = null;
 	this.metadata = {};
-	this.aliases = getProperty(index_metadata,'aliases', []);
+	this.state = "close";
+    this.num_of_shards = 0;
+    this.num_of_replicas = 0;
+    this.aliases = [];
+    if (isDefined(aliases)) {
+        var index_aliases = aliases.aliases;
+        if (isDefined(index_aliases)) {
+            this.aliases = Object.keys(aliases.aliases);
+        }
+    }
 
-	this.visibleAliases=function() { return this.aliases.length > 5 ? this.aliases.slice(0,5) : this.aliases; };
-	
-	this.settings = index_metadata.settings;
-	// FIXME: 0.90/1.0 check
-	this.editable_settings = new EditableIndexSettings(index_metadata.settings);
-	this.mappings = index_metadata.mappings;
-	this.metadata.settings = this.settings;
-	this.metadata.mappings = this.mappings;
+    this.visibleAliases=function() { return this.aliases.length > 5 ? this.aliases.slice(0,5) : this.aliases; };
 
-	// FIXME: 0.90/1.0 check
-	this.num_of_shards = getProperty(index_metadata.settings, 'index.number_of_shards');
-	this.num_of_replicas = parseInt(getProperty(index_metadata.settings, 'index.number_of_replicas'));
-	this.state = index_metadata.state;
-	
-	this.num_docs = getProperty(index_status, 'docs.num_docs', 0);
+    if (isDefined(cluster_state)) {
+        var routing = getProperty(cluster_state, "routing_table.indices");
+        this.state = "open";
+        if (isDefined(routing)) {
+            var shards = Object.keys(cluster_state.routing_table.indices[index_name].shards);
+            this.num_of_shards = shards.length;
+            var shardMap = cluster_state.routing_table.indices[index_name].shards;
+            this.num_of_replicas = shardMap[0].length - 1;
+        }
+    }
+    this.num_docs = getProperty(index_status, 'docs.num_docs', 0);
 	this.max_doc = getProperty(index_status, 'docs.max_doc', 0);
 	this.deleted_docs = getProperty(index_status, 'docs.deleted_docs', 0);
 	this.size = getProperty(index_status, 'index.primary_size_in_bytes', 0);
-	this.total_size = getProperty(index_status, 'index.size_in_bytes', 0);	
+	this.total_size = getProperty(index_status, 'index.size_in_bytes', 0);
 	this.size_in_bytes = readablizeBytes(this.size);
 	this.total_size_in_bytes = readablizeBytes(this.total_size);
 	
-	var unassigned = [];
+	this.unassigned = [];
+    this.unhealthy = false;
 
-	// adds shard information
-	
-	var unhealthy = false;
-	
-	if (isDefined(index_info)) {
-		$.map(index_info.shards, function(shards, shard_num) {
-			$.map(shards, function(shard_routing, shard_copy) {
-				if (shard_routing.node === null) {
-					unassigned.push(new UnassignedShard(shard_routing));	
-				} else {
-					if (!isDefined(index_shards[shard_routing.node])) {
-						index_shards[shard_routing.node] = [];
-					}
-					var shard_status = null;
-					if (isDefined(index_status) && isDefined(index_status.shards[shard_routing.shard])) {
-						index_status.shards[shard_routing.shard].forEach(function(status) {
-							if (status.routing.node == shard_routing.node && status.routing.shard == shard_routing.shard) {
-								shard_status = status;
-							}
-						});
-					}
-					var new_shard = new Shard(shard_routing, shard_status);
-					
-					if (new_shard.state == "RELOCATING" || new_shard.state == "INITIALIZING") {
-						unhealthy = true;
-					}
-					
-					index_shards[shard_routing.node].push(new_shard);				
-				}
-			});
-		});
-	}
+    this.getShards=function(node_id) {
+        if (isDefined(index_info)) {
+            if (this.shards === null) {
+                var index_shards = {};
+                var unassigned = [];
+                this.unassigned = unassigned;
+                $.map(index_info.shards, function(shards, shard_num) {
+                    $.map(shards, function(shard_routing, shard_copy) {
+                        if (shard_routing.node === null) {
+                            unassigned.push(new UnassignedShard(shard_routing));
+                        } else {
+                            if (!isDefined(index_shards[shard_routing.node])) {
+                                index_shards[shard_routing.node] = [];
+                            }
+                            var shard_status = null;
+                            if (isDefined(index_status) && isDefined(index_status.shards[shard_routing.shard])) {
+                                index_status.shards[shard_routing.shard].forEach(function(status) {
+                                    if (status.routing.node == shard_routing.node && status.routing.shard == shard_routing.shard) {
+                                        shard_status = status;
+                                    }
+                                });
+                            }
+                            var new_shard = new Shard(shard_routing, shard_status);
+                            index_shards[shard_routing.node].push(new_shard);
+                        }
+                    });
+                });
+                this.shards = index_shards;
+            }
+        } else {
+            this.shards = {};
+        }
+        return this.shards[node_id];
+    };
 
-	this.unhealthy = unhealthy || unassigned.length > 0;
-	this.unassigned = unassigned;
-	
-	this.settingsAsString=function() {
-		return prettyPrintObject(this.metadata);
-	};
+    if (isDefined(cluster_state) && isDefined(cluster_state.routing_table)) {
+        var instance = this;
+        var shards_map = cluster_state.routing_table.indices[this.name].shards;
+        Object.keys(shards_map).forEach(function(shard_num) {
+            shards_map[shard_num].forEach(function(shard) {
+               if (shard.state != "STARTED") {
+                   instance.unhealthy = true;
+               }
+            });
+        });
+    }
+
+    this.special = this.name.indexOf(".") === 0 || this.name.indexOf("_") === 0;
+
 	this.compare=function(b) { // TODO: take into account index properties?
 		return this.name.localeCompare(b.name);
 	};
 	
-	this.getTypes=function() {
-		return Object.keys(this.mappings).sort(function(a, b) { return a.localeCompare(b); });
-	};
+	this.equals=function(index) { return index !== null && index.name == this.name; };
 	
-	this.getAnalyzers=function() {
-		// FIXME: 0.90/1.0 check
-		var analyzers = Object.keys(getProperty(this.settings,'index.analysis.analyzer', {}));
-		if (analyzers.length === 0) {
-			Object.keys(this.settings).forEach(function(setting) {
-				if (setting.indexOf('index.analysis.analyzer') === 0) {
-					var analyzer = setting.substring('index.analysis.analyzer.'.length);
-					analyzer = analyzer.substring(0,analyzer.indexOf("."));
-					if ($.inArray(analyzer, analyzers) == -1) {
-						analyzers.push(analyzer);
-					}
-				}
-			});			
-		}
-		return analyzers.sort(function(a, b) { return a.localeCompare(b); });
-	};
+	this.closed=function() { return this.state === "close";	};
 	
-	function isAnalyzable(type) {
-		var non_analyzable_types = ['integer', 'long', 'float', 'double', 'multi_field'];
-		return non_analyzable_types.indexOf(type) == -1;
-	}
-	
-	this.getFields=function(type) {
-		if (isDefined(this.mappings[type])) {
-			var fields = this.mappings[type].properties;
-			var validFields = [];
-			Object.keys(fields).forEach(function(field) {
-				// multi fields
-				if (isDefined(fields[field].fields)) {
-					var full_path = fields[field].path != 'just_name';
-					var multi_fields = fields[field].fields;
-					Object.keys(multi_fields).forEach(function(multi_field) {
-						if (isAnalyzable(multi_fields[multi_field].type)) {
-							if (field != multi_field && full_path) {
-								validFields.push(field + "." + multi_field);		
-							} else {
-								validFields.push(multi_field);	
-							}
-						}
-					});
-				}
-				// normal fields
-				if (isAnalyzable(fields[field].type)) {
-					validFields.push(field);
-				}
-			});
-			return validFields.sort(function(a, b) { return a.localeCompare(b); });
-		} else {
-			return [];
-		}
-	};
-	
-	this.isSpecial=function() {
-		return (
-			this.name.indexOf(".") === 0 ||
-			this.name.indexOf("_") === 0
-		);
-	};
-	
-	this.equals=function(index) {
-		return index !== null && index.name == this.name;
-	};
-	
-	this.closed=function() {
-		return this.state === "close";
-	};
-	
-	this.open=function() {
-		return this.state === "open";
-	};
+	this.open=function() { return this.state === "open"; };
 }
+
+
 function EditableIndexSettings(settings) {
 	// FIXME: 0.90/1.0 check
 	this.valid_settings = [
@@ -993,12 +936,13 @@ function EditableIndexSettings(settings) {
 	});
 }
 function Node(node_id, node_info, node_stats) {
-	this.id = node_id;	
+	this.id = node_id;
 	this.name = node_info.name;
 	this.metadata = {};
 	this.metadata.info = node_info;
 	this.metadata.stats = node_stats;
 	this.transport_address = node_info.transport_address;
+	this.host = node_stats.host;
 	var master = node_info.attributes.master === 'false' ? false : true;
 	var data = node_info.attributes.data === 'false' ? false : true;
 	var client = node_info.attributes.client === 'true' ? true : false;
@@ -1007,43 +951,25 @@ function Node(node_id, node_info, node_stats) {
 	this.client = client || !master && !data;
 	this.current_master = false;
 	this.stats = node_stats;
-	
-	// FIXME: 0.90/1.0 check
+
 	this.heap_used = readablizeBytes(getProperty(this.stats,'jvm.mem.heap_used_in_bytes'));
 	this.heap_committed = readablizeBytes(getProperty(this.stats, 'jvm.mem.heap_committed_in_bytes'));
 	this.heap_used_percent = getProperty(this.stats, 'jvm.mem.heap_used_percent');
 	this.heap_max = readablizeBytes(getProperty(this.stats, 'jvm.mem.heap_max_in_bytes'));
-	
-	var total_in_bytes = 0;
-	var free_in_bytes = 0;
-	
-	// FIXME: 0.90/1.0 check. HEap max and heap_percent are not available on 0.90.0
-	if (!isDefined(this.heap_used_percent)) {
-		var heap_used = getProperty(this.stats,'jvm.mem.heap_used_in_bytes');
-		var heap_committed = getProperty(this.stats, 'jvm.mem.heap_committed_in_bytes');
-		this.heap_used_percent = Math.round(100 * (heap_used / heap_committed));
-		this.heap_max = this.heap_committed;
-		
-		// FIXME: 0.90/1.0 check. fs.total is not available on early 0.90
-		var devices = getProperty(this.stats, 'fs.data');
-		devices.forEach(function(device) {
-			total_in_bytes += getProperty(device, 'total_in_bytes');
-			free_in_bytes += getProperty(device, 'free_in_bytes');
-		});
-	} else {
-		total_in_bytes = getProperty(this.stats, 'fs.total.total_in_bytes');
-		free_in_bytes = getProperty(this.stats, 'fs.total.free_in_bytes');
-	}
-	
+
+	var total_in_bytes = getProperty(this.stats, 'fs.total.total_in_bytes');
+	var free_in_bytes = getProperty(this.stats, 'fs.total.free_in_bytes');
+
 	this.disk_total = readablizeBytes(total_in_bytes);
 	this.disk_free = readablizeBytes(free_in_bytes);
 	this.disk_used_percent =  Math.round(100 * ((total_in_bytes - free_in_bytes) / total_in_bytes));
-	
+
 	this.cpu_user = getProperty(this.stats, 'os.cpu.user');
 	this.cpu_sys = getProperty(this.stats, 'os.cpu.sys');
 	this.docs = getProperty(this.stats, 'indices.docs.count');
-	this.size = readablizeBytes(getProperty(this.stats, 'indices.store.size_in_bytes'));
-	
+    this.size_in_bytes = getProperty(this.stats, 'indices.store.size_in_bytes');
+    this.size = readablizeBytes(this.size_in_bytes);
+
 	this.setCurrentMaster=function() {
 		this.current_master = true;
 	};
@@ -1061,16 +987,8 @@ function Node(node_id, node_info, node_stats) {
 		if (this.data && !other.data) return -1; // data node comes first
 		return this.name.localeCompare(other.name); // if all the same, lex. sort
 	};
-	
-	this.matches=function(name, data, master, client) {
-		if (notEmpty(name)) {
-			if (this.name.toLowerCase().indexOf(name.trim().toLowerCase()) == -1) {
-				return false;
-			}
-		}
-		return (data && this.data || master && this.master || client && this.client);
-	};
 }
+
 function Shard(shard_routing, shard_info) {
 	this.info = isDefined(shard_info) ? shard_info : shard_routing;
 	this.primary = shard_routing.primary;
@@ -1096,207 +1014,230 @@ function Token(token, start_offset, end_offset, position) {
 	this.end_offset = end_offset;
 	this.position = position;
 }
-function Request(url, method, body) {
-	this.timestamp = getTimeString(new Date());
-	this.url = url;
-	this.method = method;
-	this.body = body;
-	
-	this.clear=function() {
-		this.url = '';
-		this.method = '';
-		this.body = '';
-	};
-	
-	this.loadFromJSON=function(json) {
-		this.method = json.method;
-		this.url = json.url;
-		this.body = json.body;
-		this.timestamp = json.timestamp;
-		return this;
-	};
-	
-	this.equals=function(request) {
-		return (
-			this.url === request.url &&
-			this.method.toUpperCase() === request.method.toUpperCase() &&
-			this.body === request.body
-		);
-	};
+function Repository(name, info) {
+	this.name = name;
+	this.type = info.type;
+	this.settings = info.settings;
+
+    this.asJson=function() {
+        var json = { type: this.type };
+        if (this.type === 'fs') {
+            var fsSettings = ['location', 'chunk_size', 'max_restore_bytes_per_sec', 'max_snapshot_bytes_per_sec', 'compress'];
+            json.settings = this.getSettings(fsSettings);
+        }
+        if (this.type === 'url') {
+            var urlSettings = ['url'];
+            json.settings = this.getSettings(urlSettings);
+        }
+        if (this.type === 's3') {
+            var s3Settings = ['region', 'bucket', 'base_path', 'access_key', 'secret_key', 'chunk_size', 'max_retries', 'compress', 'server_side_encryption'];
+            json.settings = this.getSettings(s3Settings);
+        }
+        if (this.type === 'hdfs') {
+            var hdfsSettings = ['uri', 'path', 'load_defaults', 'conf_location', 'concurrent_streams', 'compress', 'chunk_size'];
+            json.settings = this.getSettings(hdfsSettings);
+        }
+        if (this.type === 'azure') {
+            var azureSettings = ['container', 'base_path', 'concurrent_streams', 'chunk_size', 'compress'];
+            json.settings = this.getSettings(azureSettings);
+        }
+        return JSON.stringify(json);
+    };
+
+    this.validate=function() {
+        if (!notEmpty(this.name)) {
+            throw "Repository name is required";
+        }
+        if (!notEmpty(this.type)) {
+            throw "Repository type is required";
+        }
+        if (this.type === 'fs') {
+            var fsRequired = ['location'];
+            this.validateSettings(fsRequired);
+        }
+        if (this.type === 'url') {
+            var urlRequired = ['url'];
+            this.validateSettings(urlRequired);
+        }
+        if (this.type === 's3') {
+            var s3Required = ['bucket'];
+            this.validateSettings(s3Required);
+        }
+        if (this.type === 'hdfs') {
+            var hdfsRequired = ['path'];
+            this.validateSettings(hdfsRequired);
+        }
+    };
+
+    this.validateSettings=function(required) {
+        var repository = this;
+        required.forEach(function(setting) {
+            if (!notEmpty(repository.settings[setting])) {
+                throw(setting + " is required for repositories of type " + repository.type);
+            }
+        });
+    };
+
+    this.getSettings=function(availableSettings) {
+        var settings = {};
+        var currentSettings = this.settings;
+        availableSettings.forEach(function(setting) {
+            if (notEmpty(currentSettings[setting])) {
+                settings[setting] = currentSettings[setting];
+            }
+        });
+        return settings;
+    };
+}
+function Snapshot(info) {
+	this.name = info.snapshot;
+	this.indices = info.indices;
+	this.state = info.state;
+	this.start_time = info.start_time;
+	this.start_time_in_millis = info.start_time_in_millis;
+	this.end_time = info.end_time;
+	this.end_time_in_millis = info.end_time_in_millis;
+	this.duration_in_millis = info.duration_in_millis;
+	this.failures = info.failures;
+	this.shards = info.shards;
+}
+function Warmer(id, index, body) {
+    this.id = id;
+    this.index = index;
+    this.source = body.source;
+    this.types = body.types;
+}
+function PercolateQuery(query_info) {
+    this.index = query_info._index;
+    this.id = query_info._id;
+    this.source = query_info._source;
+    this.filter = {};
+
+    this.sourceAsJSON=function() {
+        try {
+            return JSON.stringify(this.source,undefined, 2);
+        } catch (error) {
+
+        }
+    };
+
+    this.equals=function(other) {
+        return (other instanceof PercolateQuery &&
+            this.index == other.index &&
+            this.id == other.id &&
+            this.source == other.source);
+    };
 }
 
-function AliasesPagination(page, results) {
-	this.page = page;
-	this.page_size = 10;
-	this.results = results;
-	this.alias_query = "";
-	this.index_query = "";
-	this.past_alias_query = null;
-	this.past_index_query = null;
-	this.total = 0;
-	this.cached_results = null;
-	
-	this.firstResult=function() {
-		if (Object.keys(this.getResults()).length > 0) {
-			return ((this.current_page() - 1) * this.page_size) + 1;
-		} else {
-			return 0;
-		}
-	};
-	
-	this.lastResult=function() {
-		if (this.current_page() * this.page_size > Object.keys(this.getResults()).length) {
-			return Object.keys(this.getResults()).length;
-		} else {
-			return this.current_page() * this.page_size;
-		}
-	};
+function PercolatorsPage(from, size, total, percolators) {
+    this.from = from;
+    this.size = size;
+    this.total = total;
+    this.percolators = percolators;
 
-	this.hasNextPage=function() {
-		return this.page_size * this.current_page() < Object.keys(this.getResults()).length;
-	};
-	
-	this.hasPreviousPage=function() {
-		return this.current_page() > 1;
-	};
-	
-	this.nextPage=function() {
-		this.page += 1;
-	};
-	
-	this.previousPage=function() {
-		this.page -= 1;
-	};
-	
-	this.current_page=function() {
-		if (this.alias_query != this.past_alias_query || this.index_query != this.past_index_query) {
-			this.page = 1;
-		}
-		return this.page;
-	};
-	
-	this.getPage=function() {
-		var count = 1;
-		var first_result = this.firstResult();
-		var last_result = this.lastResult();
-		var page = {};
-		var results = this.getResults();
-		Object.keys(results).forEach(function(alias) {
-			if (count < first_result || count > last_result) {
-				count += 1;
-			} else {
-				count += 1;
-				page[alias] = results[alias];
-			}
-		});
-		return page;
-	};
-	
-	this.setResults=function(results) {
-		this.results = results;
-		// forces recalculation of page
-		this.cached_results = null; 
-	};
-	
-	this.total=function() {
-		return Object.keys(this.getResults()).length;
-	};
-	
-	this.getResults=function() {
-		var matchingResults = {};
-		var filters_changed = (this.alias_query != this.past_alias_query || this.index_query != this.past_index_query);
-		if (filters_changed || !isDefined(this.cached_results)) { // if filters changed or no cached, calculate
-			var alias_query = this.alias_query;
-			var index_query = this.index_query;
-			var results = this.results;
-			Object.keys(results).forEach(function(alias_name) {
-				if (isDefined(alias_query) && alias_query.length > 0) {
-					if (alias_name.indexOf(alias_query) != -1) {
-						if (isDefined(index_query) && index_query.length > 0) {
-							results[alias_name].forEach(function(alias) {
-								if (alias.index.indexOf(index_query) != -1) {
-									matchingResults[alias_name] = results[alias_name];
-								}
-							});
-						} else {
-							matchingResults[alias_name] = results[alias_name];
-						}
-					} 
-				} else {
-					if (isDefined(index_query) && index_query.length > 0) {
-						results[alias_name].forEach(function(alias) {
-							if (alias.index.indexOf(index_query) != -1) {
-								matchingResults[alias_name] = results[alias_name];
-							}
-						});
-					} else {
-						matchingResults[alias_name] = results[alias_name];
-					}
-				}
-			});
-			this.cached_results = matchingResults;
-			this.past_alias_query = this.alias_query;
-			this.past_index_query = this.index_query;
-		}
-		return this.cached_results;
-	};
+    this.hasNextPage=function() {
+        return from + size < total;
+    };
+
+    this.hasPreviousPage=function() {
+        return from > 0;
+    };
+
+    this.firstResult=function() {
+        return total > 0 ? from  + 1 : 0;
+    };
+
+    this.lastResult=function() {
+        return this.hasNextPage() ? from + size : total;
+    };
+
+    this.nextOffset=function() {
+      return this.hasNextPage() ? from +size : from;
+    };
+
+    this.previousOffset=function() {
+        return this.hasPreviousPage() ? from - size : from;
+    };
+
+    this.getPage=function() {
+        return percolators;
+    };
+
+    this.total=function() {
+        return total;
+    };
 }
+function IndexMetadata(index, metadata) {
+    this.index = index;
+    this.mappings = metadata.mappings;
+    this.settings = metadata.settings;
 
-function ClusterNavigation() {
-	this.page = 1;
-	this.page_size = 5; // TODO: move it to a single place?
+    this.getTypes=function() {
+        return Object.keys(this.mappings).sort(function(a, b) { return a.localeCompare(b); });
+    };
 
-	this.query = "";
-	this.previous_query = null;
-	this.hide_special = true;
-	
-	this.data = true;
-	this.master = true;
-	this.client = true;
-	this.state = "";
-	this.node_name = "";
-	this.cached_result = [];
-	this.cluster_timestamp = null;	
-	
-	this.clone=function() {
-		var instance = new ClusterNavigation();
-		instance.page = this.page;
-		instance.query = this.query;
-		instance.hide_special = this.hide_special;
-		instance.data = this.data;
-		instance.master = this.master;
-		instance.client = this.client;
-		instance.state = this.state;
-		instance.node_name = this.node_name;
-		return instance;
-	};
-	
-	this.equals=function(other) {
-		return (
-			other !== null &&
-			this.page == other.page &&
-			this.query == other.query &&
-			this.hide_special == other.hide_special &&
-			this.data == other.data &&
-			this.master == other.master &&
-			this.client == other.client &&
-			this.state == other.state &&
-			this.node_name == other.node_name 
-		);
-	};
-	
-}
+    this.getAnalyzers=function() {
+        var analyzers = Object.keys(getProperty(this.settings,'index.analysis.analyzer', {}));
+        if (analyzers.length === 0) {
+            Object.keys(this.settings).forEach(function(setting) {
+                if (setting.indexOf('index.analysis.analyzer') === 0) {
+                    var analyzer = setting.substring('index.analysis.analyzer.'.length);
+                    analyzer = analyzer.substring(0,analyzer.indexOf("."));
+                    if ($.inArray(analyzer, analyzers) == -1) {
+                        analyzers.push(analyzer);
+                    }
+                }
+            });
+        }
+        return analyzers.sort(function(a, b) { return a.localeCompare(b); });
+    };
 
-function ModalControls() {
-	this.alert = null;
-	this.active = false;
-	this.title = '';
-	this.info = '';
+    function isAnalyzable(type) {
+        return ['float', 'double', 'byte', 'short', 'integer', 'long', 'nested', 'object'].indexOf(type) == -1;
+    }
+
+    this.getFields=function(type) {
+        var fields = [];
+        if (isDefined(this.mappings[type])) {
+            fields = this.getProperties("", this.mappings[type].properties);
+        }
+        return fields.sort(function(a, b) { return a.localeCompare(b); });
+    };
+
+    this.getProperties=function(parent, fields) {
+        var prefix = parent !== "" ? parent + "." : "";
+        var validFields = [];
+        for (var field in fields) {
+            // multi field
+            if (isDefined(fields[field].fields)) {
+                var multiPrefix = fields[field].path != 'just_name' ? prefix + field : prefix;
+                var multiProps = this.getProperties(multiPrefix, fields[field].fields);
+                validFields = validFields.concat(multiProps);
+            }
+            // nested and object types
+            if (fields[field].type == 'nested' || fields[field].type == 'object' || !isDefined(fields[field].type)) {
+                var nestedProperties = this.getProperties(prefix + field,fields[field].properties);
+                validFields = validFields.concat(nestedProperties);
+            }
+            // normal fields
+            if (isDefined(fields[field].type) && isAnalyzable(fields[field].type)) {
+                validFields.push(prefix + field);
+            }
+        }
+        return validFields;
+    };
 }
 var kopf = angular.module('kopf', []);
 
 kopf.factory('IndexSettingsService', function() {
-	return {index: null};
+
+    this.loadSettings=function(index, settings) {
+        this.index = index;
+        this.settings = settings;
+        this.editable_settings = new EditableIndexSettings(settings);
+    };
+
+    return this;
 });
 
 // manages behavior of confirmation dialog
@@ -1325,13 +1266,20 @@ kopf.factory('ConfirmDialogService', function() {
 	return this;
 });
 
-function AliasesController($scope, $location, $timeout, AlertService, AceEditorService) {
-	$scope.aliases = null;
-	$scope.new_index = {};
-	$scope.pagination= new AliasesPagination(1, []);
+kopf.controller('AliasesController', ['$scope', 'AlertService', 'AceEditorService', 'ElasticService', function($scope, AlertService, AceEditorService, ElasticService) {
+	$scope.paginator = new Paginator(1,10, [], new AliasFilter("",""));
+    $scope.page = $scope.paginator.getPage();
+    $scope.original = [];
 	$scope.editor = undefined;
-	
-	$scope.viewDetails=function(alias) {
+    $scope.new_alias = new Alias("", "", "", "", "");
+
+    $scope.aliases = [];
+
+    $scope.$watch('paginator', function(filter, previous) {
+        $scope.page = $scope.paginator.getPage();
+    }, true);
+
+    $scope.viewDetails=function(alias) {
 		$scope.details = alias;
 	};
 
@@ -1346,20 +1294,25 @@ function AliasesController($scope, $location, $timeout, AlertService, AceEditorS
 		if (!isDefined($scope.editor.error)) {
 			try {
 				$scope.new_alias.validate();
+                var index_name = $scope.new_alias.index;
+                var alias_name = $scope.new_alias.alias;
 				// if alias already exists, check if its already associated with index
-				if (isDefined($scope.aliases.info[$scope.new_alias.alias])) {
-					var aliases = $scope.aliases.info[$scope.new_alias.alias];
-					$.each(aliases,function(i, alias) {
-						if (alias.index === $scope.new_alias.index) {
-							throw "Alias is already associated with this index";
-						}
-					});
-				} else {
-					$scope.aliases.info[$scope.new_alias.alias] = [];
-				}
-				$scope.aliases.info[$scope.new_alias.alias].push($scope.new_alias);
+                var collection = $scope.paginator.getCollection();
+				var indices = collection.filter(function(a) { return a.index == index_name; });
+                if (indices.length === 0) {
+                    collection.push(new IndexAliases(index_name, [ $scope.new_alias ]));
+                } else {
+                    var index_aliases = indices[0];
+                    var aliases = index_aliases.aliases.filter(function(a) { return alias_name == a.alias;  });
+                    if (aliases.length > 0) {
+                        throw "Alias is already associated with this index";
+                    } else {
+                        index_aliases.aliases.push($scope.new_alias);
+                    }
+                }
 				$scope.new_alias = new Alias();
-				$scope.pagination.setResults($scope.aliases.info);
+				$scope.paginator.setCollection(collection);
+                $scope.page = $scope.paginator.getPage();
 				AlertService.success("Alias successfully added. Note that changes made will only be persisted after saving changes");
 			} catch (error) {
 				AlertService.error(error ,null);
@@ -1369,114 +1322,88 @@ function AliasesController($scope, $location, $timeout, AlertService, AceEditorS
 		}
 	};
 	
-	$scope.removeAlias=function(alias) {
-		delete $scope.aliases.info[alias];
-		$scope.pagination.setResults($scope.aliases.info);
-		AlertService.success("Alias successfully removed. Note that changes made will only be persisted after saving changes");
+	$scope.removeIndexAliases=function(index) {
+        var collection = $scope.paginator.getCollection();
+        for (var position = 0; position < collection.length; position++) {
+            if (index == collection[position].index) {
+                collection.splice(position, 1);
+                break;
+            }
+        }
+        $scope.paginator.setCollection(collection);
+        $scope.page = $scope.paginator.getPage();
+		AlertService.success("All aliases were removed for " + index);
 	};
 	
-	$scope.removeAliasFromIndex=function(index, alias_name) {
-		var aliases = $scope.aliases.info[alias_name];
-		for (var i = 0; i < aliases.length; i++) {
-			if (alias_name === aliases[i].alias && index === aliases[i].index) {
-				$scope.aliases.info[alias_name].splice(i,1);
-				AlertService.success("Alias successfully dissociated from index. Note that changes made will only be persisted after saving changes");
-			}
-		}
+	$scope.removeIndexAlias=function(index, alias) {
+        var index_position = 0;
+        var collection = $scope.paginator.getCollection();
+        for (; index_position < collection.length; index_position++) {
+            if (index == collection[index_position].index) {
+                break;
+            }
+        }
+        var index_aliases = collection[index_position];
+        for (var alias_position = 0; alias_position < index_aliases.aliases.length; alias_position++) {
+            if (alias == index_aliases.aliases[alias_position].alias) {
+                index_aliases.aliases.splice(alias_position, 1);
+                if (index_aliases.aliases.length === 0) {
+                    collection.splice(index_position, 1);
+                }
+                break;
+            }
+        }
+        $scope.paginator.setCollection(collection);
+        $scope.page = $scope.paginator.getPage();
+        AlertService.success("Alias successfully dissociated from index. Note that changes made will only be persisted after saving changes");
 	};
 	
 	$scope.mergeAliases=function() {
-		var deletes = [];
-		var adds = [];
-		Object.keys($scope.aliases.info).forEach(function(alias_name) {
-			var aliases = $scope.aliases.info[alias_name];
-			aliases.forEach(function(alias) {
-				// if alias didnt exist, just add it
-				if (!isDefined($scope.originalAliases.info[alias_name])) {
-					adds.push(alias);
-				} else {
-					var originalAliases = $scope.originalAliases.info[alias_name];
-					var addAlias = true;
-					for (var i = 0; i < originalAliases.length; i++) {
-						if (originalAliases[i].equals(alias)) {
-							addAlias = false;
-							break;
-						}
-					}
-					if (addAlias) {
-						adds.push(alias);
-					}
-				}
-			});
-		});
-		Object.keys($scope.originalAliases.info).forEach(function(alias_name) {
-			var aliases = $scope.originalAliases.info[alias_name];
-			aliases.forEach(function(alias) {
-				if (!isDefined($scope.aliases.info[alias.alias])) {
-					deletes.push(alias);
-				} else {
-					var newAliases = $scope.aliases.info[alias_name];
-					var removeAlias = true;
-					for (var i = 0; i < newAliases.length; i++) {
-						if (alias.index === newAliases[i].index && alias.equals(newAliases[i])) {
-							removeAlias = false;
-							break;
-						}
-					}
-					if (removeAlias) {
-						deletes.push(alias);
-					}
-				}
-			});
-		});
-		$scope.client.updateAliases(adds,deletes,
-			function(response) {
-				$scope.updateModel(function() {
-					AlertService.success("Aliases were successfully updated",response);
-				});
-				$scope.loadAliases();
-			},
-			function(error) {
-				$scope.updateModel(function() {
-					AlertService.error("Error while updating aliases",error);
-				});
-			}
-		);
-	};
-	
-	$scope._parseAliases = function(aliases) {
-		$scope.originalAliases = aliases;
-		$scope.aliases = jQuery.extend(true, {}, $scope.originalAliases);
-		$scope.pagination.setResults($scope.aliases.info);
+		var collection = $scope.paginator.getCollection();
+        var deletes = IndexAliases.diff(collection, $scope.original);
+		var adds = IndexAliases.diff($scope.original, collection);
+        if (adds.length === 0 && deletes.length === 0) {
+            AlertService.warn("No changes were made: nothing to save");
+        } else {
+            ElasticService.client.updateAliases(adds,deletes,
+                function(response) {
+                    AlertService.success("Aliases were successfully updated",response);
+                    $scope.loadAliases();
+                },
+                function(error) {
+                    AlertService.error("Error while updating aliases",error);
+                }
+            );
+        }
 	};
 
 	$scope.loadAliases=function() {
-		$scope.new_alias = new Alias();
-		$scope.client.fetchAliases(
-			function(aliases) {
-				$scope.updateModel(function() {
-					$scope._parseAliases(aliases);
-				});
+		ElasticService.client.fetchAliases(
+			function(index_aliases) {
+                $scope.original = index_aliases.map(function(ia) { return ia.clone(); });
+                $scope.paginator.setCollection(index_aliases);
+                $scope.page = $scope.paginator.getPage();
 			},
 			function(error) {
-				$scope.updateModel(function() {
-					AlertService.error("Error while fetching aliases",error);
-				});
+                AlertService.error("Error while fetching aliases",error);
 			}
 		);
 	};
 	
     $scope.$on('loadAliasesEvent', function() {
-		$scope.loadAliases();
+        $scope.indices = $scope.cluster.indices;
+        $scope.loadAliases();
 		$scope.initEditor();
     });
+}]);
 
-}
-function AnalysisController($scope, $location, $timeout, AlertService) {
+kopf.controller('AnalysisController', ['$scope', '$location', '$timeout', 'AlertService', 'ElasticService', function($scope, $location, $timeout, AlertService, ElasticService) {
+
 	$scope.indices = null;
 
 	// by index
 	$scope.field_index = null;
+    $scope.field_index_metadata = null;
 	$scope.field_type = '';
 	$scope.field_field = '';
 	$scope.field_text = '';
@@ -1484,24 +1411,65 @@ function AnalysisController($scope, $location, $timeout, AlertService) {
 	
 	// By analyzer
 	$scope.analyzer_index = '';
+    $scope.analyzer_index_metadata = null;
 	$scope.analyzer_analyzer = '';
 	$scope.analyzer_text = '';
 	$scope.analyzer_tokens = [];
-	
+
+    $scope.$watch('field_index', function(current, previous) {
+        if (isDefined(current)) {
+            $scope.loadIndexTypes(current.name);
+        }
+    });
+
+    $scope.loadIndexTypes=function(index) {
+        $scope.field_type = '';
+        $scope.field_field = '';
+        if (notEmpty(index)) {
+            ElasticService.client.getIndexMetadata(index,
+                function(metadata) {
+                    $scope.field_index_metadata = metadata;
+                },
+                function(error) {
+                    $scope.field_index = '';
+                    AlertService.error("Error while loading index metadata", error);
+                }
+            );
+        }
+    };
+
+    $scope.$watch('analyzer_index', function(current, previous) {
+        if (isDefined(current)) {
+            $scope.loadIndexAnalyzers(current.name);
+        }
+    });
+
+    $scope.loadIndexAnalyzers=function(index) {
+        $scope.analyzer_analyzer = '';
+        if (notEmpty(index)) {
+            ElasticService.client.getIndexMetadata(index,
+                function(metadata) {
+                    $scope.analyzer_index_metadata = metadata;
+                },
+                function(error) {
+                    $scope.analyzer_index = '';
+                    AlertService.error("Error while loading index metadata", error);
+                }
+            );
+        }
+    };
+
+
 	$scope.analyzeByField=function() {
 		if ($scope.field_field.length > 0 && $scope.field_text.length > 0) {
 			$scope.field_tokens = null;
-			$scope.client.analyzeByField($scope.field_index.name,$scope.field_type,$scope.field_field,$scope.field_text, 
+			ElasticService.client.analyzeByField($scope.field_index.name,$scope.field_type,$scope.field_field,$scope.field_text, 
 				function(response) {
-					$scope.updateModel(function() {
-						$scope.field_tokens = response;
-					});
+                    $scope.field_tokens = response;
 				},
 				function(error) {
-					$scope.updateModel(function() {
-						$scope.field_tokens = null;
-						AlertService.error("Error while analyzing text", error);
-					});
+                    $scope.field_tokens = null;
+                    AlertService.error("Error while analyzing text", error);
 				}
 			);
 		}
@@ -1510,17 +1478,13 @@ function AnalysisController($scope, $location, $timeout, AlertService) {
 	$scope.analyzeByAnalyzer=function() {
 		if ($scope.analyzer_analyzer.length > 0 && $scope.analyzer_text.length > 0) {
 			$scope.analyzer_tokens = null;
-			$scope.client.analyzeByAnalyzer($scope.analyzer_index.name,$scope.analyzer_analyzer,$scope.analyzer_text,
+			ElasticService.client.analyzeByAnalyzer($scope.analyzer_index.name,$scope.analyzer_analyzer,$scope.analyzer_text,
 				function(response) {
-					$scope.updateModel(function() {
-						$scope.analyzer_tokens = response;
-					});
+					$scope.analyzer_tokens = response;
 				},
 				function(error) {
-					$scope.updateModel(function() {
-						$scope.analyzer_tokens = null;
-						AlertService.error("Error while analyzing text", error);
-					});
+                    $scope.analyzer_tokens = null;
+                    AlertService.error("Error while analyzing text", error);
 				}
 			);
 		}
@@ -1530,8 +1494,8 @@ function AnalysisController($scope, $location, $timeout, AlertService) {
 		$scope.indices = $scope.cluster.open_indices();
 	});
 	
-}
-function ClusterHealthController($scope,$location,$timeout,$sce, AlertService, ConfirmDialogService) {
+}]);
+kopf.controller('ClusterHealthController', ['$scope', '$location', '$timeout', '$sce', 'AlertService', 'ConfirmDialogService', 'ElasticService', function($scope,$location,$timeout,$sce, AlertService, ConfirmDialogService, ElasticService) {
 	$scope.shared_url = '';
 	$scope.results = null;
 	
@@ -1564,7 +1528,7 @@ function ClusterHealthController($scope,$location,$timeout,$sce, AlertService, C
 		var results = {};
 		$scope.results = null;
 		var info_id = AlertService.info("Loading cluster health state. This could take a few moments.",{},30000);
-		$scope.client.getClusterDiagnosis($scope.retrieveHealth, $scope.retrieveState, $scope.retrieveStats, $scope.retrieveHotThreads,
+		ElasticService.client.getClusterDiagnosis($scope.retrieveHealth, $scope.retrieveState, $scope.retrieveStats, $scope.retrieveHotThreads,
 			function(responses) {
 				$scope.state = '';
 				if (!(responses[0] instanceof Array)) {
@@ -1660,336 +1624,267 @@ function ClusterHealthController($scope,$location,$timeout,$sce, AlertService, C
 	
 	$scope.gist_history = $scope.loadHistory();
 
-}
-function ClusterOverviewController($scope, $location, $timeout, IndexSettingsService, ConfirmDialogService, AlertService, SettingsService) {
-	$scope.settings_service = SettingsService;
-	$scope.idxSettingsSrv = IndexSettingsService;
-	$scope.dialog_service = ConfirmDialogService;
-	$scope.pagination = new ClusterNavigation();
-	$scope.previous_pagination = null;
-	
-	
-	$scope.getNodes=function() {
-		if (isDefined($scope.cluster)) {
-			return $scope.cluster.getNodes($scope.pagination.node_name, $scope.pagination.data,$scope.pagination.master,$scope.pagination.client);	
-		}
-	};
-	
+}]);
+kopf.controller('ClusterOverviewController', ['$scope', 'IndexSettingsService', 'ConfirmDialogService', 'AlertService', 'ElasticService', function($scope, IndexSettingsService, ConfirmDialogService, AlertService, ElasticService) {
+
+    $scope.index_paginator = new Paginator(1, 5, [], new IndexFilter("","", true, 0));
+
+    $scope.page = $scope.index_paginator.getPage();
+
+    $scope.node_filter = new NodeFilter("", true, true, true, 0);
+
+    $scope.nodes = [];
+
+    $scope.$watch('cluster', function(cluster, previous) {
+        if (isDefined(cluster)) {
+            $scope.setIndices(cluster.indices);
+            $scope.setNodes($scope.cluster.nodes);
+        } else {
+            $scope.setIndices([]);
+            $scope.setNodes([]);
+        }
+    });
+
+    $scope.$watch('index_paginator', function(filter, previous) {
+        if (isDefined($scope.cluster)) {
+            $scope.setIndices($scope.cluster.indices);
+        } else {
+            $scope.setIndices([]); // could it even happen?
+        }
+    }, true);
+
+    $scope.$watch('node_filter', function(filter, previous) {
+        if (isDefined($scope.cluster)) {
+            $scope.setNodes($scope.cluster.nodes);
+        } else {
+            $scope.setNodes([]);
+        }
+    }, true);
+
+    $scope.setNodes=function(nodes) {
+        $scope.nodes = nodes.filter(function(node) { return $scope.node_filter.matches(node); });
+    };
+
+    $scope.setIndices=function(indices) {
+        $scope.index_paginator.setCollection(indices);
+        $scope.page = $scope.index_paginator.getPage();
+    };
+
 	$scope.closeModal=function(forced_refresh){
 		if (forced_refresh) {
 			$scope.refreshClusterState();
 		}
 	};
 	
-	$scope.shutdown_node=function(node_id, node_name) {
-		$scope.dialog_service.open(
+	$scope.shutdownNode=function(node_id) {
+        ElasticService.client.shutdownNode(node_id,
+            function(response) {
+                AlertService.success("Node [" + node_id + "] successfully shutdown", response);
+                $scope.refreshClusterState();
+            },
+            function(error) {
+                AlertService.error("Error while shutting down node",error);
+            }
+        );
+    };
+
+    $scope.promptShutdownNode=function(node_id, node_name) {
+        ConfirmDialogService.open(
 			"are you sure you want to shutdown node " + node_name + "?",
 			"Shutting down a node will make all data stored in this node inaccessible, unless this data is replicated across other nodes." +
 			"Replicated shards will be promoted to primary if the primary shard is no longer reachable.",
 			"Shutdown",
-			function() {
-				var response = $scope.client.shutdownNode(node_id,
-					function(response) {
-						$scope.updateModel(function() {
-							AlertService.success("Node [" + node_id + "] successfully shutdown", response);
-						});
-						$scope.refreshClusterState();
-					},
-					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Error while shutting down node",error);
-						});
-					}
-				);
-			}
+			function() { $scope.shutdownNode(node_id); }
 		);
 	};
 
-	$scope.optimizeIndex=function(index){
-		$scope.dialog_service.open(
+	$scope.optimizeIndex=function(index) {
+        ElasticService.client.optimizeIndex(index,
+            function(response) {
+                AlertService.success("Index was successfully optimized", response);
+            },
+            function(error) {
+                AlertService.error("Error while optimizing index", error);
+            }
+        );
+    };
+
+    $scope.promptOptimizeIndex=function(index) {
+        ConfirmDialogService.open(
 			"are you sure you want to optimize index " + index + "?",
 			"Optimizing an index is a resource intensive operation and should be done with caution."+
 			"Usually, you will only want to optimize an index when it will no longer receive updates",
 			"Optimize",
-			function() {
-				$scope.client.optimizeIndex(index, 
-					function(response) {
-						$scope.updateModel(function() {
-							AlertService.success("Index was successfully optimized", response);
-						});
-					},
-					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Error while optimizing index", error);
-						});
-					}				
-				);
-			}
+			function() { $scope.optimizeIndex(index); }
 		);
 	};
 	
 	$scope.deleteIndex=function(index) {
-		$scope.dialog_service.open(
+        ElasticService.client.deleteIndex(index,
+            function(response) {
+                $scope.refreshClusterState();
+            },
+            function(error) {
+                AlertService.error("Error while deleting index", error);
+            }
+        );
+    };
+
+    $scope.promptDeleteIndex=function(index) {
+        ConfirmDialogService.open(
 			"are you sure you want to delete index " + index + "?",
 			"Deleting an index cannot be undone and all data for this index will be lost",
 			"Delete",
-			function() {
-				$scope.client.deleteIndex(index, 
-					function(response) {
-						$scope.refreshClusterState();
-					},
-					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Error while deleting index", error);
-						});
-					}	
-				);
-			}
+			function() { $scope.deleteIndex(index); }
 		);
 	};
 	
 	$scope.clearCache=function(index) {
-		$scope.dialog_service.open(
+        ElasticService.client.clearCache(index,
+            function(response) {
+                AlertService.success("Index cache was successfully cleared", response);
+                $scope.refreshClusterState();
+            },
+            function(error) {
+                AlertService.error("Error while clearing index cache", error);
+            }
+        );
+    };
+
+    $scope.promptClearCache=function(index) {
+        ConfirmDialogService.open(
 			"are you sure you want to clear the cache for index " + index + "?",
 			"This will clear all caches for this index.",
 			"Clear",
-			function() {
-				$scope.client.clearCache(index,
-					function(response) {
-						$scope.updateModel(function() {
-							AlertService.success("Index cache was successfully cleared", response);
-						});
-						$scope.refreshClusterState();						
-					},
-					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Error while clearing index cache", error);
-						});
-					}
-				);
-			}
+			function() { $scope.clearCache(index); }
 		);
 	};
 
 	$scope.refreshIndex=function(index) {
-		$scope.dialog_service.open(
+        ElasticService.client.refreshIndex(index,
+            function(response) {
+                AlertService.success("Index was successfully refreshed", response);
+            },
+            function(error) {
+                AlertService.error("Error while refreshing index", error);
+            }
+        );
+    };
+
+    $scope.promptRefreshIndex=function(index) {
+        ConfirmDialogService.open(
 			"are you sure you want to refresh index " + index + "?",
 			"Refreshing an index makes all operations performed since the last refresh available for search.",
 			"Refresh",
-			function() {
-				$scope.client.refreshIndex(index, 
-					function(response) {
-						$scope.updateModel(function() {
-							AlertService.success("Index was successfully refreshed", response);
-						});
-					},
-					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Error while refreshing index", error);	
-						});
-					}
-				);
-			}
+			function() { $scope.refreshIndex(index); }
 		);
 	};
 	
 	$scope.enableAllocation=function() {
-		var response = $scope.client.enableShardAllocation(
+		ElasticService.client.enableShardAllocation(
 			function(response) {
-				$scope.updateModel(function() {
-					AlertService.success("Shard allocation was successfully enabled", response);
-				});
+                AlertService.success("Shard allocation was successfully enabled", response);
 				$scope.refreshClusterState();
 			},
 			function(error) {
-				$scope.updateModel(function() {
-					AlertService.error("Error while enabling shard allocation", error);	
-				});
+                AlertService.error("Error while enabling shard allocation", error);
 			}
 		);
 	};
 	
-	$scope.disableAllocation=function(current_state) {
-		var response = $scope.client.disableShardAllocation(
+	$scope.disableAllocation=function() {
+		ElasticService.client.disableShardAllocation(
 			function(response) {
-				$scope.updateModel(function() {
-					AlertService.success("Shard allocation was successfully disabled", response);
-				});
+                AlertService.success("Shard allocation was successfully disabled", response);
 				$scope.refreshClusterState();
 			},
 			function(error) {
-				$scope.updateModel(function() {
-					AlertService.error("Error while disabling shard allocation", error);	
-				});
+                AlertService.error("Error while disabling shard allocation", error);
 			}
 		);
 	};
 	
 	$scope.closeIndex=function(index) {
-		$scope.dialog_service.open(
+        ElasticService.client.closeIndex(index,
+            function(response) {
+                AlertService.success("Index was successfully closed", response);
+                $scope.refreshClusterState();
+            },
+            function(error) { AlertService.error("Error while closing index", error); }
+        );
+    };
+
+    $scope.promptCloseIndex=function(index) {
+        ConfirmDialogService.open(
 			"are you sure you want to close index " + index + "?",
 			"Closing an index will remove all it's allocated shards from the cluster. " +
 			"Both searches and updates will no longer be accepted for the index." +
 			"A closed index can be reopened at any time",
 			"Close index",
-			function() {
-				$scope.client.closeIndex(index, 
-					function(response) {
-						$scope.updateModel(function() {
-							AlertService.success("Index was successfully closed", response);
-						});
-						$scope.refreshClusterState();
-					},
-					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Error while closing index", error);	
-						});
-					}
-				);
-			}
+            function() { $scope.closeIndex(index); }
 		);
 	};
-	
-	$scope.openIndex=function(index) {
-		$scope.dialog_service.open(
+
+    $scope.openIndex=function(index) {
+        ElasticService.client.openIndex(index,
+            function(response) {
+                AlertService.success("Index was successfully opened", response);
+                $scope.refreshClusterState();
+            },
+            function(error) {
+                AlertService.error("Error while opening index", error);
+            }
+        );
+    };
+
+    $scope.promptOpenIndex=function(index) {
+        ConfirmDialogService.open(
 			"are you sure you want to open index " + index + "?",
 			"Opening an index will trigger the recovery process for the index. " +
 			"This process could take sometime depending on the index size.",
 			"Open index",
-			function() {
-				$scope.client.openIndex(index,
-					function(response) {
-						$scope.updateModel(function() {
-							AlertService.success("Index was successfully opened", response);
-						});
-						$scope.refreshClusterState();
-					},
-					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Error while opening index", error);
-						});
-					}
-				);
-			}
+			function() { $scope.openIndex(index); }
 		);
 	};
 	
 	$scope.loadIndexSettings=function(index) {
 		$('#index_settings_option a').tab('show');
-		var indices = $scope.cluster.indices.filter(function(i) {
-			return i.name == index;
-		});
-		$scope.idxSettingsSrv.index = indices[0];
-		$('#idx_settings_tabs a:first').tab('show');
-		$(".setting-info").popover();		
-	};
-	
-	
-	$scope.firstResult=function() {
-		if ($scope.getResults().length > 0) {
-			return (($scope.current_page() - 1) * $scope.pagination.page_size) + 1;
-		} else {
-			return 0;
-		}
-	};
-	
-	$scope.lastResult=function() {
-		if ($scope.current_page() * $scope.pagination.page_size > $scope.getResults().length) {
-			return $scope.getResults().length;
-		} else {
-			return $scope.current_page() * $scope.pagination.page_size;
-		}
+        ElasticService.client.getIndexMetadata(index,
+            function(metadata) {
+                IndexSettingsService.loadSettings(index, metadata.settings);
+                $('#idx_settings_tabs a:first').tab('show');
+                $(".setting-info").popover();
+            },
+            function(error) {
+                AlertService.error("Error while loading index settings", error);
+            }
+        );
 	};
 
-	$scope.hasNextPage=function() {
-		return $scope.pagination.page_size * $scope.current_page() < $scope.getResults().length;
-	};
-	
-	$scope.hasPreviousPage=function() {
-		return $scope.current_page() > 1;
-	};
-	
-	$scope.nextPage=function() {
-		$scope.pagination.page += 1;
-	};
-	
-	$scope.previousPage=function() {
-		$scope.pagination.page -= 1;
-	};
-	
-	$scope.total=function() {
-		return $scope.getResults().length;
-	};
-	
-	$scope.current_page=function() {
-		if ($scope.pagination.query != $scope.pagination.previous_query) {
-			$scope.pagination.previous_query = $scope.pagination.query;
-			$scope.pagination.page = 1;
-		}
-		return $scope.pagination.page;
-	};
-	
-	$scope.getPage=function() {
-		var count = 1;
-		var first_result = $scope.firstResult();
-		var last_result = $scope.lastResult();
-		var page = $.map($scope.getResults(),function(i) {
-			if (count < first_result || count > last_result) {
-				count += 1;
-				return null;
-			}
-			count += 1;
-			return i;
-		});
-		return page;
-	};
-	
-	$scope.index=function(index) {
-		var page = $scope.getPage();
-		if (isDefined(page[index])) {
-			return page[index];
-		} else {
-			return null;
-		}
-	};
-	
-	$scope.getResults=function() {
-		if ($scope.cluster !== null && ($scope.pagination.cluster_timestamp === null || $scope.pagination.cluster_timestamp != $scope.cluster.created_at|| !$scope.pagination.equals($scope.previous_pagination))) {
-			var indices = isDefined($scope.cluster) ? $scope.cluster.indices : [];
-			var query = $scope.pagination.query;
-			var state = $scope.pagination.state;
-			var hide_special = $scope.pagination.hide_special;
-			$scope.pagination.cached_result = $.map(indices,function(i) {
-				if (hide_special && i.isSpecial()) {
-					return null;
-				}
-				
-				if (notEmpty(query)) {
-					if (i.name.toLowerCase().indexOf(query.trim().toLowerCase()) == -1) {
-						return null;
-					} 
-				}
-				
-				if (state.length > 0) {
-					if (state == "unhealthy") {
-						if (!i.unhealthy) {
-							return null;							
-						}
-					} else if ((state == "open" || state == "close") && state != i.state) {
-						return null;						
-					}
-				} 
-				return i;
-			});
-			$scope.previous_pagination = $scope.pagination.clone();
-			$scope.pagination.cluster_timestamp = $scope.cluster.created_at;
-		}
-		return $scope.pagination.cached_result;
-	};
-	
-}
-function ClusterSettingsController($scope, $location, $timeout, AlertService) {
+    $scope.showIndexSettings=function(index) {
+        ElasticService.client.getIndexMetadata(index,
+            function(metadata) {
+                $scope.displayInfo('settings for index ' + index, metadata.settings);
+            },
+            function(error) {
+                AlertService.error("Error while loading index settings", error);
+            }
+        );
+    };
 
+    $scope.showIndexMappings=function(index) {
+        ElasticService.client.getIndexMetadata(index,
+            function(metadata) {
+                $scope.displayInfo('mappings for index ' + index, metadata.mappings);
+            },
+            function(error) {
+                AlertService.error("Error while loading index mappings", error);
+            }
+        );
+    };
+
+}]);
+kopf.controller('ClusterSettingsController', ['$scope', '$location', '$timeout', 'AlertService', 'ElasticService', function($scope, $location, $timeout, AlertService, ElasticService) {
 	$scope.$on('loadClusterSettingsEvent', function() {
 		$('#cluster_settings_option a').tab('show');
 		$('#cluster_settings_tabs a:first').tab('show');
@@ -1999,22 +1894,18 @@ function ClusterSettingsController($scope, $location, $timeout, AlertService) {
 	});
 
 	$scope.save=function() {
-		var response = $scope.client.updateClusterSettings(JSON.stringify($scope.settings, undefined, ""),
+		ElasticService.client.updateClusterSettings(JSON.stringify($scope.settings, undefined, ""),
 			function(response) {
-				$scope.updateModel(function() {
-					AlertService.success("Cluster settings were successfully updated",response);
-				});
+                AlertService.success("Cluster settings were successfully updated",response);
 				$scope.refreshClusterState();
 			}, 
 			function(error) {
-				$scope.updateModel(function() {
-					AlertService.error("Error while updating cluster settings",error);
-				});
+                AlertService.error("Error while updating cluster settings",error);
 			}
 		);
 	};
-}
-function CreateIndexController($scope, $location, $timeout, AlertService) {
+}]);
+kopf.controller('CreateIndexController', ['$scope', '$location', '$timeout', 'AlertService', 'ElasticService', function($scope, $location, $timeout, AlertService, ElasticService) {
 	$scope.settings = '';
 	$scope.shards = '';
 	$scope.replicas = '';
@@ -2058,13 +1949,11 @@ function CreateIndexController($scope, $location, $timeout, AlertService) {
 			if ($scope.replicas.trim().length > 0) {
 				index_settings.number_of_replicas = $scope.replicas;
 			}
-			$scope.client.createIndex($scope.name, JSON.stringify(settings, undefined, ""), 
+			ElasticService.client.createIndex($scope.name, JSON.stringify(settings, undefined, ""), 
 				function(response) {
 					$scope.refreshClusterState();
 				}, function(error) { 
-					$scope.updateModel(function() {
-						AlertService.error("Error while creating index", error);
-					});
+                    AlertService.error("Error while creating index", error);
 				}
 			);
 		}
@@ -2078,14 +1967,12 @@ function CreateIndexController($scope, $location, $timeout, AlertService) {
 		$scope.name = '';
 		$scope.replicas = '';
 	};
-}
-function GlobalController($scope, $location, $timeout, $sce, ConfirmDialogService, AlertService, SettingsService, ThemeService) {
-	$scope.dialog = ConfirmDialogService;
-	$scope.version = "0.5.8";
-	$scope.username = null;
-	$scope.password = null;
+}]);
+kopf.controller('GlobalController', ['$scope', '$location', '$timeout', '$http', '$q', '$sce', '$window', 'ConfirmDialogService', 'AlertService', 'SettingsService', 'ThemeService', 'ElasticService', function($scope, $location, $timeout, $http, $q, $sce, $window, ConfirmDialogService, AlertService, SettingsService, ThemeService, ElasticService) {
+	$scope.version = "1.3.0-SNAPSHOT";
 	$scope.alert_service = AlertService;
-	
+    $scope.modal = new ModalControls();
+
 	$scope.home_screen=function() {
 		$('#cluster_option a').tab('show');
 	};
@@ -2093,61 +1980,36 @@ function GlobalController($scope, $location, $timeout, $sce, ConfirmDialogServic
 	$scope.getTheme=function() {
 		return ThemeService.getTheme();
 	};
-	
-	$scope.setConnected=function(status) {
-		if (!status) {
-			$scope.cluster = null;
-			$scope.cluster_health = null;
-		}
-		$scope.is_connected = status;
-	};
 
 	$scope.broadcastMessage=function(message,args) {
 		$scope.$broadcast(message,args);
 	};
 	
 	$scope.readParameter=function(name){
-		var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
+		var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec($window.location.href);
 		return isDefined(results) ? results[1] : null;
 	};
-	
-	$scope.setHost=function(url) {
-		if (url.indexOf("http://") !== 0 && url.indexOf("https://") !== 0) {
-			url = "http://" + url;
-		}
-		$scope.connection = new ESConnection(url);
-		$scope.setConnected(false);
-		try {
-			$scope.client = new ElasticClient($scope.connection);
-			$scope.home_screen();
-		} catch (error) {
-			$scope.client = null;
-			AlertService.error(error.message, error.body);
-		}
-	};
-	
-	$scope.connect=function() {
-		// when opening from filesystem, just try default ES location
-		if ($location.host() === "") {
-			$scope.setHost("http://localhost:9200");
-		} else {
-			var location = $scope.readParameter('location');
-			// reads ES location from url parameter
-			if (isDefined(location)) {
-				$scope.setHost(location);
-			} else { // uses current location as ES location
-				var absUrl = $location.absUrl();
-				var cutIndex = absUrl.indexOf("/_plugin/kopf");
-				$scope.setHost(absUrl.substring(0,cutIndex));
-			}
-		}		
-	};
-	
-	$scope.connect();
 
-	$scope.modal = new ModalControls();
-	$scope.alert = null;
-	$scope.is_connected = false;
+    $scope.connect=function() {
+        try {
+            var host = "http://localhost:9200"; // default
+            if ($location.host() !== "") { // not opening from fs
+                var location = $scope.readParameter('location');
+                if (isDefined(location)) {
+                    host = location;
+                } else {
+                    var url = $location.absUrl();
+                    host = url.substring(0, url.indexOf("/_plugin/kopf"));
+                }
+            }
+            ElasticService.connect(host);
+            this.home_screen(); // FIXME: not even sure why this is here
+        } catch(error) {
+            AlertService.error(error.message, error.body);
+        }
+    };
+
+	$scope.connect();
 
 	$scope.alertClusterChanges=function() {
 		if (isDefined($scope.cluster)) {
@@ -2174,40 +2036,30 @@ function GlobalController($scope, $location, $timeout, $sce, ConfirmDialogServic
 	};
 		
 	$scope.refreshClusterState=function() {
-		if (isDefined($scope.client)) {
-			$timeout(function() { 
-				$scope.client.getClusterDetail(
+		if (ElasticService.isConnected()) {
+			$timeout(function() {
+				ElasticService.client.getClusterDetail(
 					function(cluster) {
-						$scope.updateModel(function() { 
-							cluster.computeChanges($scope.cluster);
-							$scope.cluster = cluster;
-							$scope.alertClusterChanges();
-						});
+                        cluster.computeChanges($scope.cluster);
+                        $scope.cluster = cluster;
+                        $scope.alertClusterChanges();
 					},
 					function(error) {
-						$scope.updateModel(function() { 
-							AlertService.error("Error while retrieving cluster information", error);
-							$scope.cluster = null; 
-						});
+                        AlertService.error("Error while retrieving cluster information", error);
+                        $scope.cluster = null;
 					}
 				);
-			
-				$scope.client.getClusterHealth( 
+
+				ElasticService.client.getClusterHealth(
 					function(cluster) {
-						$scope.updateModel(function() { 
-							$scope.cluster_health = cluster;
-							$scope.setConnected(true);
-						});
+                        $scope.cluster_health = cluster;
 					},
 					function(error) {
-						$scope.updateModel(function() {
-							$scope.cluster_health = null;
-							$scope.setConnected(false);
-							AlertService.error("Error connecting to [" + $scope.host + "]",error);						
-						});
+                        $scope.cluster_health = null;
+                        AlertService.error("Error connecting to [" + $scope.host + "]",error);
 					}
 				);
-			}, 100);			
+			}, 100);
 		}
 	};
 
@@ -2219,7 +2071,7 @@ function GlobalController($scope, $location, $timeout, $sce, ConfirmDialogServic
 	$scope.autoRefreshCluster();
 
 	$scope.hasConnection=function() {
-		return $scope.is_connected;
+		return isDefined($scope.cluster_health);
 	};
 	
 	$scope.isActive=function(tab) {
@@ -2247,35 +2099,34 @@ function GlobalController($scope, $location, $timeout, $sce, ConfirmDialogServic
 		$scope.$apply(action);
 	};
 
-}
-function IndexSettingsController($scope, $location, $timeout, IndexSettingsService, AlertService) {
+}]);
+
+kopf.controller('IndexSettingsController', ['$scope', '$location', '$timeout', 'IndexSettingsService', 'AlertService', 'ElasticService', function($scope, $location, $timeout, IndexSettingsService, AlertService, ElasticService) {
 	$scope.service = IndexSettingsService;
 
 	$scope.save=function() {
-		var index = $scope.service.index;
+        var index = $scope.service.index;
+		var settings = $scope.service.settings;
 		var new_settings = {};
+        var editable_settings = $scope.service.editable_settings;
 		// TODO: could move that to editable_index_settings model
-		index.editable_settings.valid_settings.forEach(function(setting) {
-			if (notEmpty(index.editable_settings[setting])) {
-				new_settings[setting] = index.editable_settings[setting];
+		editable_settings.valid_settings.forEach(function(setting) {
+			if (notEmpty(editable_settings[setting])) {
+				new_settings[setting] = editable_settings[setting];
 			}
 		});
-		$scope.client.updateIndexSettings(index.name, JSON.stringify(new_settings, undefined, ""),
+		ElasticService.client.updateIndexSettings(index, JSON.stringify(new_settings, undefined, ""),
 			function(response) {
-				$scope.updateModel(function() {
-					AlertService.success("Index settings were successfully updated", response);
-				});
+                AlertService.success("Index settings were successfully updated", response);
 				$scope.refreshClusterState();
 			},
 			function(error) {
-				$scope.updateModel(function() {
-					AlertService.error("Error while updating index settings", error);
-				});
+                AlertService.error("Error while updating index settings", error);
 			}
 		);
 	};
- }
-function NavbarController($scope, $location, $timeout, AlertService, SettingsService, ThemeService) {
+ }]);
+kopf.controller('NavbarController', ['$scope', '$location', '$timeout', 'AlertService', 'SettingsService', 'ThemeService', function($scope, $location, $timeout, AlertService, SettingsService, ThemeService) {
 	$scope.settings_service = SettingsService;
 	$scope.new_refresh = $scope.settings_service.getRefreshInterval();
 	$scope.theme = ThemeService.getTheme();
@@ -2297,11 +2148,11 @@ function NavbarController($scope, $location, $timeout, AlertService, SettingsSer
 		ThemeService.setTheme($scope.theme);
 	};
 
-}
+}]);
 
-function RestController($scope, $location, $timeout, AlertService, AceEditorService) {
-	
-	$scope.request = new Request($scope.connection.host + "/_search","GET","{}");
+kopf.controller('RestController', ['$scope', '$location', '$timeout', 'AlertService', 'AceEditorService', 'ElasticService', function($scope, $location, $timeout, AlertService, AceEditorService, ElasticService) {
+
+	$scope.request = new Request(ElasticService.connection.host + "/_search","GET","{}");
 	$scope.validation_error = null;
 
 	$scope.loadHistory=function() {
@@ -2356,11 +2207,14 @@ function RestController($scope, $location, $timeout, AlertService, AceEditorServ
 		$scope.request.body = $scope.editor.format();
 		$('#rest-client-response').html('');
 		if (notEmpty($scope.request.url)) {
-			// TODO: deal with basic auth here
+			var a = document.createElement('a');
+			a.href = $scope.request.url;
+			var username = a.username || null;
+			var password = a.password || null;
 			if ($scope.request.method == 'GET' && '{}' !== $scope.request.body) {
 				AlertService.info("You are executing a GET request with body content. Maybe you meant to use POST or PUT?");
 			}
-			$scope.client.executeRequest($scope.request.method,$scope.request.url,null,null,$scope.request.body,
+			ElasticService.client.executeRequest($scope.request.method,$scope.request.url,username,password,$scope.request.body,
 				function(response) {
 					var content = response;
 					try {
@@ -2369,35 +2223,29 @@ function RestController($scope, $location, $timeout, AlertService, AceEditorServ
 						// nothing to do
 					}
 					$('#rest-client-response').html(content);
-					$scope.updateModel(function() {
-						$scope.addToHistory(new Request($scope.request.url,$scope.request.method,$scope.request.body));
-					});
-
+					$scope.addToHistory(new Request($scope.request.url,$scope.request.method,$scope.request.body));
 				},
-				function(error) {
-					$scope.updateModel(function() {
-						if (error.status !== 0) {
-							AlertService.error("Request was not successful: " + error.statusText);
-						} else {
-							AlertService.error($scope.request.url + " is unreachable");
-						}
-					});
-					try {
-						$('#rest-client-response').html(JSONTree.create(JSON.parse(error.responseText)));
-					} catch (invalid_json) {
-						$('#rest-client-response').html(error.responseText);
+				function(error, status) {
+					if (status !== 0) {
+						AlertService.error("Request was not successful");
+                        try {
+                            $('#rest-client-response').html(JSONTree.create(error));
+                        } catch (invalid_json) {
+                            $('#rest-client-response').html(error);
+                        }
+					} else {
+						AlertService.error($scope.request.url + " is unreachable");
 					}
 				}
 			);
 		}
 	};
-}
-function PercolatorController($scope, $location, $timeout, ConfirmDialogService, AlertService, AceEditorService) {
+}]);
+kopf.controller('PercolatorController', ['$scope', 'ConfirmDialogService', 'AlertService', 'AceEditorService', 'ElasticService', function($scope, ConfirmDialogService, AlertService, AceEditorService, ElasticService) {
 	$scope.editor = undefined;
-	$scope.total = 0;
-	$scope.queries = [];
-	$scope.page = 1;
-	$scope.filter = "";
+	$scope.pagination = new PercolatorsPage(0, 0, 0, []);
+
+    $scope.filter = "";
 	$scope.id = "";
 	
 	$scope.index = null;
@@ -2416,35 +2264,17 @@ function PercolatorController($scope, $location, $timeout, ConfirmDialogService,
 	};
 
 	$scope.previousPage=function() {
-		$scope.page -= 1;
-		$scope.loadPercolatorQueries();
+		$scope.loadPercolatorQueries(this.pagination.previousOffset());
 	};
 	
 	$scope.nextPage=function() {
-		$scope.page += 1;
-		$scope.loadPercolatorQueries();
+		$scope.loadPercolatorQueries(this.pagination.nextOffset());
 	};
-	
-	$scope.hasNextPage=function() {
-		return $scope.page * 10 < $scope.total;
-	};
-	
-	$scope.hasPreviousPage=function() {
-		return $scope.page > 1;
-	};
-	
-	$scope.firstResult=function() {
-		return $scope.total > 0 ? ($scope.page - 1) * 10  + 1 : 0;
-	};
-	
-	$scope.lastResult=function() {
-		return $scope.hasNextPage() ? $scope.page * 10 : $scope.total;
-	};
-	
+
 	$scope.parseSearchParams=function() {
 		var queries = [];
 		if ($scope.id.trim().length > 0) {
-			queries.push({"term":{"_id":$scope.id}});
+			queries.push({"query_string":{ default_field: '_id', query: $scope.id}});
 		}
 		if ($scope.filter.trim().length > 0) {
 			var filter = JSON.parse($scope.filter);
@@ -2463,27 +2293,21 @@ function PercolatorController($scope, $location, $timeout, ConfirmDialogService,
 			query.sourceAsJSON(),
 			"Delete",
 			function() {
-				$scope.client.deletePercolatorQuery(query.index, query.id,
+				ElasticService.client.deletePercolatorQuery(query.index, query.id,
 					function(response) {
-						var refreshIndex = $scope.client.is1() ? query.index : '_percolator';
-						$scope.client.refreshIndex(refreshIndex,
+						var refreshIndex = query.index;
+						ElasticService.client.refreshIndex(refreshIndex,
 							function(response) {
-								$scope.updateModel(function() {
-									AlertService.success("Query successfully deleted", response);
-									$scope.loadPercolatorQueries();
-								});
+                                AlertService.success("Query successfully deleted", response);
+                                $scope.loadPercolatorQueries();
 							},
 							function(error) {
-								$scope.updateModel(function() {
-									AlertService.error("Error while reloading queries", error);
-								});
+                                AlertService.error("Error while reloading queries", error);
 							}
 						);
 					},
 					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Error while deleting query", error);
-						});
+                        AlertService.error("Error while deleting query", error);
 					}
 				);
 			}
@@ -2506,28 +2330,22 @@ function PercolatorController($scope, $location, $timeout, ConfirmDialogService,
 			AlertService.error("Query must be defined");
 			return;
 		}
-		$scope.client.createPercolatorQuery($scope.new_query.index, $scope.new_query.id, $scope.new_query.source,
+		ElasticService.client.createPercolatorQuery($scope.new_query,
 			function(response) {
-				var refreshIndex = $scope.client.is1() ? $scope.new_query.index : '_percolator';
-				$scope.client.refreshIndex(refreshIndex,
+				var refreshIndex = $scope.new_query.index;
+				ElasticService.client.refreshIndex(refreshIndex,
 					function(response) {
-						$scope.updateModel(function() {
-							AlertService.success("Percolator Query successfully created", response);
-							$scope.index = $scope.new_query.index;
-							$scope.loadPercolatorQueries();
-						});
+                        AlertService.success("Percolator Query successfully created", response);
+                        $scope.index = $scope.new_query.index;
+                        $scope.loadPercolatorQueries(0);
 					},
 					function(error) {
-						$scope.updateModel(function() {
-							AlertService.success("Error while reloading queries", error);
-						});
+                        AlertService.success("Error while reloading queries", error);
 					}
 				);
 			},
 			function(error) {
-				$scope.updateModel(function() {
-					AlertService.error("Error while creating percolator query", error);
-				});
+                AlertService.error("Error while creating percolator query", error);
 			}
 		);
 	};
@@ -2540,330 +2358,242 @@ function PercolatorController($scope, $location, $timeout, ConfirmDialogService,
 		}
 	};
 	
-	$scope.loadPercolatorQueries=function() {
-		var params = {};
+	$scope.loadPercolatorQueries=function(from) {
 		try {
+            from = isDefined(from) ? from : 0;
 			var queries = $scope.parseSearchParams();
+            var body = { from: from, size: 10 };
 			if (queries.length > 0) {
-				params.query = {"bool": {"must": queries}};
+				body.query = { bool: { must: queries } };
 			}
-			params.from = (($scope.page - 1) * 10);
-			$scope.client.fetchPercolateQueries($scope.index, JSON.stringify(params),
-				function(response) {
-					$scope.updateModel(function() {
-						$scope.total = response.hits.total;
-						$scope.queries = response.hits.hits.map(function(q) { return new PercolateQuery(q); });
-					});
+			ElasticService.client.fetchPercolateQueries($scope.index, body,
+				function(percolators) {
+                    $scope.pagination = percolators;
 				},
 				function(error) {
-					if (!(isDefined(error.responseJSON) && error.responseJSON.error == "IndexMissingException[[_percolator] missing]")) {
-						$scope.updateModel(function() {
-							AlertService.error("Error while reading loading percolate queries", error);
-						});
-					}
+                    AlertService.error("Error while reading loading percolate queries", error);
 				}
 			);
 		} catch (error) {
 			AlertService.error("Filter is not a valid JSON");
-			return;
 		}
 	};
 	
-}
+}]);
 
-function PercolateQuery(query_info) {
-	// FIXME: 0.90/1.0 check
-	if (query_info._index == '_percolator') {
-		this.index = query_info._type;
-	} else {
-		this.index = query_info._index;
-	}
-	this.id = query_info._id;
-	this.source = query_info._source;
-	
-	this.sourceAsJSON=function() {
-		try {
-			return JSON.stringify(this.source,undefined, 2);
-		} catch (error) {
-
-		}
-	};
-	
-	this.equals=function(other) {
-		return (other instanceof PercolateQuery &&
-			this.index == other.index &&
-			this.id == other.id && 
-			this.source == other.source);
-	};
-}
-function RepositoryController($q, $scope, $location, $timeout, ConfirmDialogService, AlertService, AceEditorService) {
-
-	$scope.dialog_service = ConfirmDialogService;
+kopf.controller('RepositoryController', ['$scope', 'ConfirmDialogService', 'AlertService', 'ElasticService', function($scope, ConfirmDialogService, AlertService, ElasticService) {
+	// registered repositories
 	$scope.repositories = [];
-	$scope.repositories_names = [];
-	$scope.snapshots = [];
 	$scope.indices = [];
+	
+	$scope.paginator = new Paginator(1, 10, [], new SnapshotFilter());
+    $scope.page = $scope.paginator.getPage();
+    $scope.snapshots = [];
+	
+	$scope.snapshot = null;
+	$scope.snapshot_repository = '';
+
 	$scope.restorable_indices = [];
-	$scope.new_repo = {};
+	$scope.repository_form = new Repository('', { settings: {}, type: '' });
 	$scope.new_snap = {};
 	$scope.restore_snap = {};
 	$scope.editor = undefined;
 
-    $scope.$on('loadRepositoryEvent', function() {
-		$scope.reload();
-		$scope.initEditor();
-    });
+    $scope.$watch('paginator', function(filter, previous) {
+        $scope.page = $scope.paginator.getPage();
+    }, true);
 	
-	$scope.initEditor=function(){
-		if(!angular.isDefined($scope.editor)){
-			$scope.editor = AceEditorService.init('repository-settings-editor');
+	$scope.$on('loadRepositoryEvent', function() {
+		$scope.snapshot = null; // clear 'active' snapshot
+		$scope.reload();
+	});
+
+	$scope.reload=function(){
+		$scope.loadIndices();
+		$scope.loadRepositories();
+		if (notEmpty($scope.snapshot_repository)) {
+			$scope.fetchSnapshots($scope.snapshot_repository);
 		}
 	};
-
+	
 	$scope.loadIndices=function() {
-		if( angular.isDefined($scope.cluster) )
-		{
+		if (isDefined($scope.cluster)) {
 			$scope.indices = $scope.cluster.indices || [];
 		}
 	};
 
-    $scope.reload=function(){
-		$scope.loadRepositories().then(
-							function() {
-								$scope.allSnapshots($scope.repositories)
-							});
-		$scope.loadIndices();
-    };
-
-    $scope.optionalParam=function(body, object, paramname){
-		if(angular.isDefined(object[paramname]))
-		{
+	$scope.optionalParam=function(body, object, paramname){
+		if(angular.isDefined(object[paramname])) {
 			body[paramname] = object[paramname];
 		}
 		return body;
+	};
+
+    $scope.executeDeleteRepository = function(repository) {
+        ElasticService.client.deleteRepository(repository.name,
+            function(response) {
+                AlertService.success("Repository successfully deleted", response);
+                if (notEmpty($scope.snapshot_repository) && $scope.snapshot_repository == repository.name) {
+                    $scope.snapshot_repository = '';
+                }
+                $scope.reload();
+            },
+            function(error) {
+                AlertService.error("Error while deleting repositor", error);
+            }
+        );
     };
 
-	$scope.deleteRepository=function(name, value){
-		$scope.dialog_service.open(
-			"are you sure you want to delete repository " + name + "?",
-			value,
+	$scope.deleteRepository=function(repository) {
+		ConfirmDialogService.open(
+			"are you sure you want to delete repository " + repository.name + "?",
+			repository.settings,
 			"Delete",
-			function() {
-				$scope.client.deleteRepository(name,
-					function(response) {
-						AlertService.success("Repository successfully deleted", response);
-						$scope.reload();
-					},
-					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Error while deleting repositor", error);
-						});
-					}
-				);
-			}
+            function() { $scope.executeDeleteRepository(repository); }
 		);
 	};
 
-	$scope.restoreSnapshot=function(){
-
-		var body = {}
+	$scope.restoreSnapshot=function() {
+		var body = {};
 		// dont add to body if not present, these are optional, all indices included by default
-		if(angular.isDefined($scope.restore_snap.indices) && $scope.restore_snap.indices.length > 0)
-		{
-			body["indices"] = $scope.restore_snap.indices.join(",");
+		if (angular.isDefined($scope.restore_snap.indices) && $scope.restore_snap.indices.length > 0) {
+			body.indices = $scope.restore_snap.indices.join(",");
 		}
 
-		if(angular.isDefined($scope.restore_snap.include_global_state))
-		{
-			//TODO : when es fixes bug [https://github.com/elasticsearch/elasticsearch/issues/4949], this extra "true/false" -> true/false handling will go away
-			body["include_global_state"] = ($scope.restore_snap.include_global_state == 'true');
+		if (angular.isDefined($scope.restore_snap.include_global_state)) {
+			body.include_global_state = $scope.restore_snap.include_global_state;
 		}
 
 		$scope.optionalParam(body, $scope.restore_snap, "ignore_unavailable");
 		$scope.optionalParam(body, $scope.restore_snap, "rename_replacement");
 		$scope.optionalParam(body, $scope.restore_snap, "rename_pattern");
 
-		$scope.client.restoreSnapshot($scope.restore_snap.snapshot.repository, $scope.restore_snap.snapshot.snapshot, JSON.stringify(body),
+		ElasticService.client.restoreSnapshot($scope.snapshot_repository, $scope.snapshot.name, JSON.stringify(body),
 			function(response) {
 				AlertService.success("Snapshot Restored Started");
 				$scope.reload();
 			},
 			function(error) {
-				$scope.updateModel(function() {
-					AlertService.error("Error while started restore of snapshot", error);
-				});
+                AlertService.error("Error while started restore of snapshot", error);
 			}
 		);
 	};
 
-	$scope.createRepository=function(){
-		$scope.new_repo.settings = $scope.editor.format();
-		if ($scope.editor.error === null){
-			var body = {
-				type: $scope.new_repo.type,
-				settings: JSON.parse($scope.new_repo.settings)
-			}
-
-			$scope.client.createRepository($scope.new_repo.name, JSON.stringify(body),
-				function(response) {
-					AlertService.success("Repository created");
-					$scope.loadRepositories();
-				},
-				function(error) {
-					$scope.updateModel(function() {
-						AlertService.error("Error while creating repository", error);
-					});
-				}
-			);
-		}
-	};
-
-	$scope._parseRepositories=function(response, deferred){
-		$scope.updateModel(function() {
-			$scope.repositories = response;
-			$scope.repositories_names = [];
-			$.each($scope.repositories, function(key, value){
-				$scope.repositories_names.push({"name":key, "value":key});
-			});
-		});
-		deferred.resolve(true);
-	};
+    $scope.createRepository=function(){
+        try {
+            $scope.repository_form.validate();
+            ElasticService.client.createRepository($scope.repository_form.name, $scope.repository_form.asJson(),
+                function(response) {
+                    AlertService.success("Repository created");
+                    $scope.loadRepositories();
+                },
+                function(error) {
+                    AlertService.error("Error while creating repository", error);
+                }
+            );
+        } catch (error) {
+            AlertService.error(error);
+        }
+    };
 
 	$scope.loadRepositories=function() {
-		var deferred = $q.defer();
-		try {
-			$scope.client.getRepositories(
-				function(response) {
-					$scope._parseRepositories(response, deferred)
-				},
-				function(error) {
-					$scope.updateModel(function() {
-						AlertService.error("Error while reading repositories", error);
-					});
-					deferred.reject(true);
-				}
-			)
-		} catch (error) {
-			AlertService.error("Failed to load repositories");
-			deferred.reject(false);
-		}
-		return deferred.promise
+		ElasticService.client.getRepositories(
+			function(response) {
+                $scope.repositories = response;
+			},
+			function(error) {
+                $scope.repositories = [];
+                AlertService.error("Error while reading repositories", error);
+			}
+		);
 	};
 
 	$scope.createSnapshot=function(){
-		var body = {}
+		var body = {};
 
 		// name and repo required
-		if(!angular.isDefined($scope.new_snap.repository))
-		{
+		if (!isDefined($scope.new_snap.repository)) {
 			AlertService.warn("Repository is required");
-			return
+			return;
 		}
 
-		if(!angular.isDefined($scope.new_snap.name))
-		{
+		if (!isDefined($scope.new_snap.name)) {
 			AlertService.warn("Snapshot name is required");
-			return
+			return;
 		}
 
 		// dont add to body if not present, these are optional, all indices included by default
-		if(angular.isDefined($scope.new_snap.indices) && $scope.new_snap.indices.length > 0)
-		{
-			body["indices"] = $scope.new_snap.indices.join(",");
+		if (isDefined($scope.new_snap.indices) && $scope.new_snap.indices.length > 0) {
+			body.indices = $scope.new_snap.indices.join(",");
 		}
 
-		if(angular.isDefined($scope.new_snap.include_global_state))
-		{
-			//TODO : when es fixes bug [https://github.com/elasticsearch/elasticsearch/issues/4949], this extra "true/false" -> true/false handling will go away
-			body["include_global_state"] = ($scope.new_snap.include_global_state == 'true');
+		if(isDefined($scope.new_snap.include_global_state)) {
+			body.include_global_state = $scope.new_snap.include_global_state;
 		}
 		
 		$scope.optionalParam(body, $scope.new_snap, "ignore_unavailable");
 
-		$scope.client.createSnapshot($scope.new_snap.repository, $scope.new_snap.name, JSON.stringify(body),
+		ElasticService.client.createSnapshot($scope.new_snap.repository.name, $scope.new_snap.name, JSON.stringify(body),
 			function(response) {
 				AlertService.success("Snapshot created");
 				$scope.reload();
 			},
 			function(error) {
-				$scope.updateModel(function() {
-					AlertService.error("Error while creating snapshot", error);
-				});
+                AlertService.error("Error while creating snapshot", error);
 			}
 		);
 	};
 
-	$scope.deleteSnapshot=function(snapshot){
-			$scope.dialog_service.open(
-			"are you sure you want to delete snapshot " + snapshot.snapshot + "?",
+	$scope.deleteSnapshot=function(snapshot) {
+			ConfirmDialogService.open(
+			"are you sure you want to delete snapshot " + snapshot.name + "?",
 			snapshot,
 			"Delete",
 			function() {
-				$scope.client.deleteSnapshot(
-					snapshot.repository,
-					snapshot.snapshot,
+				ElasticService.client.deleteSnapshot(
+					$scope.snapshot_repository,
+					snapshot.name,
 					function(response) {
 						AlertService.success("Snapshot successfully deleted", response);
 						$scope.reload();
 					},
 					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Error while deleting snapshot", error);
-						});
+                        AlertService.error("Error while deleting snapshot", error);
 					}
 				);
 			}
 		);
 	};
 
-	$scope.allSnapshots=function(repositories) {
-		var all = [];
-		$.each( repositories, function( repository, value ){
-			$scope.fetchSnapshots(repository).then(
-					function(data){
-						$.merge(all, data );
-					});
-		});
-		$scope.snapshots = all;
-	};
-
-	$scope._parseSnapshots=function(repository, response, deferred) {
-		var arr = response["snapshots"];
-
-		// add the repository name to each snapshot object
-		//
-		if(arr && arr.constructor==Array && arr.length!==0){
-			$.each(arr, function(index, value){
-				value["repository"] = repository;
-			});
-		}
-		deferred.resolve(response["snapshots"]);
-	};
-
 	$scope.fetchSnapshots=function(repository) {
-		var deferred = $q.defer();
-		try {
-			$scope.client.getSnapshots(repository,
-				function(response) {
-					$scope._parseSnapshots(repository, response, deferred);
-				},
-				function(error) {
-					$scope.updateModel(function() {
-						AlertService.error("Error while fetching snapshots", error);
-					});
-					deferred.resolve([]);
-				}
-			)
-		} catch (error) {
-			AlertService.error("Failed to load snapshots");
-			deferred.resolve([]);
-		}
-		return deferred.promise;
+		ElasticService.client.getSnapshots(repository,
+			function(response) {
+                $scope.paginator.setCollection(response);
+                $scope.page = $scope.paginator.getPage();
+			},
+			function(error) {
+                $scope.paginator.setCollection([]);
+                $scope.page = $scope.paginator.getPage();
+                AlertService.error("Error while fetching snapshots", error);
+			}
+		);
 	};
 
-}
+	$scope.selectSnapshot=function(snapshot) {
+		$scope.snapshot = snapshot;
+	};
+	
+	$scope.unselectSnapshot=function() {
+		$scope.snapshot = null;
+	};
+	
+	$scope.selectRepository=function(repository) {
+		$scope.snapshot_repository = repository;
+		$scope.fetchSnapshots(repository);
+	};
+}]);
 
-function ConfirmDialogController($scope, $location, $timeout, ConfirmDialogService) {
+kopf.controller('ConfirmDialogController', ['$scope', '$location', '$timeout', 'ConfirmDialogService', function($scope, $location, $timeout, ConfirmDialogService) {
 
 	$scope.dialog_service = ConfirmDialogService;
 	
@@ -2875,19 +2605,22 @@ function ConfirmDialogController($scope, $location, $timeout, ConfirmDialogServi
 		$scope.dialog_service.confirm();
 	};
 	
-}
-function WarmupController($scope, $location, $timeout, ConfirmDialogService, AlertService, AceEditorService) {
+}]);
+kopf.controller('WarmupController', ['$scope', 'ConfirmDialogService', 'AlertService', 'AceEditorService', 'ElasticService', function($scope, ConfirmDialogService, AlertService, AceEditorService, ElasticService) {
 	$scope.editor = undefined;
 	$scope.indices = [];
 	$scope.index = null;
-	$scope.pagination = new WarmersPagination(1, []);
+	$scope.paginator = new Paginator(1, 10, [], new WarmerFilter(""));
+    $scope.page = $scope.paginator.getPage();
 	
-	// holds data for new warmer. maybe create a model for that
-	$scope.new_warmer_id = '';
-	$scope.new_index = '';
-	$scope.new_source = '';
-	$scope.new_types = '';
-	
+	$scope.warmer = new Warmer('', '', { types: [], source: {} });
+
+    $scope.warmers = [];
+
+    $scope.$watch('paginator', function(filter, previous) {
+        $scope.page = $scope.paginator.getPage();
+    }, true);
+
 	$scope.$on('loadWarmupEvent', function() {
 		$scope.loadIndices();
 		$scope.initEditor();
@@ -2899,10 +2632,6 @@ function WarmupController($scope, $location, $timeout, ConfirmDialogService, Ale
 		}
 	};
 
-	$scope.totalWarmers=function() {
-		return $scope.pagination.total();
-	};
-	
 	$scope.loadIndices=function() {
 		$scope.indices = $scope.cluster.indices;
 	};
@@ -2911,17 +2640,14 @@ function WarmupController($scope, $location, $timeout, ConfirmDialogService, Ale
 		if ($scope.editor.hasContent()) {
 			$scope.editor.format();
 			if (!isDefined($scope.editor.error)) {
-				$scope.client.registerWarmupQuery($scope.new_index.name, $scope.new_types, $scope.new_warmer_id, $scope.editor.getValue(),
+                $scope.warmer.source = $scope.editor.getValue();
+				ElasticService.client.registerWarmupQuery($scope.warmer,
 					function(response) {
-						$scope.updateModel(function() {
-							$scope.loadIndexWarmers();
-							AlertService.success("Warmup query successfully registered", response);
-						});
+                        $scope.loadIndexWarmers();
+                        AlertService.success("Warmup query successfully registered", response);
 					},
 					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Request did not return a valid JSON", error);
-						});
+                        AlertService.error("Request did not return a valid JSON", error);
 					}
 				);
 			}
@@ -2930,23 +2656,19 @@ function WarmupController($scope, $location, $timeout, ConfirmDialogService, Ale
 		}
 	};
 	
-	$scope.deleteWarmupQuery=function(warmer_id, source) {
+	$scope.deleteWarmupQuery=function(warmer) {
 		ConfirmDialogService.open(
-			"are you sure you want to delete query " + warmer_id + "?",
-			source,
+			"are you sure you want to delete query " + warmer.id + "?",
+			warmer.source,
 			"Delete",
 			function() {
-				$scope.client.deleteWarmupQuery($scope.index.name, warmer_id,
+				ElasticService.client.deleteWarmupQuery(warmer,
 					function(response) {
-						$scope.updateModel(function() {
-							AlertService.success("Warmup query successfully deleted", response);
-							$scope.loadIndexWarmers();
-						});
+                        AlertService.success("Warmup query successfully deleted", response);
+                        $scope.loadIndexWarmers();
 					},
 					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Error while deleting warmup query", error);
-						});
+                        AlertService.error("Error while deleting warmup query", error);
 					}
 				);
 			}
@@ -2955,28 +2677,77 @@ function WarmupController($scope, $location, $timeout, ConfirmDialogService, Ale
 	
 	$scope.loadIndexWarmers=function() {
 		if (isDefined($scope.index)) {
-			$scope.client.getIndexWarmers($scope.index.name, $scope.pagination.warmer_id,
-				function(response) {
-					$scope.updateModel(function() {
-						if (isDefined(response[$scope.index.name])) {
-							$scope.pagination.setResults(response[$scope.index.name].warmers);
-						} else {
-							$scope.pagination.setResults([]);
-						}
-					});
+			ElasticService.client.getIndexWarmers($scope.index, "",
+				function(warmers) {
+                    $scope.paginator.setCollection(warmers);
+                    $scope.page = $scope.paginator.getPage();
 				},
 				function(error) {
-					$scope.updateModel(function() {
-						AlertService.error("Error while fetching warmup queries", error);
-					});
+                    $scope.paginator.setCollection([]);
+                    $scope.page = $scope.paginator.getPage();
+                    AlertService.error("Error while fetching warmup queries", error);
 				}
 			);
 		} else {
-			$scope.pagination.setResults([]);
+			$scope.paginator.setCollection([]);
+            $scope.page = $scope.paginator.getPage();
 		}
 	};
 	
-}
+}]);
+kopf.controller('BenchmarkController', ['$scope', '$location', '$timeout', 'AlertService', 'ElasticService', function($scope, $location, $timeout, AlertService, ElasticService) {
+	$scope.bench = new Benchmark();
+	$scope.competitor = new Competitor();
+	$scope.indices = [];
+	$scope.types = [];
+
+	$scope.$on('loadBenchmarkEvent', function() {
+		if (isDefined($scope.cluster)) {
+			$scope.indices = $scope.cluster.indices || [];
+		}
+	});
+	
+	$scope.addCompetitor=function() {
+		if (notEmpty($scope.competitor.name)) {
+			this.bench.addCompetitor($scope.competitor);
+			$scope.competitor = new Competitor();	
+		} else {
+			AlertService.error("Competitor needs a name");
+		}
+	};
+	
+	$scope.removeCompetitor=function(index) {
+		$scope.bench.competitors.splice(index, 1);
+	};
+	
+	$scope.editCompetitor=function(index) {
+		var edit = $scope.bench.competitors.splice(index, 1);
+		$scope.competitor = edit[0];
+	};
+	
+	$scope.runBenchmark=function() {
+		$('#benchmark-result').html('');
+		try {
+			var json = $scope.bench.toJson();
+			ElasticService.client.executeBenchmark(json, 
+				function(response) {
+					$scope.result = JSONTree.create(response);
+					$('#benchmark-result').html($scope.result);
+				},
+				function(error, status) {
+                    if (status == 503) {
+                        AlertService.info("No available nodes for executing benchmark. At least one node must be started with '--node.bench true' option.");
+                    } else {
+                        AlertService.error(error.error);
+                    }
+				}
+			);
+		} catch (error) {
+			AlertService.error(error);
+		}
+	};
+	
+}]);
 var Alert=function(message, response, level, _class, icon) {
 	var current_date = new Date();
 	this.message = message;
@@ -3019,25 +2790,25 @@ kopf.factory('AlertService', function() {
 	// creates an error alert
 	this.error=function(message, response, timeout) {
 		timeout = isDefined(timeout) ? timeout : 15000;
-		return this.addAlert(new Alert(message, response, "error", "alert-danger", "icon-warning-sign"), timeout);
+		return this.addAlert(new Alert(message, response, "error", "alert-danger", "fa fa-warning"), timeout);
 	};
 	
 	// creates an info alert
 	this.info=function(message, response, timeout) {
 		timeout = isDefined(timeout) ? timeout : 5000;
-		return this.addAlert(new Alert(message, response, "info", "alert-info", "icon-info"), timeout);
+		return this.addAlert(new Alert(message, response, "info", "alert-info", "fa fa-info"), timeout);
 	};
 	
 	// creates success alert
 	this.success=function(message, response, timeout) {
 		timeout = isDefined(timeout) ? timeout : 5000;
-		return this.addAlert(new Alert(message, response, "success", "alert-success", "icon-ok"), timeout);
+		return this.addAlert(new Alert(message, response, "success", "alert-success", "fa fa-check"), timeout);
 	};
 	
 	// creates a warn alert
 	this.warn=function(message, response, timeout) {
 		timeout = isDefined(timeout) ? timeout : 10000;
-		return this.addAlert(new Alert(message, response, "warn", "alert-warning", "icon-info"), timeout);
+		return this.addAlert(new Alert(message, response, "warn", "alert-warning", "fa fa-info"), timeout);
 	};
 	
 	this.addAlert=function(alert, timeout) {
@@ -3082,7 +2853,7 @@ kopf.factory('AceEditorService', function() {
 });
 kopf.factory('ThemeService', function() {
 	
-	this.theme = "default";
+	this.theme = "dark";
 	
 	this.setTheme=function(theme) {
 		this.theme = theme;
@@ -3099,6 +2870,27 @@ kopf.factory('ThemeService', function() {
 	
 	return this;
 });
+kopf.factory('ElasticService', ['$http','$q', function($http, $q) {
+    this.client = null;
+    this.connection = null;
+
+    this.connect=function(url) {
+        this.client = null;
+        this.connection = null;
+        if (url.indexOf("http://") !== 0 && url.indexOf("https://") !== 0) {
+            url = "http://" + url;
+        }
+        this.connection = new ESConnection(url);
+        this.client = new ElasticClient(this.connection, $http, $q);
+    };
+
+    this.isConnected=function() {
+      return isDefined(this.client);
+    };
+
+    return this;
+
+}]);
 function AceEditor(target) {
 	// ace editor
 	this.editor = ace.edit(target);
@@ -3152,104 +2944,435 @@ function Gist(title, url) {
 	};
 
 }
-function WarmersPagination(page, results) {
-	this.page = page;
-	this.page_size = 10;
-	this.results = results;
-	this.warmer_id = "";
-	this.past_warmer_id = null;
-	this.total = 0;
-	this.cached_results = null;
+function Benchmark() {
+	this.name = '';
+	this.num_executor = 1;
+	this.percentiles = '[10, 25, 50, 75, 90, 99]';
+	this.competitors = [ ];
 	
-	this.firstResult=function() {
-		if (Object.keys(this.getResults()).length > 0) {
-			return ((this.current_page() - 1) * this.page_size) + 1;
-		} else {
-			return 0;
-		}
+	this.addCompetitor=function(competitor) {
+		this.competitors.push(competitor);
 	};
 	
-	this.lastResult=function() {
-		if (this.current_page() * this.page_size > Object.keys(this.getResults()).length) {
-			return Object.keys(this.getResults()).length;
-		} else {
-			return this.current_page() * this.page_size;
+	this.toJson=function() {
+		var body = {};
+		body.name = this.name;
+		if (notEmpty(this.num_executor)) {
+			body.num_executor_nodes = this.num_executor;
 		}
+		if (notEmpty(this.percentiles)) {
+			body.percentiles = JSON.parse(this.percentiles);
+		}
+		if (this.competitors.length > 0) {
+			body.competitors = this.competitors.map(function(c) { return c.toJson(); });
+		}
+		if (notEmpty(this.iterations)) {
+			body.iterations = this.iterations;
+		}
+		if (notEmpty(this.concurrency)) {
+			body.concurrency = this.concurrency;
+		}
+		if (notEmpty(this.multiplier)) {
+			body.multiplier = this.multiplier;
+		}
+		if (notEmpty(this.num_slowest)) {
+			body.num_slowest = this.num_slowest;
+		}
+		return JSON.stringify(body, null, 4);
 	};
+	
+}
 
-	this.hasNextPage=function() {
-		return this.page_size * this.current_page() < Object.keys(this.getResults()).length;
-	};
+function Competitor() {
+	this.name = '';
+
+	// override benchmark options
+	this.iterations = '';
+	this.concurrency = '';
+	this.multiplier = '';
+	this.num_slowest = '';
+	this.warmup = true;
+	this.requests = [];
 	
-	this.hasPreviousPage=function() {
-		return this.current_page() > 1;
-	};
+	// defined only by competitor
+	this.search_type = 'query_then_fetch';
+	this.indices = '';
+	this.types = '';
 	
-	this.nextPage=function() {
-		this.page += 1;
-	};
+	// cache
+	this.filter_cache = false;
+	this.field_data = false;
+	this.recycler_cache = false;
+	this.id_cache = false;
 	
-	this.previousPage=function() {
-		this.page -= 1;
-	};
+	this.cache_fields = '';
+	this.cache_keys = '';
 	
-	this.current_page=function() {
-		if (this.warmer_id != this.past_warmer_id) {
-			this.page = 1;
+	this.toJson=function() {
+		var body = {};
+		body.name = this.name;
+		if (notEmpty(this.requests)) {
+			body.requests = JSON.parse(this.requests);
 		}
-		return this.page;
-	};
-	
-	this.getPage=function() {
-		var count = 1;
-		var first_result = this.firstResult();
-		var last_result = this.lastResult();
-		var page = {};
-		var results = this.getResults();
-		Object.keys(results).forEach(function(alias) {
-			if (count < first_result || count > last_result) {
-				count += 1;
+		if (notEmpty(this.iterations)) {
+			if (isNumber(this.iterations)) {
+				body.iterations = parseInt(this.iterations);
 			} else {
-				count += 1;
-				page[alias] = results[alias];
+				throw "Iterations must be a valid number";
 			}
-		});
-		return page;
-	};
-	
-	this.setResults=function(results) {
-		this.results = results;
-		// forces recalculation of page
-		this.cached_results = null; 
-		while (this.total() < this.firstResult()) {
-			this.previousPage();
 		}
-	};
-	
-	this.total=function() {
-		return Object.keys(this.getResults()).length;
-	};
-	
-	this.getResults=function() {
-		var matchingResults = {};
-		var filters_changed = this.warmer_id != this.past_warmer_id;
-		if (filters_changed || !isDefined(this.cached_results)) { // if filters changed or no cached, calculate
-			var warmer_id = this.warmer_id;
-			var results = this.results;
-			Object.keys(results).forEach(function(current_warmer_id) {
-				if (isDefined(warmer_id) && warmer_id.length > 0) {
-					if (current_warmer_id.indexOf(warmer_id) != -1) {
-						matchingResults[current_warmer_id] = results[current_warmer_id];
-					} 
-				} else {
-					matchingResults[current_warmer_id] = results[current_warmer_id];
-				}
-			});
-			this.cached_results = matchingResults;
-			this.past_warmer_id = this.warmer_id;
+		if (notEmpty(this.concurrency)) {
+			if (isNumber(this.concurrency)) {
+				body.concurrency = parseInt(this.concurrency);
+			} else {
+				throw "Concurrency must be a valid number";
+			}
 		}
-		return this.cached_results;
+		if (notEmpty(this.multiplier)) {
+			if (isNumber(this.multiplier)) {
+				body.multiplier = parseInt(this.multiplier);
+			} else {
+				throw "Multiplier must be a valid number";
+			}
+		}
+		if (notEmpty(this.num_slowest)) {
+			if (isNumber(this.num_slowest)) {
+				body.num_slowest = parseInt(this.num_slowest);
+			} else {
+				throw "Num slowest must be a valid number";
+			}
+		}
+		if (notEmpty(this.indices)) {
+			body.indices = this.indices.split(",").map(function(index) { return index.trim(); });
+		}
+		if (notEmpty(this.types)) {
+			body.types = this.types.split(",").map(function(type) { return type.trim(); });
+		}
+
+		body.search_type = this.search_type;
+
+		body.clear_caches = {};
+		body.clear_caches.filter = this.filter_cache;
+		body.clear_caches.field_data = this.field_data;
+		body.clear_caches.id = this.id_cache;
+		body.clear_caches.recycler = this.recycler_cache;
+		if (notEmpty(this.cache_fields)) {
+			body.clear_caches.fields = this.cache_fields.split(",").map(function(field) { return field.trim(); });
+		}
+		if (notEmpty(this.cache_keys)) {
+			body.clear_caches.filter_keys = this.cache_keys.split(",").map(function(key) { return key.trim(); });
+		}
+		
+		return body;
 	};
+	
+}
+function Request(url, method, body) {
+    this.timestamp = getTimeString(new Date());
+    this.url = url;
+    this.method = method;
+    this.body = body;
+
+    this.clear=function() {
+        this.url = '';
+        this.method = '';
+        this.body = '';
+    };
+
+    this.loadFromJSON=function(json) {
+        this.method = json.method;
+        this.url = json.url;
+        this.body = json.body;
+        this.timestamp = json.timestamp;
+        return this;
+    };
+
+    this.equals=function(request) {
+        return (
+            this.url === request.url &&
+            this.method.toUpperCase() === request.method.toUpperCase() &&
+            this.body === request.body
+            );
+    };
+}
+function ClusterNavigation() {
+    this.page = 1;
+    this.page_size = 5; // TODO: move it to a single place?
+
+    this.query = "";
+    this.previous_query = null;
+    this.hide_special = true;
+
+    this.data = true;
+    this.master = true;
+    this.client = true;
+    this.state = "";
+    this.node_name = "";
+    this.cached_result = [];
+    this.cluster_timestamp = null;
+
+    this.clone=function() {
+        var instance = new ClusterNavigation();
+        instance.page = this.page;
+        instance.query = this.query;
+        instance.hide_special = this.hide_special;
+        instance.data = this.data;
+        instance.master = this.master;
+        instance.client = this.client;
+        instance.state = this.state;
+        instance.node_name = this.node_name;
+        return instance;
+    };
+
+    this.equals=function(other) {
+        return (
+            other !== null &&
+            this.page == other.page &&
+            this.query == other.query &&
+            this.hide_special == other.hide_special &&
+            this.data == other.data &&
+            this.master == other.master &&
+            this.client == other.client &&
+            this.state == other.state &&
+            this.node_name == other.node_name
+            );
+    };
+
+}
+function ModalControls() {
+    this.alert = null;
+    this.active = false;
+    this.title = '';
+    this.info = '';
+}
+function Paginator(page, page_size, collection, filter) {
+
+    this.filter = filter;
+
+    this.page = page;
+
+    this.page_size = page_size;
+
+    this.$collection = isDefined(collection) ? collection : [];
+
+    this.nextPage=function() {
+        this.page += 1;
+    };
+
+    this.previousPage=function() {
+        this.page -= 1;
+    };
+
+    this.getPage=function() {
+        var results = this.getResults();
+        var total = results.length;
+
+        var first = total > 0 ? ((this.page - 1) * this.page_size) + 1 : 0;
+        while (total < first) {
+            this.previousPage();
+            first = (this.page - 1) * this.page_size + 1;
+        }
+        var last = this.page * this.page_size > total ? total : this.page * this.page_size;
+
+        var elements = total > 0 ? results.slice(first - 1, last) : [];
+
+        var next = this.page_size * this.page < total;
+        var previous = this.page > 1;
+        while (elements.length < this.page_size) {
+            elements.push(null);
+        }
+        return new Page(elements, total, first, last, next, previous);
+    };
+
+    this.setCollection=function(collection) {
+        this.$collection = collection;
+    };
+
+    this.getResults=function() {
+        var filter = this.filter;
+        var collection = this.$collection;
+        if (filter.isBlank()) {
+            return collection;
+        } else {
+            var filtered_collection = [];
+            collection.forEach(function(item) {
+                if (filter.matches(item)) {
+                    filtered_collection.push(item);
+                }
+            });
+            return filtered_collection;
+        }
+    };
+
+
+    this.getCollection=function() {
+        return this.$collection;
+    };
+
+}
+
+function Page(elements, total, first, last, next, previous) {
+    this.elements = elements;
+    this.total = total;
+    this.first = first;
+    this.last = last;
+    this.next = next;
+    this.previous = previous;
+}
+function AliasFilter(index, alias) {
+
+    this.index = index;
+    this.alias = alias;
+
+    this.clone=function() { return new AliasFilter(this.index, this.alias); };
+
+    this.equals=function(other) {
+        return other !== null && this.index == other.index && this.alias == other.alias;
+    };
+
+    this.isBlank=function() { return !notEmpty(this.index) && !notEmpty(this.alias); };
+
+    this.matches=function(index_alias) {
+        if (this.isBlank()) {
+            return true;
+        } else {
+            var matches = true;
+            if (notEmpty(this.index)) {
+                matches = index_alias.index.indexOf(this.index) != -1;
+            }
+            if (matches && notEmpty(this.alias)) {
+                matches = false;
+                var aliases = index_alias.aliases;
+                for (var i = 0; !matches && i < aliases.length; i++) {
+                    var alias = aliases[i];
+                    matches = alias.alias.indexOf(this.alias) != -1;
+                }
+            }
+            return matches;
+        }
+    };
+
+}
+function SnapshotFilter() {
+
+    this.clone=function() { return new SnapshotFilter(); };
+
+    this.equals=function(other) { return other !== null; };
+
+    this.isBlank=function() { return true; };
+
+    this.matches=function(snapshot) { return true; };
+
+}
+function WarmerFilter(id) {
+
+    this.id = id;
+
+    this.clone=function() { return new WarmerFilter(this.id); };
+
+    this.equals=function(other) {
+        return other !== null && this.id == other.id;
+    };
+
+    this.isBlank=function() { return !notEmpty(this.id); };
+
+    this.matches=function(warmer) {
+        if (this.isBlank()) {
+            return true;
+        } else {
+            return warmer.id.indexOf(this.id) != -1;
+        }
+    };
+
+}
+function IndexFilter(name, state, hide_special, timestamp) {
+    this.name = name;
+    this.state = state;
+    this.hide_special = hide_special;
+    this.timestamp = timestamp;
+
+    this.clone=function() {
+        return new IndexFilter(this.name, this.state, this.hide_special, this.timestamp);
+    };
+
+    this.equals=function(other) {
+        return (
+            other !== null &&
+            this.name == other.name &&
+            this.state == other.state &&
+            this.hide_special === other.hide_special &&
+            this.timestamp == other.timestamp
+        );
+    };
+
+    this.isBlank=function() {
+        return !notEmpty(this.name) && !notEmpty(this.state) && !notEmpty(this.hide_special);
+    };
+
+    this.matches=function(index) {
+        if (this.isBlank()) {
+            return true;
+        } else {
+            var matches = true;
+            if (this.hide_special) {
+                matches = !index.special;
+            }
+            if (matches && notEmpty(this.state)) {
+                if (this.state == "unhealthy" && !index.unhealthy) {
+                    matches = false;
+                } else if ((this.state == "open" || this.state == "close") && this.state != index.state) {
+                    matches = false;
+                }
+            }
+            if (matches && notEmpty(this.name)) {
+                try {
+                    var reg = new RegExp(this.name.trim(), "i");
+                    matches = reg.test(index.name);
+                }
+                catch (err) { // if not valid regexp, still try normal matching
+                    matches = index.name.indexOf(this.name.toLowerCase()) != -1;
+                }
+            }
+            return matches;
+        }
+    };
+
+}
+function NodeFilter(name, data, master, client, timestamp) {
+    this.name = name;
+    this.data = data;
+    this.master = master;
+    this.client = client;
+    this.timestamp = timestamp;
+
+    this.clone=function() {
+        return new NodeFilter(this.name, this.data, this.master, this.client);
+    };
+
+    this.equals=function(other) {
+        return (
+            other !== null &&
+            this.name == other.name &&
+            this.data == other.data &&
+            this.master == other.master &&
+            this.client == other.client &&
+            this.timestamp == other.timestamp
+            );
+    };
+
+    this.isBlank=function() {
+        return !notEmpty(this.name) && (this.data && this.master && this.client);
+    };
+
+    this.matches=function(node) {
+        if (this.isBlank()) {
+            return true;
+        } else {
+            var matches = notEmpty(this.name) ? node.name.toLowerCase().indexOf(this.name.toLowerCase()) != -1 : true;
+            return matches && (node.data && this.data || node.master && this.master || node.client && this.client);
+        }
+    };
+
 }
 function readablizeBytes(bytes) {
 	if (bytes > 0) {
@@ -3287,6 +3410,11 @@ function isDefined(value) {
 // string.trim().length is grater than 0
 function notEmpty(value) {
 	return isDefined(value) && value.toString().trim().length > 0;
+}
+
+function isNumber(value) {
+	var exp = /\d+/;
+	return exp.test(value);
 }
 
 // Returns the given date as a String formatted as hh:MM:ss

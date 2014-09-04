@@ -145,7 +145,7 @@ function AdhocCtrl($scope, $http, Analyzer, Tokenizer, Filter, Data){
 
 
 
-        var path = $scope.data.host + "/rtf/_analyze?tokenizer=" + tokenizer.name + "&filters=" + filterList;
+        var path = $scope.data.host + "/_analyze?tokenizer=" + tokenizer.name + "&filters=" + filterList;
 
         $http.post(path, $scope.analyzer.query)
             .success(function(response){

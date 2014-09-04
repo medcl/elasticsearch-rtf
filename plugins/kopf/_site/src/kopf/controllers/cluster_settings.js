@@ -1,5 +1,4 @@
-function ClusterSettingsController($scope, $location, $timeout, AlertService) {
-
+kopf.controller('ClusterSettingsController', ['$scope', '$location', '$timeout', 'AlertService', 'ElasticService', function($scope, $location, $timeout, AlertService, ElasticService) {
 	$scope.$on('loadClusterSettingsEvent', function() {
 		$('#cluster_settings_option a').tab('show');
 		$('#cluster_settings_tabs a:first').tab('show');
@@ -9,18 +8,14 @@ function ClusterSettingsController($scope, $location, $timeout, AlertService) {
 	});
 
 	$scope.save=function() {
-		var response = $scope.client.updateClusterSettings(JSON.stringify($scope.settings, undefined, ""),
+		ElasticService.client.updateClusterSettings(JSON.stringify($scope.settings, undefined, ""),
 			function(response) {
-				$scope.updateModel(function() {
-					AlertService.success("Cluster settings were successfully updated",response);
-				});
+                AlertService.success("Cluster settings were successfully updated",response);
 				$scope.refreshClusterState();
 			}, 
 			function(error) {
-				$scope.updateModel(function() {
-					AlertService.error("Error while updating cluster settings",error);
-				});
+                AlertService.error("Error while updating cluster settings",error);
 			}
 		);
 	};
-}
+}]);

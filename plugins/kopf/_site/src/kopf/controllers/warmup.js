@@ -1,15 +1,18 @@
-function WarmupController($scope, $location, $timeout, ConfirmDialogService, AlertService, AceEditorService) {
+kopf.controller('WarmupController', ['$scope', 'ConfirmDialogService', 'AlertService', 'AceEditorService', 'ElasticService', function($scope, ConfirmDialogService, AlertService, AceEditorService, ElasticService) {
 	$scope.editor = undefined;
 	$scope.indices = [];
 	$scope.index = null;
-	$scope.pagination = new WarmersPagination(1, []);
+	$scope.paginator = new Paginator(1, 10, [], new WarmerFilter(""));
+    $scope.page = $scope.paginator.getPage();
 	
-	// holds data for new warmer. maybe create a model for that
-	$scope.new_warmer_id = '';
-	$scope.new_index = '';
-	$scope.new_source = '';
-	$scope.new_types = '';
-	
+	$scope.warmer = new Warmer('', '', { types: [], source: {} });
+
+    $scope.warmers = [];
+
+    $scope.$watch('paginator', function(filter, previous) {
+        $scope.page = $scope.paginator.getPage();
+    }, true);
+
 	$scope.$on('loadWarmupEvent', function() {
 		$scope.loadIndices();
 		$scope.initEditor();
@@ -21,10 +24,6 @@ function WarmupController($scope, $location, $timeout, ConfirmDialogService, Ale
 		}
 	};
 
-	$scope.totalWarmers=function() {
-		return $scope.pagination.total();
-	};
-	
 	$scope.loadIndices=function() {
 		$scope.indices = $scope.cluster.indices;
 	};
@@ -33,17 +32,14 @@ function WarmupController($scope, $location, $timeout, ConfirmDialogService, Ale
 		if ($scope.editor.hasContent()) {
 			$scope.editor.format();
 			if (!isDefined($scope.editor.error)) {
-				$scope.client.registerWarmupQuery($scope.new_index.name, $scope.new_types, $scope.new_warmer_id, $scope.editor.getValue(),
+                $scope.warmer.source = $scope.editor.getValue();
+				ElasticService.client.registerWarmupQuery($scope.warmer,
 					function(response) {
-						$scope.updateModel(function() {
-							$scope.loadIndexWarmers();
-							AlertService.success("Warmup query successfully registered", response);
-						});
+                        $scope.loadIndexWarmers();
+                        AlertService.success("Warmup query successfully registered", response);
 					},
 					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Request did not return a valid JSON", error);
-						});
+                        AlertService.error("Request did not return a valid JSON", error);
 					}
 				);
 			}
@@ -52,23 +48,19 @@ function WarmupController($scope, $location, $timeout, ConfirmDialogService, Ale
 		}
 	};
 	
-	$scope.deleteWarmupQuery=function(warmer_id, source) {
+	$scope.deleteWarmupQuery=function(warmer) {
 		ConfirmDialogService.open(
-			"are you sure you want to delete query " + warmer_id + "?",
-			source,
+			"are you sure you want to delete query " + warmer.id + "?",
+			warmer.source,
 			"Delete",
 			function() {
-				$scope.client.deleteWarmupQuery($scope.index.name, warmer_id,
+				ElasticService.client.deleteWarmupQuery(warmer,
 					function(response) {
-						$scope.updateModel(function() {
-							AlertService.success("Warmup query successfully deleted", response);
-							$scope.loadIndexWarmers();
-						});
+                        AlertService.success("Warmup query successfully deleted", response);
+                        $scope.loadIndexWarmers();
 					},
 					function(error) {
-						$scope.updateModel(function() {
-							AlertService.error("Error while deleting warmup query", error);
-						});
+                        AlertService.error("Error while deleting warmup query", error);
 					}
 				);
 			}
@@ -77,25 +69,21 @@ function WarmupController($scope, $location, $timeout, ConfirmDialogService, Ale
 	
 	$scope.loadIndexWarmers=function() {
 		if (isDefined($scope.index)) {
-			$scope.client.getIndexWarmers($scope.index.name, $scope.pagination.warmer_id,
-				function(response) {
-					$scope.updateModel(function() {
-						if (isDefined(response[$scope.index.name])) {
-							$scope.pagination.setResults(response[$scope.index.name].warmers);
-						} else {
-							$scope.pagination.setResults([]);
-						}
-					});
+			ElasticService.client.getIndexWarmers($scope.index, "",
+				function(warmers) {
+                    $scope.paginator.setCollection(warmers);
+                    $scope.page = $scope.paginator.getPage();
 				},
 				function(error) {
-					$scope.updateModel(function() {
-						AlertService.error("Error while fetching warmup queries", error);
-					});
+                    $scope.paginator.setCollection([]);
+                    $scope.page = $scope.paginator.getPage();
+                    AlertService.error("Error while fetching warmup queries", error);
 				}
 			);
 		} else {
-			$scope.pagination.setResults([]);
+			$scope.paginator.setCollection([]);
+            $scope.page = $scope.paginator.getPage();
 		}
 	};
 	
-}
+}]);

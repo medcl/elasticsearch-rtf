@@ -26,7 +26,7 @@
 													<div class="col-xs-6">
 														<div class="form-group">
 															<label class="form-label">target index</label>
-															<select class="form-control input-sm" ng-model="new_alias.index" ng-options="i for i in aliases.indices">
+															<select class="form-control input-sm" ng-model="new_alias.index" ng-options="i.name as i.name for i in indices">
 																<option value="">select index</option>
 															</select>
 														</div>
@@ -55,10 +55,10 @@
 										<div class="col-lg-12 action-buttons">
 											<span class="validation-error">{{editor.error}}</span>
 											<button type="submit" class="btn btn-default input-sm" ng-click="editor.format()">
-												<i class="icon-align-left"></i> format
+												<i class="fa fa-align-left"></i> format
 											</button>
 											<button type="submit" class="btn btn-primary input-sm" ng-click="addAlias()">
-												<i class="icon-plus-sign"></i> add
+												<i class="fa fa-plus-circle"></i> add
 											</button>
 										</div>
 									</div>
@@ -85,25 +85,25 @@
 									<form class="form-inline" role="form">
 										<div class="col-xs-6 form-group">
 											<label class="form-label">alias name</label>
-											<input type="text" ng-model="pagination.alias_query" class="form-control input-sm" placeholder="filter by alias name">
+											<input type="text" ng-model="paginator.filter.alias" class="form-control input-sm" placeholder="filter by alias name">
 										</div>
 										<div class="col-xs-6 form-group">
 											<label class="form-label">index name</label>
-											<input type="text" ng-model="pagination.index_query" class="form-control input-sm" placeholder="filter by index name">
+											<input type="text" ng-model="paginator.filter.index" class="form-control input-sm" placeholder="filter by index name">
 										</div>
 									</form>
 								</div>
 								<div class="row">
 									<div class="col-lg-12">
 										<div class="pagination-block">
-											<span ng-switch on="pagination.hasPreviousPage()">
-												<i class="icon-double-angle-left normal-action" ng-click="pagination.previousPage()" ng-switch-when="true"></i>
-												<i class="icon-double-angle-left inactive-action" ng-switch-when="false"></i>
+											<span ng-switch on="page.previous">
+												<i class="fa fa-angle-double-left normal-action" ng-click="paginator.previousPage()" ng-switch-when="true"></i>
+												<i class="fa fa-angle-double-left inactive-action" ng-switch-when="false"></i>
 											</span>
-											{{pagination.firstResult()}}-{{pagination.lastResult()}} of {{pagination.total()}}
-											<span ng-switch on="pagination.hasNextPage()">
-												<i class="icon-double-angle-right normal-action" ng-click="pagination.nextPage()" ng-switch-when="true"></i>
-												<i class="icon-double-angle-right inactive-action" ng-switch-when="false"></i>
+											{{page.first}}-{{page.last}} of {{page.total}}
+											<span ng-switch on="page.next">
+												<i class="fa fa-angle-double-right normal-action" ng-click="paginator.nextPage()" ng-switch-when="true"></i>
+												<i class="fa fa-angle-double-right inactive-action" ng-switch-when="false"></i>
 											</span>
 										</div>
 									</div>
@@ -112,26 +112,22 @@
 									<div class="col-lg-12">
 										<table class="table table-striped table-bordered table-condensed">
 											<tr class="header-row">
-												<td class="aliases-alias-cell">
-													<i class="icon-tag"></i> alias name
-												</td>
-												<td>
-													<i class="icon-pushpin"></i> target indices
-												</td>
+												<td class="aliases-alias-cell">index</td>
+												<td>aliases</td>
 											</tr>
-											<tr ng-repeat="(alias_name, aliases) in pagination.getPage()">
+											<tr ng-repeat="index_alias in page.elements track by $index" ng-show="index_alias != null">
 												<td>
-													<i class="icon-remove remove-icon normal-action" ng-click="removeAlias(alias_name)" title="remove alias from all indices"></i>
-													<span class="aliases-new-alias-input">{{alias_name}}</span>
+													<i class="fa fa-times remove-icon normal-action" ng-click="removeIndexAliases(index_alias.index)" title="remove all aliases for this index"></i>
+													<span class="aliases-new-alias-input">{{index_alias.index}}</span>
 												</td>
 												<td>
-													<span ng-repeat="alias in aliases" class="aliases-index-alias">
+													<span ng-repeat="alias in index_alias.aliases track by $index" class="aliases-index-alias">
 														<span class="aliases-new-alias-input" ng-click="viewDetails(alias)">
 															<a data-toggle="modal" href="#alias_details" data-backdrop="static">
-																{{alias.index}}
+																{{alias.alias}}
 															</a>
 														</span>
-														<i class="icon-remove normal-action danger-action" ng-click="removeAliasFromIndex(alias.index,alias.alias)" title="remove alias from a single index"></i>
+														<i class="fa fa-times normal-action danger-action" ng-click="removeIndexAlias(index_alias.index,alias.alias)" title="remove alias from a single index"></i>
 													</div>
 												</td>
 											</tr>
@@ -140,7 +136,7 @@
 								</div>
 								<div class="action-buttons">
 									<button type="submit" class="btn btn-danger input-sm" ng-click="mergeAliases()">
-										<i class="icon-save"></i> save
+										<i class="fa fa-save"></i> save
 									</button>
 								</div>
 							</div>

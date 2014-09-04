@@ -74,7 +74,7 @@
 						$(el).click();
 					}
 				});
-				// es throws a 500 if you specify types from different indicies with _all
+				// es throws a 500 if you specify types from different indices with _all
 				jEl.siblings(".uiQueryFilter-type.selected").forEach(function(el) {
 					if(this.metadata.types[$(el).text()].indices.intersection(indices).length === 0) {
 						$(el).click();
@@ -212,9 +212,9 @@
 		_aliasSelector_template: function() {
 			var aliases = Object.keys(this.metadata.aliases).sort();
 			aliases.unshift( i18n.text("QueryFilter.AllIndices") );
-			return { tag: "DIV", cls: "uiQueryFilter-section uiQueryFilter-aliases", child:
+			return { tag: "DIV", cls: "uiQueryFilter-section uiQueryFilter-aliases", children: [
 				{ tag: "SELECT", onChange: this._selectAlias_handler, children: aliases.map(ut.option_template) }
-			};
+			] };
 		},
 		_indexSelector_template: function() {
 			var indices = Object.keys( this.metadata.indices ).sort();

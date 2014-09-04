@@ -16,29 +16,29 @@
 								<div class="row cluster-health-filters form-group">
 									<div class="col-xs-6 col-sm-3">
 									  <label class="cluster-map-node-type">
-									    <input type="checkbox" ng-model="retrieveHealth"> <i class="icon-heart-empty node-type-icon"> </i> cluster health
+									    <input type="checkbox" ng-model="retrieveHealth"> <i class="fa fa-heart-o node-type-icon"> </i> cluster health
 									  </label>
 									</div>
 									<div class="col-xs-6 col-sm-3">
 									  <label class="cluster-map-node-type">
-									    <input type="checkbox" ng-model="retrieveState"> <i class="icon-sitemap node-type-icon"> </i> cluster state
+									    <input type="checkbox" ng-model="retrieveState"> <i class="fa fa-sitemap node-type-icon"> </i> cluster state
 									  </label>
 									</div>
 									<div class="col-xs-6 col-sm-3">
 									  <label class="cluster-map-node-type">
-											<input type="checkbox" ng-model="retrieveStats"> <i class="icon-bar-chart node-type-icon"> </i> nodes stats
+											<input type="checkbox" ng-model="retrieveStats"> <i class="fa fa-bar-chart-o node-type-icon"> </i> nodes stats
 										</label>
 									</div>
 									<div class="col-xs-6 col-sm-3">
 									  <label class="cluster-map-node-type">
-									    <input type="checkbox" ng-model="retrieveHotThreads"> <i class="icon-fire node-type-icon"> </i> hot threads
+									    <input type="checkbox" ng-model="retrieveHotThreads"> <i class="fa fa-fire node-type-icon"> </i> hot threads
 									  </label>
 									</div>
 								</div>
 								<div class="row">
 									<div class="col-xs-12 form-group" style="text-align: right;">
 										<button type="button" class="btn btn-primary input-sm" title="load cluster information" ng-click='loadClusterHealth()'>
-											<i class="icon-stethoscope"></i> Load
+											<i class="fa fa-stethoscope"></i> Load
 										</button>
 									</div>
 								</div>
@@ -53,7 +53,7 @@
 								<div class="row">
 									<div class="col-xs-12 form-group" style="text-align: right;">
 										<button type="button" title="easily share cluster information with others" class="btn btn-success input-sm" ng-click='checkPublishClusterHealth()' ng-disabled="results == null" data-toggle="modal" href="#confirm_dialog" data-backdrop="static" tabindex="-1">
-											<i class="icon-github"></i> Gist
+											<i class="fa fa-github"></i> Gist
 										</button>
 									</div>
 								</div>

@@ -13,9 +13,7 @@ angular.module('inquisitor.service', [])
     })
     .value('Analyzer', {
         query: 'the quick brown fox',
-        analyzers: ['standard', 'simple', 'whitespace', 'stop', 'keyword', 'pattern', 'snowball'
-        ,'lowercase_keyword','lowercase_keyword_ngram_min_size1','lowercase_keyword_ngram_min_size2','lowercase_keyword_ngram_min_size3','lowercase_keyword_ngram','lowercase_keyword_without_standard','lowercase_whitespace','smartcn','ik','ik_max_word','ik_smart','mmseg','mmseg_maxword','mmseg_complex','mmseg_simple','index_ansj','query_ansj'
-        ,'comma_spliter','pct_spliter','custom_snowball_analyzer','simple_english_analyzer','edge_ngram','pinyin_ngram_analyzer','pinyin_first_letter_analyzer','pinyin_first_letter_keyword_analyzer','stconvert','s2t_convert','t2s_convert','s2t_keep_both_convert','t2s_keep_both_convert','string2int','custom_string2int','path_analyzer'],
+        analyzers: ['standard', 'simple', 'whitespace', 'stop', 'keyword', 'pattern', 'snowball'],
         customAnalyzers: {},
         fields: {},
         currentField: {},
@@ -23,11 +21,7 @@ angular.module('inquisitor.service', [])
     })
     .value('Tokenizer', {
         query: 'the quick brown fox',
-        tokenizers: ['standard', 'keyword', 'edgeNGram', 'nGram', 'letter', 'lowercase', 'whitespace', 'uax_url_email', 'path_hierarchy'
-        ,'my_pinyin','pinyin_first_letter','pinyin','mmseg_maxword','mmseg_complex'
-        ,'mmseg_simple','semicolon_spliter','pct_spliter','s2t_convert','t2s_convert'
-        ,'s2t_keep_both_convert','t2s_keep_both_convert','ngram_1_to_2','ngram_1_to_3'
-        ,'smartcn_sentence','ik','mmseg'],
+        tokenizers: ['standard', 'keyword', 'edgeNGram', 'nGram', 'letter', 'lowercase', 'whitespace', 'uax_url_email', 'path_hierarchy'],
         ttext: {}
     })
     .value('Filter', {
@@ -35,8 +29,7 @@ angular.module('inquisitor.service', [])
         filters: ['standard', 'asciifolding', 'length', 'lowercase', 'nGram', 'edgeNGram',
                     'porterStem', 'shingle', 'stop', 'word_delimiter', 'stemmer','keyword_marker',
                     'kstem', 'snowball', 'phonetic', 'synonym', 'dictionary_decompounder', 'hyphenation_decompounder',
-                    'reverse', 'elision', 'truncate', 'unique', 'trim','smartcn_word'
-                    ,'ngram_min_3','ngram_min_2','ngram_min_1','min2_length','min3_length','s2t_convert','t2s_convert','s2t_keep_both_convert','t2s_keep_both_convert','my_string2int','pinyin_first_letter'],
+                    'reverse', 'elision', 'truncate', 'unique', 'trim'],
         ftext: {}
     });
 
@@ -90,7 +83,6 @@ app.config(function ($routeProvider) {
             templateUrl: "views/tokenizers.html"
         });
 });
-
 
 
 

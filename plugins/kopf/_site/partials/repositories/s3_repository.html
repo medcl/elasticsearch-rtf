@@ -1,0 +1,58 @@
+<div class="col-xs-12">
+    <div class="row">
+            <div class="form-group col-md-6">
+                <label class="form-label">region</label>
+                <input ng-model="repository_form.settings.region" class="form-control input-sm" placeholder="Region where bucket is located. Defaults to US Standard">
+            </div>
+            <div class="form-group col-md-6">
+                <label class="form-label">bucket</label>
+                <input ng-model="repository_form.settings.bucket" class="form-control input-sm" placeholder="name of bucket to be used for snapshots">
+            </div>
+    </div>
+</div>
+<div class="form-group col-xs-12">
+    <label class="form-label">base path</label>
+    <input ng-model="repository_form.settings.base_path" class="form-control input-sm" placeholder="Path within bucket to repository data(defaults to root dir)">
+</div>
+<div class="form-group col-md-6">
+    <label class="form-label">access key</label>
+    <input ng-model="repository_form.settings.access_key" class="form-control input-sm" placeholder="The access key to use for authentication. Defaults to value of cloud.aws.access_key.">
+</div>
+<div class="form-group col-md-6">
+    <label class="form-label">secret key</label>
+    <input ng-model="repository_form.settings.secret_key" class="form-control input-sm" placeholder="The secret key to use for authentication. Defaults to value of cloud.aws.secret_key.">
+</div>
+<div class="form-group col-md-6">
+    <label class="form-label">chunk size</label>
+    <input ng-model="repository_form.settings.chunk_size" class="form-control input-sm" placeholder="chunk size(1g, 10m, 5k). defaults to unlimited">
+</div>
+<div class="form-group col-md-6">
+    <label class="form-label">max retries</label>
+    <input ng-model="repository_form.settings.max_retries" class="form-control input-sm" placeholder="Number of retries in case of S3 errors. Defaults to 3.">
+</div>
+<div class="form-group col-md-6">
+    <label class="form-label">compress snapshot files(defaults to false)</label>
+    <div class="row">
+        <div class="col-xs-12">
+            <label class="cluster-map-node-type">
+                <input type="checkbox" ng-model="repository_form.settings.compress" ng-true-value="true"> True
+            </label>
+            <label class="cluster-map-node-type">
+                <input type="checkbox" ng-model="repository_form.settings.compress" ng-true-value="false"> False
+            </label>
+        </div>
+    </div>
+</div>
+<div class="form-group col-md-6">
+    <label class="form-label">server side encryption</label>
+    <div class="row">
+        <div class="col-xs-12">
+            <label class="cluster-map-node-type">
+                <input type="checkbox" ng-model="repository_form.settings.server_side_encryption" ng-true-value="true"> True
+            </label>
+            <label class="cluster-map-node-type">
+                <input type="checkbox" ng-model="repository_form.settings.server_side_encryption" ng-true-value="false"> False
+            </label>
+        </div>
+    </div>
+</div>

@@ -5,17 +5,11 @@
 table.overview tr td { width: 16.67%; }
 
 .index-menu-icon {
-	padding-right: 5px;
+	padding-right: 18px;
 }
-
 .dropdown-menu .divider {
 	margin: 5px 0px;
 }
-
-.cluster-map-header-index-icon {
-	padding-right: 5px;
-}
-
 .cluster-map-header-cluster-actions {
 	font-size: 32px;
 	vertical-align: middle !important;
@@ -177,17 +171,9 @@ a.cluster-map-node-action {
 	padding-left: 0px;
 	padding-right: 0px;	
 }
-.node-progress-left {
-	padding-right: 6px;
-	padding-left: 0px;
-}
-.node-progress-center {
+.node-progress-bar {
 	padding-left: 3px;
 	padding-right: 3px;
-}
-.node-progress-right {
-	padding-left: 6px;
-	padding-right: 0px;
 }
 .progress-title-top {
 	font-size: 8px;
@@ -205,4 +191,8 @@ a.cluster-map-node-action {
 	padding-bottom: 0px;
 	line-height: 8px;
 	margin-top: 0px;
+}
+.index-dropdown {
+    right: 0;
+    left: inherit;
 }
