@@ -1,5 +1,0 @@
-http://tinysort.sjeiti.com/
-
-License:
-http://code.google.com/p/tinysort/
-MIT
