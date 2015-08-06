@@ -7,7 +7,7 @@ if NOT DEFINED JAVA_HOME goto err
 set SCRIPT_DIR=%~dp0
 for %%I in ("%SCRIPT_DIR%..") do set ES_HOME=%%~dpfI
 
-TITLE Elasticsearch Plugin Manager 1.6.0
+TITLE Elasticsearch Plugin Manager 1.7.1
 
 SET HOSTNAME=%COMPUTERNAME%
 

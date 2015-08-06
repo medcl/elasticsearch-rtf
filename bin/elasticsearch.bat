@@ -1,7 +1,7 @@
 @echo off
 
 SETLOCAL enabledelayedexpansion
-TITLE Elasticsearch 1.6.0
+TITLE Elasticsearch 1.7.1
 
 SET params='%*'
 

@@ -1,3 +1,5 @@
+.DS_Store
+*.DS_Store
 data
 logs
 under_test
