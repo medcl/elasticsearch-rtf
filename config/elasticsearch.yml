@@ -384,7 +384,7 @@ index:
       my_pinyin:
         type: pinyin
         first_letter: prefix
-        padding_char: ''
+        padding_char: ' '
       mmseg_maxword:
         type: mmseg
         seg_type: max_word
@@ -397,6 +397,12 @@ index:
         min_gram: 2
         type: nGram
     analyzer:
+      pinyin_standard_analyzer:
+          type: custom
+          tokenizer: my_pinyin
+          filter:
+             - lowercase
+             - word_delimiter
       pinyin_ngram_analyzer:
           type: custom
           tokenizer: my_pinyin
