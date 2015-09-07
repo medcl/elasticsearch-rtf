@@ -421,6 +421,12 @@ index:
         filter:
         - lowercase
         tokenizer: mmseg_maxword
+      mmseg_maxword_with_cut_letter_digi:
+        type: custom
+        filter:
+        - lowercase
+        - cut_letter_digit
+        tokenizer: mmseg_maxword
       mmseg_complex:
         type: custom
         filter:
