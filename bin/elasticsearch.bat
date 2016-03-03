@@ -1,7 +1,7 @@
 @echo off
 
 SETLOCAL enabledelayedexpansion
-TITLE Elasticsearch 2.1.1
+TITLE Elasticsearch 2.2.0
 
 SET params='%*'
 
@@ -43,6 +43,6 @@ IF ERRORLEVEL 1 (
 	EXIT /B %ERRORLEVEL%
 )
 
-"%JAVA_HOME%\bin\java" %JAVA_OPTS% %ES_JAVA_OPTS% %ES_PARAMS% !newparams! -cp "%ES_CLASSPATH%" "org.elasticsearch.bootstrap.Elasticsearch" start
+"%JAVA_HOME%\bin\java" %JAVA_OPTS% %ES_JAVA_OPTS% %ES_PARAMS% -cp "%ES_CLASSPATH%" "org.elasticsearch.bootstrap.Elasticsearch" start !newparams!
 
 ENDLOCAL
