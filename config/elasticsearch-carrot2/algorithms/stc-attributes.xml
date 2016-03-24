@@ -1,0 +1,11 @@
+<attribute-sets default="overridden-attributes">
+  <attribute-set id="overridden-attributes">
+    <value-set>
+      <label>overridden-attributes</label>
+      <!--
+      See: http://download.carrot2.org/head/manual/#section.customizing.component-suites-and-attributes.component-attributes
+      for tools that will help you to edit this file.
+      -->
+    </value-set>
+  </attribute-set>
+</attribute-sets>

@@ -1,0 +1,49 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-info">
+            <p>This page shows the basic monitoring graphs.</p>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3">
+        <div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Nodes</h3>
+                </div>
+                <div class="panel-body">
+                    <!-- TODO show only positive values in y-axis, maybe remove x-axis -->
+                    <!-- TODO make it so we have only whole numbers -->
+                    <c3chart bindto-id="chart-nodes" chart-data="vm.dataNodes" chart-columns="vm.columnsNodes" chart-x="vm.datax">
+                        <chart-axis>
+                            <chart-axis-x axis-id="x" axis-type="timeseries">
+                                <chart-axis-x-tick tick-format="%S"/>
+                            </chart-axis-x>
+                        </chart-axis>
+                    </c3chart>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Shards</h3>
+                </div>
+                <div class="panel-body">
+                    <!-- TODO show only positive values in y-axis, maybe remove x-axis -->
+                    <!-- TODO make it so we have only whole numbers -->
+                    <c3chart bindto-id="chart-shards" chart-data="vm.dataShards" chart-columns="vm.columnsShards" chart-x="vm.dataxShards">
+                        <chart-axis>
+                            <chart-axis-x axis-id="xShards" axis-type="timeseries">
+                                <chart-axis-x-tick tick-format="%S"/>
+                            </chart-axis-x>
+                        </chart-axis>
+                    </c3chart>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

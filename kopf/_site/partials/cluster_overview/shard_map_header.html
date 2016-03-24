@@ -1,0 +1,34 @@
+<tr>
+	<!-- cluster actions -->
+	<th class="box cluster-map-header-cluster-actions">
+		<div class="row">
+			<div class="col-lg-3 col-xs-6">
+				<a href="#" class="cluster-map-header-cluster-action" ng-click="selectTab('loadCreateIndex')">
+					<i class="icon-file-alt" title="create new index"></i>
+				</a>
+			</div>
+			<div class="col-lg-3 col-xs-6">
+				<a class="cluster-map-header-cluster-action">
+					<i class="icon-lock" ng-show="cluster.disableAllocation === 'true'" ng-click="enableAllocation()" title="enabled shard allocation"></i>
+					<i class="icon-unlock-alt" ng-show="cluster.disableAllocation !== 'true'" ng-click="disableAllocation()" title="disable shard allocation"></i>
+				</a>
+			</div>
+			<div class="col-lg-3 col-xs-6">
+				<a href="#" ng-click="selectTab('loadClusterSettingsEvent')" class="cluster-map-header-cluster-action">
+					<i class="icon-cog" title="cluster settings"></i>
+				</a>
+			</div>
+			<div class="col-lg-3 col-xs-6">
+				<a href="#" ng-click="selectTab('loadClusterHealth')" class="cluster-map-header-cluster-action">
+					<i class="icon-stethoscope" title="cluster health information"></i>
+				</a>
+			</div>
+		</div>
+	</th>
+	<!-- indices -->
+	<th class="index-cell box" ng-init="position = 0" ng-include src="'partials/cluster_overview/index_header.html'"></th>
+	<th class="index-cell box" ng-init="position = 1" ng-include src="'partials/cluster_overview/index_header.html'"></th>
+	<th class="index-cell box" ng-init="position = 2" ng-include src="'partials/cluster_overview/index_header.html'"></th>
+	<th class="index-cell box" ng-init="position = 3" ng-include src="'partials/cluster_overview/index_header.html'"></th>
+	<th class="index-cell box" ng-init="position = 4" ng-include src="'partials/cluster_overview/index_header.html'"></th>
+</tr>

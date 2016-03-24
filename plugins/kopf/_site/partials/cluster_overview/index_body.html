@@ -1,0 +1,33 @@
+<div ng-show="index != null">
+  <a ng-show="canReceiveShard(index, node)" data-toggle="modal" href="#confirm_dialog" target="_self" data-backdrop="static" role="menuitem" tabindex="-1">
+    <span class="shard shard-relocation-target shard-closed" ng-click="promptRelocateShard(node.id)">
+      <i class="fa fa-fw fa-check"></i>
+    </span>
+  </a>
+  <span id="{{shard.id}}" class="normal-action" ng-repeat="shard in cluster.getShards(node.id, index.name) track by $index">
+    <span class="dropdown">
+      <a data-toggle="dropdown" href="#" target="_self">
+        <span class="shard {{shard.primary ? 'shard-primary' : ''}} shard-{{shard.state.toLowerCase()}} {{relocatingShard && relocatingShard.id === shard.id ? 'shard-relocation-source' : ''}}">
+          {{shard.shard}}
+        </span>
+      </a>
+      <ul class="dropdown-menu index-dropdown" role="menu">
+        <li role="presentation">
+          <a class="cluster-map-header-index-action" role="menuitem" tabindex="-1" ng-click="showShardStats(shard.shard, shard.index, shard.node)">
+            <i class="fa fa-fw fa-info-circle index-menu-icon"></i> show shard stats
+          </a>
+        </li>
+        <li role="presentation" ng-hide="relocatingShard && relocatingShard.id === shard.id">
+          <a class="cluster-map-header-index-action" role="menuitem" tabindex="-1" ng-click="selectShardRelocation(shard)">
+            <i class="fa fa-fw fa-arrows"></i> select for relocation
+          </a>
+        </li>
+        <li role="presentation" ng-show="relocatingShard && relocatingShard.id === shard.id">
+          <a class="cluster-map-header-index-action" role="menuitem" tabindex="-1" ng-click="selectShardRelocation()">
+            <i class="fa fa-fw fa-arrows"></i> unselect for relocation
+          </a>
+        </li>
+      </ul>
+    </span>
+  </span>
+</div>

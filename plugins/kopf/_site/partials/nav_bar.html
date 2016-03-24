@@ -1,0 +1,128 @@
+<div class="navbar navbar-fixed-top navbar-cluster-status-{{clusterStatus}}" ng-controller="NavbarController">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle dropdown-toggle navbar-toggle-{{clusterStatus}}" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <span class="navbar-brand navbar-cluster-status-{{clusterStatus}}">
+        <i class="fa fa-fw fa-circle navbar-logo-action">
+          <span style="display:block; margin-top: -24px; font-size: 26px; font-weight: 500" class="navbar-cluster-status-{{clusterStatus}}-nav">K</span>
+        </i>
+      </span>
+    </div>
+    <div class="collapse navbar-collapse">
+      <ul class="nav navbar-nav navbar-cluster-status-{{clusterStatus}}">
+        <li ng-navbar-section target="cluster" text="cluster" icon="fa-sitemap"></li>
+        <li ng-navbar-section target="nodes" text="nodes" icon="fa-server"></li>
+        <li ng-navbar-section target="rest" text="rest" icon="fa-edit"></li>
+        <li class="">
+          <a target="_self" href="#" data-toggle="dropdown" class="dropdown-toggle">
+            <i class="fa fa-fw fa-magic"></i> more <i class="fa fa-fw fa-caret-down"></i>
+          </a>
+          <ul class="dropdown-menu">
+            <li ng-navbar-section target="createIndex" text="create index" icon="fa-file-o"></li>
+            <li ng-navbar-section target="clusterSettings" text="cluster settings" icon="fa-cog"></li>
+            <li ng-navbar-section target="aliases" text="aliases" icon="fa-tags"></li>
+            <li ng-navbar-section target="analysis" text="analysis" icon="fa-puzzle-piece"></li>
+            <li ng-navbar-section target="percolator" text="percolator" icon="fa-bell-o"></li>
+            <li ng-navbar-section target="warmers" text="warmers" icon="fa-fire"></li>
+            <li ng-navbar-section target="snapshot" text="snapshot" icon="fa-camera"></li>
+            <li ng-navbar-section target="indexTemplates" text="index templates" icon="fa-book"></li>
+            <li ng-navbar-section target="cat" text="cat apis" icon="fa-list"></li>
+            <li ng-navbar-section target="hotthreads" text="hot threads" icon="fa-tasks"></li>
+          </ul>
+        </li>
+        <!-- li ng-navbar-section name="benchmark" icon="fa-bar-chart-o" version="1.4.0"></li -->
+      </ul>
+      <ul class="nav navbar-nav navbar-cluster-status-{{clusterStatus}} navbar-right visible-lg">
+        <li class="connection-info" ng-show="clusterName">
+          {{clusterName}} @ {{clientName || current_host}}
+        </li>
+        <li>
+          <a target="_self" href="#" data-toggle="dropdown" class="dropdown-toggle">
+            <i class="fa fa-fw fa-cog"></i><i class="fa fa-fw fa-caret-down"></i>
+          </a>
+          <ul class="dropdown-menu form-horizontal navbar-app-settings">
+            <li>
+              <div class="row">
+                <div class="col-lg-12">
+                  <span class="pull-right navbar-app-setting">v{{version}}</span>
+                </div>
+              </div>
+            </li>
+            <li class="divider"></li>
+            <li class="navbar-menu-section">
+              <div class="row">
+                <div class="col-xs-5">
+                  <label class="navbar-app-setting pull-right">refresh rate:</label>
+                </div>
+                <div class="col-xs-7">
+                  <select ng-model="new_refresh" class="form-control input-sm" ng-change="changeRefresh()">
+                    <option value="5000">every 5s</option>
+                    <option value="10000">every 10s</option>
+                    <option value="15000">every 15s</option>
+                    <option value="30000">every 30s</option>
+                    <option value="60000">every 1m</option>
+                  </select>
+                </div>
+              </div>
+            </li>
+            <li class="navbar-menu-section">
+              <div class="row">
+                <div class="col-xs-5">
+                  <label class="navbar-app-setting pull-right">theme:</label>
+                </div>
+                <div class="col-xs-7">
+                  <select ng-model="theme" class="form-control input-sm" ng-change="changeTheme()">
+                    <option value="light">light</option>
+                    <option value="dark">dark</option>
+                  </select>
+                </div>
+              </div>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <div class="row">
+                <div class="col-lg-12">
+                  <span class="navbar-app-setting">connect to a different host</span>
+                </div>
+              </div>
+            </li>
+            <li class="navbar-menu-section">
+              <div class="row">
+                <div class="col-lg-12">
+                  <input type="text" class="form-control" ng-model="new_host" ng-keypress="handleConnectToHost($event)" placeholder="http://localhost:9200">
+                </div>
+              </div>
+            </li>
+            <li ng-show="host_history.length > 0"><h5>previous hosts</h5></li>
+            <li ng-show="host_history.length > 0" class="divider"></li>
+            <li ng-show="host_history.length > 0" ng-repeat="host in host_history" ng-click="connectToHost(host.host)">
+              <a target="_self" href class="host-history">{{host.host}}</a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <div class="row">
+                <div class="col-lg-12">
+                  <span class="navbar-app-setting">found a bug? <a href="https://github.com/lmenezes/elasticsearch-kopf/issues/new" target="_blank">be cool and <b>report it!</b></a></span>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<script>
+  $(function() {
+    $('.dropdown-menu input').click(function(e) {
+      e.stopPropagation();
+    });
+    $('.dropdown-menu select').click(function(e) {
+      e.stopPropagation();
+    });
+  });
+</script>

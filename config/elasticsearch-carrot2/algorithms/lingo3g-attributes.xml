@@ -1,0 +1,15 @@
+<attribute-sets default="overridden-attributes">
+  <attribute-set id="overridden-attributes">
+    <value-set>
+      <label>overridden-attributes</label>
+     
+      <!--
+      Below are some attributes of Lingo3G you can change. See
+        http://download.carrot2.org/head/manual/#section.customizing.component-suites-and-attributes.component-attributes
+      and
+        http://download.carrotsearch.com/lingo3g/manual/
+      for tools that will help you to edit this file.
+      -->
+    </value-set>
+  </attribute-set>
+</attribute-sets>

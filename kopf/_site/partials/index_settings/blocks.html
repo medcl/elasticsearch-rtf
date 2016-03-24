@@ -1,0 +1,50 @@
+<div class="row">
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">blocks.read_only</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="set to true to have the index read only. false to allow writes and metadata changes" data-original-title="index.blocks.read_only" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<select ng-model="service.index.editable_settings['index.blocks.read_only']" disabled="true" class="form-control input-sm">
+				<option value="true">true</option>
+				<option value="false">false</option>
+			</select>
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">blocks.read</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="set to true to disable read operations against the index" data-original-title="index.blocks.read" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<select ng-model="service.index.editable_settings['index.blocks.read']" class="form-control input-sm">
+				<option value="true">true</option>
+				<option value="false">false</option>
+			</select>
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">blocks.write</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="set to true to disable write operations against the index" data-original-title="index.blocks.write" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<select ng-model="service.index.editable_settings['index.blocks.write']" class="form-control input-sm">
+				<option value="true">true</option>
+				<option value="false">false</option>
+			</select>
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">blocks.metadata</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="set to true to disable metadata operations against the index" data-original-title="index.blocks.metadata" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<select ng-model="service.index.editable_settings['index.blocks.metadata']" disabled="true" class="form-control input-sm">
+				<option value="true">true</option>
+				<option value="false">false</option>
+			</select>
+		</div>
+	</div>
+</div>

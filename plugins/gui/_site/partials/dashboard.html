@@ -1,0 +1,125 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-info">
+            <p>Welcome to the elasticsearch plugin: <strong>gui</strong>. With this plugin you can do a number of
+                things.</p>
+            <ul>
+                <li>Connect to each elasticsearch instance you have (html based) access to</li>
+                <li>Search the connected elasticsearch instance. This is how a search box on a website could work.</li>
+                <li>Construct a query and learn about the constructed query.</li>
+            </ul>
+            <p>Starting from elasticsearch 1.4 there have been some security measures. One thing is that CORS is now by
+                default disabled. This is smart from security perspective but prevents this plugin from running if you
+                are not coming from the same host as the elasticsearch server. If you still want this to work add the
+                following properties to elasticsearch.yml: http.cors.enabled: true and
+                http.cors.allow-origin: "http://www.gridshore.nl"</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Indexes information</h3>
+            </div>
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th>Index</th>
+                        <th>Size</th>
+                        <th>#docs</th>
+                        <th>#shards</th>
+                        <th>#replicas</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="index in vm.indices">
+                        <td>{{index.name}}</td>
+                        <td>{{index.size}}</td>
+                        <td>{{index.numDocs}}</td>
+                        <td>{{index.numShards}}</td>
+                        <td><button type="button" class="btn btn-link" ng-click="vm.openChangeReplicas(index)">{{index.numReplicas}}</button></td>
+                        <td><button confirmed-click="vm.removeIndex(index.name)"
+                                  ng-confirm-click="Do you want to remove the index {{index.key}}"
+                                  class="btn btn-link" title="Remove index"><span class=" glyphicon glyphicon-trash"></span></button>
+                            <button confirmed-click="vm.openIndex(index.name)" ng-hide="index.state"
+                                  ng-confirm-click="Do you want to open the index {{vm.index.key}}"
+                                  class="btn btn-link" title="Open index"><span class=" glyphicon glyphicon-play-circle"></span></button>
+                            <button confirmed-click="vm.closeIndex(index.name)" ng-show="index.state"
+                                  ng-confirm-click="Do you want to close the index {{index.key}}"
+                                  class="btn btn-link" title="Close index"><span class="glyphicon glyphicon-eject"></span></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>        
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Basic cluster information</h3>
+            </div>
+
+            <table class="table table-condensed">
+                <thead></thead>
+                <tbody>
+                    <tr><th>Cluster name</th><td>{{vm.health.cluster_name}}</td></tr>
+                    <tr><th>Number of nodes</th><td>{{vm.health.number_of_nodes}}</td></tr>
+                    <tr><th>Number of data nodes</th><td>{{vm.health.number_of_data_nodes}}</td></tr>
+                    <tr><th>Active primary shards</th><td>{{vm.health.active_primary_shards}}</td></tr>
+                    <tr><th>Active shards</th><td>{{vm.health.active_shards}}</td></tr>
+                    <tr><th>Relocating shards</th><td>{{vm.health.relocating_shards}}</td></tr>
+                    <tr><th>Initializing shards</th><td>{{vm.health.initializing_shards}}</td></tr>
+                    <tr><th>Unassigned shards</th><td>{{vm.health.unassigned_shards}}</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Information about the nodes</h3>
+            </div>
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th>Node name</th>
+                        <th>Version</th>
+                        <th>Client</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="(key,value) in vm.nodes">
+                        <td>{{value.name}}</td>
+                        <td>{{value.version}}</td>
+                        <td ng-show="value.attributes.client">
+                            <span class="glyphicon glyphicon-ok"></span> (data: {{value.attributes.data}})
+                        </td>
+                        <td ng-hide="value.attributes.client"><span class="glyphicon glyphicon-remove"></span></td>
+                        <td><a href="#/node/{{key}}">More info</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>        
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Site plugins per node</h3>
+            </div>
+            <div class="panel-body">
+                <dl ng-repeat="node in vm.nodes">
+                    <dt>{{node.name}}</dt>
+                    <dd ng-repeat="plugin in node.plugins">
+                        <a href="{{vm.serverUrl}}{{plugin.url}}" target="_blank">{{plugin.name}}</a>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,116 @@
+<div class="row">
+  <div class="col-md-6">
+    <div class="content-panel">
+      <div class="panel-group" id="#newIndexTemplateAccordion">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#newIndexTemplateAccordion" target="_self" href="#newIndexTemplatePanel">
+                create index template
+              </a>
+            </h4>
+          </div>
+          <div id="newIndexTemplatePanel" class="panel-collapse collapse in">
+            <div class="panel-body" style="min-height: 460px;">
+              <div class="row">
+                <div class="col-md-12">
+                  <form role="form">
+                    <div class="row">
+                      <div class="col-xs-12">
+                        <div class="form-group">
+                          <label class="form-label">template name</label>
+                          <input type="text" class="form-control input-sm" placeholder="template name" ng-model="template.name">
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label class="form-label">body</label>
+
+                    <div id="index-template-editor" class="kopf-ace-editor" style="height: 225px"></div>
+                  </div>
+                </div>
+                <div class="col-lg-12 action-buttons">
+                  <span class="validation-error">{{editor.error}}</span>
+                  <button type="submit" class="btn btn-default input-sm" ng-click="editor.format()">
+                    <i class="fa fa-align-left"></i> format
+                  </button>
+                  <button type="submit" class="btn btn-primary input-sm" ng-click="createIndexTemplate()">
+                    <i class="fa fa-plus-circle"></i> save
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="content-panel">
+      <div class="panel-group" id="#listIndexTemplatesAccordion">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#listIndexTemplatesAccordion" target="_self" href="#indexTemplatesList">
+                existing index templates
+              </a>
+            </h4>
+          </div>
+          <div id="indexTemplatesList" class="panel-collapse collapse in">
+            <div class="panel-body" style="min-height: 460px;">
+              <div class="row">
+                <form class="form-inline" role="form">
+                  <div class="col-xs-6 form-group">
+                    <label class="form-label">template name</label>
+                    <input type="text" ng-model="paginator.filter.name" class="form-control input-sm" placeholder="filter by template name">
+                  </div>
+                  <div class="col-xs-6 form-group">
+                    <label class="form-label">template pattern</label>
+                    <input type="text" ng-model="paginator.filter.template" class="form-control input-sm" placeholder="filter by template pattern">
+                  </div>
+                </form>
+              </div>
+              <div class="row">
+                <div class="col-lg-12">
+                  <ng-pagination page="page" paginator="paginator"></ng-pagination>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-12">
+                  <table class="table table-striped table-bordered table-condensed">
+                    <tr class="header-row">
+                      <td>name</td>
+                      <td>template pattern</td>
+                    </tr>
+                    <tr ng-repeat="template in page.elements track by $index" ng-show="template != null">
+                      <td>
+                        {{template.name}}
+                      </td>
+                      <td>
+                        {{template.body.template}}
+                        <a data-toggle="modal" target="_self" href="#confirm_dialog"
+                           class="remove-icon" data-backdrop="static">
+                          <i class="fa fa-times remove-icon" title="delete template" ng-click="deleteIndexTemplate(template)"></i>
+                        </a>
+                        <a target="_self" class="details-icon" href="">
+                          <i class="fa fa-pencil details-icon" title="edit template" ng-click="loadIndexTemplate(template)"></i>
+                        </a>
+                        <a data-toggle="modal" target="_self" href="#"
+                           class="details-icon" data-backdrop="static">
+                          <i class="fa fa-info-circle details-icon" title="view details" ng-click="displayInfo(template.name, template.body)"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

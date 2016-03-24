@@ -1,0 +1,64 @@
+<div class="row">
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">concurrent_streams</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="defaults to 3">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<input type="text" class="form-control input-sm" ng-model="settings[active_settings]['indices.recovery.concurrent_streams']">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">file_chunk_size</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="defaults to 512kb">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<input type="text" class="form-control input-sm" ng-model="settings[active_settings]['indices.recovery.file_chunk_size']">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">translog_ops</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="defaults to 1000">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<input type="text" class="form-control input-sm" ng-model="settings[active_settings]['indices.recovery.translog_ops']">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">translog_size</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="defaults to 512kb">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<input type="text" class="form-control input-sm" ng-model="settings[active_settings]['indices.recovery.translog_size']">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">max_bytes_per_sec</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="defaults to 20mb">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<input type="text" class="form-control input-sm" ng-model="settings[active_settings]['indices.recovery.max_bytes_per_sec']">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">compress</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="defaults to true">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<BR>
+			<label class="cluster-map-node-type">
+				<!-- input type checkbox margin-top -5px -->
+				<input type="checkbox" ng-model="settings[active_settings]['indices.recovery.compress']" ng-true-value="true"> True
+				<input type="checkbox" ng-model="settings[active_settings]['indices.recovery.compress']" ng-true-value="false"> False
+			</label>			
+		</div>
+	</div>	
+</div>
+<script>
+    $(function () { $(".setting-info").tooltip();});
+</script>

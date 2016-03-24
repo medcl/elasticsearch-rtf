@@ -1,0 +1,126 @@
+.tree-dnd-animate-enter,
+.tree-dnd-node.ng-enter {
+    -webkit-transition: 0 linear all;
+    -moz-transition: 0 linear all;
+    -ms-transition: 0 linear all;
+    -o-transition: 0 linear all;
+    transition: 0 linear all;
+    position: relative;
+    display: block;
+    opacity: 0;
+    max-height: 0;
+}
+
+.tree-dnd-animate-enter.tree-dnd-animate-enter-active,
+.tree-dnd-node.ng-enter-active {
+    opacity: 1;
+    max-height: 30px;
+}
+
+.tree-dnd-animate-leave,
+.tree-dnd-node.ng-leave {
+    -webkit-transition: 0 linear all;
+    -moz-transition: 0 linear all;
+    -ms-transition: 0 linear all;
+    -o-transition: 0 linear all;
+    transition: 0 linear all;
+    position: relative;
+    display: block;
+    height: 30px;
+    max-height: 30px;
+    opacity: 1;
+}
+
+
+.tree-dnd-animate-leave.tree-dnd-animate-leave-active,
+.tree-dnd-node.ng-leave-active {
+    height: 0;
+    max-height: 0;
+    opacity: 0;
+}
+
+.tree-dnd-node > td {
+    position: relative;
+}
+
+.tree-dnd-animate.ng-enter {
+}
+
+.tree-dnd .tree-icon,
+.tree-label {
+    cursor: pointer;
+}
+
+.tree-dnd > thead > tr > td, .tree-dnd > tbody > tr > td, .tree-dnd > tfoot > tr > td {
+    vertical-align: middle !important;
+}
+
+.tree-dnd-empty {
+    border: 2px dashed #72da67 !important;
+    min-height: 100px;
+    background-color: #e5e5e5;
+}
+
+.indented {
+    position: relative;
+}
+
+.tree-dnd-hidden {
+    display: none;
+}
+
+.tree-dnd-placeholder {
+    position: relative;
+    margin: 0px;
+    padding: 0px;
+    min-height: 20px;
+    line-height: 20px;
+}
+
+.tree-dnd-handle {
+    cursor: pointer;
+    text-decoration: none;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    min-height: 20px;
+    line-height: 20px;
+}
+
+.tree-dnd-drag {
+    position: absolute;
+    pointer-events: none;
+    z-index: 999;
+    opacity: .7;
+    background-color: #cdffdc;
+    border: 2px dashed #385736;
+}
+
+.tree-dnd-status {
+    position: absolute;
+    background-color: #ffffff;
+    border: 1px solid #92e5d3;
+    padding: 1px 4px;
+    opacity: .85;
+}
+
+.tree-dnd-nodes {
+    margin: 0px;
+    padding: 0px;
+    list-style: none;
+}
+
+.tree-dnd-nodes .tree-dnd-node {
+    border-radius: 0px !important;
+}
+
+.tree-dnd-nodes .tree-dnd-nodes {
+    padding-left: 20px;
+}
+
+.tree-dnd-node, .tree-dnd-placeholder {
+    /*margin: 0px;*/
+    /*padding: 0px;*/
+    min-height: 20px;
+    line-height: 20px;
+}

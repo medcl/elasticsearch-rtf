@@ -1,0 +1,50 @@
+<div class="row">
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">blocks.read_only</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="set to true to have the index read only. false to allow writes and metadata changes">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<select ng-model="editable_settings['index.blocks.read_only']" disabled="true" class="form-control input-sm">
+				<option value="true">true</option>
+				<option value="false">false</option>
+			</select>
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">blocks.read</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="set to true to disable read operations against the index">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<select ng-model="editable_settings['index.blocks.read']" class="form-control input-sm">
+				<option value="true">true</option>
+				<option value="false">false</option>
+			</select>
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">blocks.write</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="set to true to disable write operations against the index">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<select ng-model="editable_settings['index.blocks.write']" class="form-control input-sm">
+				<option value="true">true</option>
+				<option value="false">false</option>
+			</select>
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">blocks.metadata</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="set to true to disable metadata operations against the index">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<select ng-model="editable_settings['index.blocks.metadata']" disabled="true" class="form-control input-sm">
+				<option value="true">true</option>
+				<option value="false">false</option>
+			</select>
+		</div>
+	</div>
+</div>

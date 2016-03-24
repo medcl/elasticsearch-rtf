@@ -1,0 +1,69 @@
+<div class="modal-header">
+    <h1>Create an aggregation</h1>
+</div>
+<div class="modal-body">
+    <form role="form" class="form-horizontal">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">Available Fields</label>
+            <div class="col-sm-8">
+                <select class="form-control" ng-model="adVm.dialog.field" ng-options="key as value.forPrint for (key,value) in adVm.fields">
+                    <option value="">-- chose field --</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label">Aggregation name (alpha num,-,_)</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" ng-model="adVm.dialog.name" ng-pattern="/[a-zA-Z0-9]*/"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label">Aggregation types</label>
+            <div class="col-sm-8">
+                <select class="form-control" ng-model="adVm.dialog.aggstype" ng-options="aggsType for aggsType in adVm.aggsTypes">
+                    <option value="">-- chose aggregation --</option>
+                </select>
+            </div>
+        </div>
+        <div ng-show="adVm.dialog.aggstype == 'Term'">
+            <p class="text-info">No special configuration for a Term facet</p>
+        </div>
+        <div ng-show="adVm.dialog.aggstype == 'Range'">
+            <div ng-repeat="range in adVm.ranges">
+                <span>from: {{range[0]}}</span>
+                <span>to: {{range[1]}}</span>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">from</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="number" ng-model="adVm.dialog.range.from"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">to</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="number" ng-model="adVm.dialog.range.to"/>
+                </div>
+            </div>
+            <btn class="btn btn-info btn-mini" ng-click="adVm.addRangeField(dialog)" title="Add range Field"> Add range
+                <span class="glyphicon glyphicon-plus-sign"></span>
+            </btn>
+        </div>
+        <div ng-show="adVm.dialog.aggstype == 'DateHistogram'">
+            <label class="col-sm-4 control-label">Interval</label>
+            <div class="col-sm-8">
+                <select class="form-control" ng-model="adVm.dialog.interval" ng-options="anInterval for anInterval in adVm.intervals">
+                </select>
+            </div>
+        </div>
+        <div ng-show="adVm.dialog.aggstype == 'Histogram'">
+            <label class="col-sm-4 control-label">Interval</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="number" ng-model="adVm.dialog.interval"/>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button ng-click="adVm.close(adVm.dialog)" class="btn btn-primary">Add</button>
+</div>

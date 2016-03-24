@@ -1,0 +1,60 @@
+<div class="row" class="overview-stats" ng-controller="ClusterStatsController">
+  <div class="col-lg-5ths col-md-3 col-sm-6 col-xs-12">
+    <div class="stat-block bordered">
+      <span class="tooltiped" data-placement="bottom" title="number of nodes in the cluster">
+        <span class="cluster-map-stat-number">{{cluster.number_of_nodes | number:0}}</span>
+        <span class="cluster-map-stat-description">nodes</span>
+      </span>
+    </div>
+  </div>
+  <div class="col-lg-5ths col-md-3 col-sm-6 col-xs-12">
+    <div class="stat-block bordered">
+      <span class="tooltiped" data-placement="bottom" title="total number of indices">
+        <span class="cluster-map-stat-number">{{cluster.total_indices | number:0}}</span>
+        <span class="cluster-map-stat-description">indices</span>
+      </span>
+    </div>
+  </div>
+  <div class="col-lg-5ths col-md-3 col-sm-6 col-xs-12">
+    <div class="stat-block bordered">
+      <span class="tooltiped" data-placement="bottom" title="number of shards in the cluster (closed indices are not taken into account)">
+        <span class="cluster-map-stat-number">{{cluster.shards | number:0}}</span>
+        <span class="cluster-map-stat-description">shards</span>
+      </span>
+    </div>
+  </div>
+  <div class="col-lg-5ths col-md-3 col-sm-6 col-xs-12">
+    <div class="stat-block bordered">
+      <div class="cluster-stat-detail">
+        <span class="tooltiped" data-placement="bottom" title="number of documents (replicas are not taken into account)">
+          <span class="cluster-map-stat-number">{{cluster.num_docs | number:0}}</span>
+          <span class="cluster-map-stat-description">docs</span>
+        </span>
+        <span ng-show="cluster.changes.getDocDelta() != 0">
+          <i ng-show="cluster.changes.getDocDelta() > 0" class="fa fa-arrow-up"></i>
+          <i ng-show="cluster.changes.getDocDelta() < 0" class="fa fa-arrow-down"></i>
+          {{cluster.changes.absDocDelta() | number:0}}
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5ths col-md-3 col-sm-6 col-xs-12">
+    <div class="stat-block bordered">
+      <div class="cluster-stat-detail">
+        <span class="tooltiped" data-placement="bottom" title="total data in the cluster(replicas are taken into account)">
+          <span class="cluster-map-stat-number">{{cluster.total_size_in_bytes | bytes}}</span>
+        </span>
+        <span ng-show="cluster.changes.getDataDelta() != 0">
+          <i ng-show="cluster.changes.getDataDelta() > 0" class="fa fa-arrow-up"></i>
+          <i ng-show="cluster.changes.getDataDelta() < 0" class="fa fa-arrow-down"></i>
+          {{cluster.changes.absDataDelta()}}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  $(function() {
+    $(".tooltiped").tooltip();
+  });
+</script>

@@ -1,0 +1,18 @@
+<div class="modal-header">
+    <h1>Change the number of replicas for index: {{cnrVm.dialog.name}}</h1>
+</div>
+<div class="modal-body">
+    <p>Beware, changing the number of replicas can have an impact on you cluster state. Especially
+    when increasing the number of replicas it could mean a lot of work.</p>
+    <form role="form" class="form-horizontal">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">Number of replicas</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="number" ng-model="cnrVm.dialog.numReplicas"/>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button ng-click="cnrVm.close(cnrVm.dialog)" class="btn btn-primary">Change</button>
+</div>

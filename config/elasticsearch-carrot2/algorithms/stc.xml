@@ -1,0 +1,10 @@
+<!-- Components included in all applications -->
+<component-suite>
+  <algorithms>
+    <algorithm component-class="org.carrot2.clustering.stc.STCClusteringAlgorithm" id="stc"
+               attribute-sets-resource="stc-attributes.xml">
+      <label>STC</label>
+      <title>Suffix Tree Clustering</title>
+    </algorithm>
+  </algorithms>
+</component-suite>

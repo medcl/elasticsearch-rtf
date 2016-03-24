@@ -1,0 +1,19 @@
+.explanation-result {
+    border: 1px solid #444;
+		border-radius: 4px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+.explanation-result-title {
+	font-size: 14px;
+	padding: 5px;
+}
+.explanation-result table {
+	border-top: none;
+	border-left: none;
+	border-right: none;
+}
+
+.explanation-result .table thead > tr > th {
+  border-bottom: 1px solid #444;
+}

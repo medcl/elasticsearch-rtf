@@ -1,0 +1,38 @@
+<div class="modal" id="alias_details" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+		  <i class="fa fa-times-circle-o modal-close-icon pull-right" data-dismiss="modal"></i>
+        <h4 class="modal-title">{{details.alias}}</h4>
+      </div>
+      <div class="modal-body">
+		  <form class="form-horizontal" role="form">
+		    <div class="form-group">
+		      <label class="col-xs-3 control-label">index</label>
+					<div class="col-xs-9">
+						<input class="form-control input-sm" disabled="true" value="{{details.index}}">
+					</div>
+		    </div>
+		    <div class="form-group">
+		      <label class="col-xs-3 control-label">indexing routing</label>
+					<div class="col-xs-9">
+						<input class="form-control input-sm" disabled="true" value="{{details.index_routing}}">
+					</div>
+		    </div>
+		    <div class="form-group">
+		      <label class="col-xs-3 control-label">searching routing</label>
+					<div class="col-xs-9">
+						<input class="form-control input-sm" disabled="true" value="{{details.search_routing}}">
+					</div>
+		    </div>
+		    <div class="form-group">
+		      <label class="col-xs-3 control-label">filter</label>
+					<div class="col-xs-9">
+						<input class="form-control input-sm" disabled="true" value="{{details.filter}}">
+					</div>
+		    </div>
+		  </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,110 @@
+
+/*
+  Allow angular.js to be loaded in body, hiding cloaked elements until
+  templates compile.  The !important is important given that there may be
+  other selectors that are more specific or come later and might alter display.
+ */
+[ng\:cloak], [ng-cloak], .ng-cloak {
+    display: none !important;
+}
+
+
+
+
+.header {
+	margin-top:50px;
+}
+
+.uneditable-input {
+    width:90%
+}
+
+textarea {
+    width:90%
+}
+
+thead {
+    font-weight:bold;
+}
+.brand {
+    margin-right:120px;
+}
+.elasticHit {
+    position: relative;
+    margin: 15px 0;
+    padding: 39px 19px 14px;
+    *padding-top: 19px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.elasticResponseStatus {
+    position: relative;
+    margin: 15px 0;
+    padding: 7px 39px 19px 14px;
+    *padding-top: 7px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+/* Echo out a label for the example */
+.elasticHitTitle {
+    content: "Example";
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: bold;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    color: #9da0a4;
+    -webkit-border-radius: 4px 0 4px 0;
+    -moz-border-radius: 4px 0 4px 0;
+    border-radius: 4px 0 4px 0;
+}
+
+
+.explainHit {
+    content: "Example";
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: bold;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    color: #9da0a4;
+    -webkit-border-radius: 4px 0 4px 0;
+    -moz-border-radius: 4px 0 4px 0;
+    border-radius: 4px 0 4px 0;
+}
+
+.highlight {
+    background-color:yellow;
+}
+
+.alert pre {
+    background:none;
+    border:none;
+}
+
+.dropdown {
+    margin-bottom:20px;
+    display:inline-block;
+}
+
+.modal.large{
+    width: 780px;
+    margin-left: -390px; /* - width/2 */
+}
+
+.superscript{font-size:70%; position:relative;  top:-3px; color:lightgray}
+.subscript{font-size:60%;  position:relative; bottom:-3px}

@@ -1,0 +1,105 @@
+<div class="row">
+  <div class="col-lg-10" ng-include src="'partials/cluster_overview/filters.html'"></div>
+  <div class="col-lg-2">
+    <ng-pagination page="page" paginator="index_paginator" label="'selected indices'"></ng-pagination>
+  </div>
+</div>
+<table class="table table-bordered table-condensed table-rounded overview">
+  <thead>
+    <tr>
+      <!-- cluster actions -->
+      <th class="box cluster-map-header-cluster-actions">
+        <div class="row">
+          <div class="col-lg-3 col-xs-6">
+            <a class="cluster-map-header-cluster-action">
+              <i class="fa fa-lock danger-action" ng-show="cluster.disableAllocation === 'true'" ng-click="enableAllocation()" title="enable shard allocation"></i>
+              <i class="fa fa-unlock-alt" ng-show="cluster.disableAllocation !== 'true'" ng-click="disableAllocation()" title="disable shard allocation"></i>
+            </a>
+          </div>
+          <div class="col-lg-3 col-xs-6">
+            <a class="cluster-map-header-cluster-action" ng-click="expandedView = !expandedView">
+              <i class="fa fa-expand" title="expanded node view" ng-hide="expandedView"></i>
+              <i class="fa fa-compress" title="compact node view" ng-show="expandedView"></i>
+            </a>
+          </div>
+          <div class="col-lg-3 col-xs-6">
+            <a class="cluster-map-header-cluster-action">
+              <i class="fa fa-sort-alpha-asc" title="sort ascending" ng-show="index_filter.asc" ng-click="index_filter.asc = false"></i>
+              <i class="fa fa-sort-alpha-desc" title="sort descending" ng-hide="index_filter.asc" ng-click="index_filter.asc = true"></i>
+            </a>
+          </div>
+          <div class="col-lg-3 col-xs-6">
+            <div class="dropdown">
+              <a data-toggle="dropdown" href="#" target="_self" class="cluster-map-header-cluster-action">
+                <i class="fa fa-caret-down"></i>
+              </a>
+              <ul class="dropdown-menu cluster-dropdown" role="menu">
+                <li role="presentation">
+                  <a data-toggle="modal" href="#confirm_dialog" target="_self" class="cluster-map-header-index-action" data-backdrop="static" role="menuitem" tabindex="-1" ng-click="promptCloseIndices()">
+                    <i class="fa fa-fw fa-folder-open index-menu-icon"></i> close selected
+                  </a>
+                  <a data-toggle="modal" href="#confirm_dialog" target="_self" class="cluster-map-header-index-action" data-backdrop="static" role="menuitem" tabindex="-1" ng-click="promptOpenIndices()">
+                    <i class="fa fa-fw fa-folder index-menu-icon" title="open index"></i> open selected
+                  </a>
+                </li>
+                <li role="presentation">
+                  <a data-toggle="modal" href="#confirm_dialog" target="_self" class="cluster-map-header-index-action" role="menuitem" tabindex="-1" data-backdrop="static" ng-click="promptOptimizeIndices()">
+                    <i class="fa fa-fw fa-wrench index-menu-icon"></i> optimize selected
+                  </a>
+                </li>
+                <li role="presentation">
+                  <a data-toggle="modal" href="#confirm_dialog" target="_self" class="cluster-map-header-index-action" title="refresh index" role="menuitem" tabindex="-1" data-backdrop="static" ng-click="promptRefreshIndices()">
+                    <i class="fa fa-fw fa-refresh index-menu-icon"></i> refresh selected
+                  </a>
+                </li>
+                <li role="presentation">
+                  <a data-toggle="modal" href="#confirm_dialog" target="_self" class="cluster-map-header-index-action" role="menuitem" tabindex="-1" data-backdrop="static" data-keyboard="fa fa-fwlse" ng-click="promptClearCaches()">
+                    <i class="fa fa-fw fa-circle-o index-menu-icon"></i> clear selected caches
+                  </a>
+                </li>
+                <li role="presentation" class="divider"></li>
+                <li role="presentation">
+                  <a data-toggle="modal" href="#confirm_dialog" target="_self" class="cluster-map-header-index-action" title="delete index" role="menuitem" tabindex="-1" data-backdrop="static" ng-click="promptDeleteIndices()">
+                    <i class="fa fa-fw fa-trash-o danger-action index-menu-icon"></i> delete selected
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </th>
+      <!-- indices -->
+      <th ng-repeat="index in page.elements track by $index" class="table-header box" ng-include="'partials/cluster_overview/index_header.html'">
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-show="cluster.unassigned_shards > 0 || cluster.relocating_shards > 0 || cluster.initializing_shards > 0">
+      <td class="box unassigned-row">
+        <div ng-show="cluster.unassigned_shards > 0">
+          <i class="fa fa-fw fa-warning danger-action"> </i>
+          <span>{{cluster.unassigned_shards | number:0}} unassigned shards</span>
+        </div>
+        <div ng-show="cluster.relocating_shards > 0">
+          <i class="fa fa-fw fa-refresh fa-spin"> </i>
+          <span>{{cluster.relocating_shards | number:0}} relocating shards</span>
+        </div>
+        <div ng-show="cluster.initializing_shards > 0">
+          <i class="fa fa-fw fa-spinner fa-spin"> </i>
+          <span>{{cluster.initializing_shards | number:0}} initializing shards</span>
+        </div>
+        <div class="normal-action">
+          <span ng-show="index_filter.healthy" ng-click="index_filter.healthy = false"><small><i>show only unhealthy indices</i></small></span>
+          <span ng-hide="index_filter.healthy" ng-click="index_filter.healthy = true"><small><i>show all indices</i></small></span>
+        </div>
+      </td>
+      <td class="shards-cell shards box" ng-repeat="index in page.elements track by $index" ng-include="'partials/cluster_overview/index_unassigned.html'">
+      </td>
+    </tr>
+    <tr ng-repeat="node in nodes | orderBy:'name':false track by $index">
+      <td class="box" ng-static-include file="cluster_overview/node_cell"></td>
+      <td ng-repeat="index in page.elements track by $index" ng-class="{'box': index.closed}" class="shards-cell" ng-include="'partials/cluster_overview/index_body.html'">
+      </td>
+    </tr>
+  </tbody>
+</table>

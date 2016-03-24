@@ -1,0 +1,45 @@
+<div>
+	<div class="content-panel">
+		<div class="row">
+			<div class="col-lg-12">
+				<span class="pull-right" >
+					<select ng-model="active_settings" class="form-control input-sm">
+						<option value="persistent" selected="selected">displaying persistent settings</option>
+						<option value="transient">displaying transient settings</option>
+					</select>
+				</span>
+			</div>
+		</div>
+		<div class="content-panel">
+			<div class="row">
+				<div class="col-sm-2 col-xs-12">
+					<ul class="nav nav-pills nav-stacked" id="cluster_settings_tabs">
+						<li><a target="_self" href="#cluster_settings_cluster" data-toggle="tab">cluster</a></li>
+						<li><a target="_self" href="#cluster_settings_routing" data-toggle="tab">routing</a></li>
+						<li><a target="_self" href="#cluster_settings_recovery" data-toggle="tab">recovery</a></li>
+					</ul>
+				</div>
+				<div class="col-sm-10 col-xs-12">
+					<div class="tab-content">
+						<div class="tab-pane active" id="cluster_settings_cluster" ng-include src="'partials/cluster_settings/cluster.html'"></div>
+						<div class="tab-pane" id="cluster_settings_routing" ng-include src="'partials/cluster_settings/routing.html'"></div>
+						<div class="tab-pane" id="cluster_settings_recovery" ng-include src="'partials/cluster_settings/recovery.html'"></div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-12">
+					<span class="pull-right" >
+						<form class="form-inline" role="form">
+						  <div class="form-group">
+						  </div>
+							<a href="#!cluster" class="btn btn-default btn-sm">back</a>
+							<button type="button" class="btn btn-primary btn-sm" ng-click='save()'><i class="fa fa-check"></i> save</button>
+						</form>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+

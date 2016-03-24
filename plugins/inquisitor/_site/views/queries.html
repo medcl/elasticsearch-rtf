@@ -1,0 +1,201 @@
+<div class="container-fluid" id="content" style="margin-top:20px" xmlns="http://www.w3.org/1999/html">
+    <div class="row-fluid">
+        <div class="span3">
+            <div class="dropdown" ng-controller="DropdownCtrl">
+                <a class="btn dropdown-toggle" ng-cloak>
+                    <strong>Index:</strong> {{data.currentIndex}} <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li ng-repeat="choice in indices">
+                        <a ng-click="$parent.data.currentIndex = choice">{{choice}}</a>
+                    </li>
+                </ul>
+
+            </div>
+
+            <div class="dropdown" ng-controller="DropdownCtrl" ng-cloak>
+                <a class="btn dropdown-toggle">
+                    <strong>Type:</strong> {{data.currentType}} <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li ng-repeat="choice in types[data.currentIndex]">
+                        <a ng-click="$parent.data.currentType = choice">{{choice}}</a>
+                    </li>
+                </ul>
+            </div>
+
+            <form ng-controller="QueryInput" ng-submit="executeQuery()">
+                <fieldset >
+                    <input type="text" ng-model="data.host" value="" ng-cloak>
+                    <button type="button" style="margin-bottom: 10px" class="btn" ng-click="hostChanged()">Reload</button>
+                    <textarea rows="20" ng-model="data.query" ng-cloak>{{data.query}}</textarea><br/>
+                    <button type="submit" class="btn">Query</button>
+                </fieldset>
+            </form>
+        </div>
+
+        <div class="span8" ng-controller="QueryOutput">
+
+            <div class="row-fluid" autodetectfield>
+                <div class="span8 offset2" ng-model="data.query">
+                    <pre ng-cloak>{{data.query|jsonlint}}</pre>
+                </div>
+                <div class="span2">
+                    <a>
+                        <span ng-show="data.indexMissing"
+                              tooltip-placement="bottom"
+                              tooltip="An index must be selected from the dropdown."
+                              class="label label-important" ng-cloak>Index Missing</span>
+                    </a>
+
+                    <a>
+                        <span ng-show="data.typeMissing"
+                              tooltip-placement="bottom"
+                              tooltip="A type must be selected from the dropdown."
+                              class="label label-important" ng-cloak>Type Missing</span>
+                    </a>
+
+                    <a >
+                        <span ng-hide="data.autodetectfield"
+                              style="margin-top:20px"
+                              tooltip-placement="bottom"
+                              tooltip="Based on your Type's mapping, no fields were autodetected (or the _all field was used)."
+                              class="label label-warning" ng-cloak>Highlighting Disabled</span>
+                    </a>
+                    <a >
+                        <span ng-show="data.autodetectfield"
+                              style="margin-top:20px"
+                              tooltip-placement="bottom"
+                              tooltip="One or more mapped fields were autodetected."
+                              class="label label-success" ng-cloak>Highlighting Enabled</span>
+                    </a>
+
+                </div>
+            </div>
+
+
+            <div class="alert alert-error" ng-show="data.elasticError">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <td>Field</td>
+                        <td>Value</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Status</td>
+                        <td>{{data.elasticError.status}}</td>
+                    </tr>
+                    <tr>
+                        <td>Error</td>
+                        <td>{{data.elasticError.Error}}</td>
+                    </tr>
+                    <tr>
+                        <td>Details</td>
+                        <td>
+                            <table>
+                                <tr ng-repeat="detail in data.elasticError.details">
+                                    <td>{{detail.errorName}}</td>
+                                    <td>{{detail.errorDesc}}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <rawerror error="{{data.elasticError}}"></rawerror>
+            </div>
+
+            <div class="alert alert-info" ng-show="data.elasticValidation.valid">
+                <table class="table table-bordered" style="margin-bottom: 0px;">
+                    <thead>
+                    <tr>
+                        <td>Index</td>
+                        <td>Lucene Query Translation</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="index in data.elasticValidation.explanations">
+                        <td>{{index.index}}</td>
+                        <td>{{index.explanation}}</td>
+                    </tr>
+                </table>
+            </div>
+
+
+
+            <div ng-show="data.elasticResponse">
+                <div class="elasticResponseStatus" style="text-align: center;border: none">
+                    <span class="label label-info">Elapsed Time: {{data.elasticResponse.took}}ms</span>
+                    <span class="label" ng-class="{'label-success': data.elasticResponse.hits.total > 0, 'label-important': data.elasticResponse.hits.total == 0}">Total Hits: {{data.elasticResponse.hits.total}}</span>
+                    <span class="label label-info" ng-show="data.elasticResponse.hits.total">Max Score: {{data.elasticResponse.hits.max_score}}</span>
+                </div>
+
+                <div class="elasticHit" ng-repeat="hits in data.elasticResponse.hits.hits">
+                    <div class="elasticHitTitle">{{hits._score}} - {{hits._id}}</div>
+                    <div class="explainHit"><a modal-open="a{{hits._id}}">Explain Result</a></div>
+
+
+                    <div id="a{{hits._id}}" class="modal large hide">
+                        <div class="modal-header">
+                            <button class="close" modal-close="a{{hits._id}}">×</button>
+                            <h3>Explain Result</h3>
+                        </div>
+                        <div class="modal-body">
+                            <p>Explain results is currently not functional, due to the Explain API not support POST requests.</p>
+                            <p>This problem <a href="https://github.com/elasticsearch/elasticsearch/commit/b4b3e350a6072bab214fffdbbb1bec89f29da9a2">has been fixed in Master</a> and should be resolved soon.</p>
+                            <p>You may run this from your command-line to get the Explain results:</p>
+                            <code>curl -XGET {{$parent.data.host}}/{{$parent.data.currentIndex}}/{{$parent.data.currentType}}/{{hits._id}}/_explain?pretty -d '{{$parent.data.query|jsonparse}}'</code>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="#" class="btn" modal-close="a{{hits._id}}">Close</a>
+                        </div>
+                    </div>
+
+
+                    <div ng-show="hits.highlight">
+                        <h3>Matched Fragments</h3>
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <td>Field</td>
+                                <td>Fragment</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="(key,val) in hits.highlight">
+                                <td>{{key}}</td>
+                                <td>
+                                    <p ng-repeat="fragment in val">
+                                        [...]<span ng-bind-html="fragment"></span>[...]
+                                    </p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>Full Source</h3>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <td>Field</td>
+                            <td>Value</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="(key,val) in hits._source">
+                            <td>{{key}}</td>
+                            <td>{{val}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+</div> <!-- /container -->

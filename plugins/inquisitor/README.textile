@@ -1,0 +1,78 @@
+h1. elasticsearch-inquisitor
+
+Inquisitor is a tool help understand and debug your queries in ElasticSearch.
+
+|_. elasticsearch-inquisitor |_. ElasticSearch |
+| master | 0.19.0.RC1 -> 0.90.* |
+| v0.1.* | 0.19.0.RC1 -> 0.20.6 |
+
+*Note:* Inquisitor requires ElasticSearch 0.19.0.RC1 for the 'Analyzers' and 'Tokenizers' tabs, but the main 'Queries' tab will function with versions >= 0.14.0
+ 
+h3. Installation
+
+To install Inquisitor onto your node, run <code>bin/plugin -install polyfractal/elasticsearch-inquisitor</code>
+
+Inquisitor automatically connects to <code>localhost</code>, so it must be run on a node that is web-accessible.  To access Inquisitor, open <code>http://localhost:9200/_plugin/inquisitor/</code>
+
+
+h2. Features
+
+h4. Discovery
+
+Inquisitor automatically discovers your indices, types and mappings.  Simply select the index and type you wish to query
+
+!indices.png!
+
+h4. JSON Parsing and Formatting
+
+Inquisitor parses your JSON query as you type.  If the JSON is valid, it prints a nicely formatted version for reference.  If there is an error, Inquisitor uses JSONLint to help identify the error.
+
+!json.png!
+
+h4. Pretty Errors
+
+Error messages from ElasticSearch are often large, nested blocks of text mixed with JSON encoded JSON (eww).  Inquisitor parses the error and re-formats it into a table, allowing you to quickly identify the problem with your query.
+
+!errors.png!
+
+h4. Automatic Highlighting
+
+Inquisitor attempts to autodetect fields that match properties in your mapping.  If a property is autodetected, highlighting is automatically enabled in the results.
+
+!highlighting.png!
+
+h4. Formatted Search Results
+
+Search results are presented in a formatted table.  Relevance scores and document IDs are displayed in the top-left corner of each result.  In the top-right corner, Inquisitor gives you the ability to dive into the result's scoring using ElasticSearch's Explain API.  If highlighting is enabled, highlighted fragments be marked with yellow backgrounds.  The full document source is shown below the fragments.
+
+!result.png!
+
+h4. Analyzer testing
+
+In addition to query results, Inquisitor has a tab that analyzes arbitrary text using ElasticSearch's built-in analyzers.  Inquisitor also allows you to look at the output of your custom analyzers and on a per-field basis.  You can even build "AdHoc" analyzers using a mix a tokenizer and one or more filters.
+
+!analyzers.png!
+
+
+h4. Tokenizer testing
+
+Simlar to the Analyzer tab, Inquisitor also has a Tokenizer tab which analyzes arbitrary text with various tokenizers. 
+
+!tokenizers.png! 
+
+
+h2. Background Information
+
+This plugin was written because "relevant result" problems are extremely common.  Relevance scoring is affected by query composition, mapping details and the documents inside your index.  This makes it difficult for third-parties to help diagnose without a complete recreation of the search environment.
+
+I'm hoping that Inquisitor helps people diagnose their query problems without needing to turn to outside help, by providing a friendly interface to how ElasticSearch is parsing and executing search requests.  It can also function as a great learning tool, to understand how ElasticSearch parses and matches queries.
+
+Inquisitor was written in AngularJS.  This is my first project in AngularJS, so if you are reading the code...be kind!  I basically have no idea what I'm doing in Angular =)
+
+h2. Roadmap
+* Fully integrate the Explain API once it supports POST requests
+* Nested and Parent/Child support
+* Modifying the default settings of analyzers/tokenizers
+* Ad-hoc analyzer creation to test analyzers that have not been mapped yet
+* Visual query builder
+

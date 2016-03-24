@@ -1,0 +1,8 @@
+<div ng-controller="DebugController">
+  <span ng-click="visible = !visible" class="normal-action">
+    <i class="fa fa-fw fa-chevron-circle-{{visible ? 'up' : 'down'}}"></i> {{visible ? 'hide' : 'show'}} log
+  </span>
+  <div ng-repeat="msg in messages track by $index">
+    {{msg}}
+  </div>
+</div>

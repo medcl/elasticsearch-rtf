@@ -1,0 +1,53 @@
+<div>
+	<div class="content-panel">
+		<div class="row">
+			<div class="col-sm-6">
+					<div class="row">
+						<div class="col-xs-12">
+						  <div class="form-group">
+						    <label class="form-label">name</label>
+								<input type="text" ng-model="name" class="form-control input-sm" placeholder="New index name">
+						  </div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-6">
+						  <div class="form-group">
+						    <label class="form-label">number of shards</label>
+								<input type="text" ng-model="shards" class="form-control input-sm" placeholder="# of shards" type="number">
+						  </div>
+						</div>
+						<div class="col-sm-6">
+						  <div class="form-group">
+						    <label class="form-label">number of replicas</label>
+								<input type="text" ng-model="replicas" class="form-control input-sm" placeholder="# of replicas" type="number">
+						  </div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+						  <div class="form-group">
+						    <label class="form-label">load settings from existing index</label>
+								<select ng-model="source_index" ng-options="i.name as i.name for i in indices | orderBy:'name'" class="form-control input-sm" ng-change="updateEditor()">
+								</select>
+						  </div>
+						</div>
+					</div>
+			</div>
+			<div class="col-sm-6">
+			  <div class="form-group">
+			    <label class="form-label">settings</label>
+					<div id="index-settings-editor" class="kopf-ace-editor create-index-editor"></div>
+			  </div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-lg-12">
+				<span class="pull-right">
+					<a href="#!cluster" class="btn btn-default">back</a>
+					<button type="button" class="btn btn-primary" ng-click='createIndex()'><i class="fa fa-check"></i> Create</button>
+				</span>
+			</div>
+		</div>
+	</div>
+</div>

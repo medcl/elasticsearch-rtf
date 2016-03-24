@@ -1,0 +1,11 @@
+<!-- Components included in all applications -->
+<component-suite>
+  <algorithms>
+    <algorithm component-class="org.carrot2.clustering.kmeans.BisectingKMeansClusteringAlgorithm" 
+               id="kmeans"
+               attribute-sets-resource="kmeans-attributes.xml">
+      <label>K-means</label>
+      <title>Bisecting k-means</title>
+    </algorithm>
+  </algorithms>
+</component-suite>

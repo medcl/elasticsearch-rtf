@@ -1,0 +1,128 @@
+<div class="row">
+  <div class="col-md-6">
+    <div class="content-panel">
+      <div class="panel-group" id="#indexAnalysisAccordion">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#indexAnalysisAccordion" target="_self" href="#fieldTypeAnalysis">
+                analyze by field type
+              </a>
+            </h4>
+          </div>
+          <div id="fieldTypeAnalysis" class="panel-collapse collapse in">
+            <div class="panel-body">
+              <div class="row">
+                <div class="col-sm-4">
+                  <div class="form-group">
+                    <label class="form-label">index name</label>
+                    <select class="form-control input-sm" ng-model="field_index" ng-options="i as i.name for i in indices | orderBy:'name' track by i.name">
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-4">
+                  <div class="form-group">
+                    <label class="form-label">type</label>
+                    <select class="form-control input-sm" ng-model="field_type" ng-options="type for type in field_index_metadata.getTypes(field_index)">
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-4">
+                  <div class="form-group">
+                    <label class="form-label">field name</label>
+                    <select class="form-control input-sm" ng-model="field_field" ng-options="field for field in field_index_metadata.getFields(field_type)">
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="form-group">
+                    <label class="form-label">&nbsp;</label>
+                    <input type="text" class="form-control input-sm" placeholder="text to analyze" ng-model="field_text">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-12 action-buttons">
+                  <button type="submit" class="btn btn-primary btn-sm input-sm" ng-click="analyzeByField()">
+                    <i class="fa fa-bolt"></i> analyze
+                  </button>
+                </div>
+              </div>
+              <div class="row content-panel">
+                <div class="col-lg-12">
+                  <div ng-repeat="token in field_tokens" class="analysis-token bordered" ng-include src="'partials/analysis/analysis_token.html'">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="content-panel">
+      <div class="panel-group" id="#analyzerAnalysisAccordion">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#analyzerAnalysisAccordion" target="_self" href="#analyzerAnalysis">
+                analyze by analyzer
+              </a>
+            </h4>
+          </div>
+          <div id="analyzerAnalysis" class="panel-collapse collapse in">
+            <div class="panel-body">
+              <div class="row">
+                <div class="col-sm-4">
+                  <div class="form-group">
+                    <label class="form-label">index name</label>
+                    <select class="form-control input-sm" ng-model="analyzer_index" ng-options="i as i.name for i in indices | orderBy:'name' track by i.name">
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-4">
+                  <div class="form-group">
+                    <label class="form-label">analyzer name</label>
+                    <select class="form-control input-sm" ng-model="analyzer_analyzer" ng-options="analyzer for analyzer in analyzer_index_metadata.getAnalyzers()">
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-4"></div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="form-group">
+                    <label class="form-label">&nbsp;</label>
+                    <input type="text" class="form-control input-sm" placeholder="text to analyze" ng-model="analyzer_text">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-12 action-buttons">
+                  <button type="submit" class="btn btn-primary input-sm" ng-click="analyzeByAnalyzer()">
+                    <i class="fa fa-bolt"></i> analyze
+                  </button>
+                </div>
+              </div>
+              <div class="row content-panel">
+                <div class="col-lg-12">
+                  <div ng-repeat="token in analyzer_tokens" class="analysis-token bordered">
+                    <div class="analysis-token-token">
+                      {{token.token}}
+                    </div>
+                    <div class="analysis-token-info">
+                      <b>start</b>: {{token.start_offset}} <b>end</b>: {{token.end_offset}} <b>pos</b>: {{token.position}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

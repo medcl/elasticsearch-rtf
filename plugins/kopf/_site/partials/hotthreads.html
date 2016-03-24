@@ -1,0 +1,78 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="content-panel">
+      <div class="panel-group" id="#hotThreadsAccordion">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#hotThreadsAccordion" target="_self" href="#hotThreadsPanel">
+                hot threads
+              </a>
+            </h4>
+          </div>
+          <div id="hotThreadsPanel" class="panel-collapse collapse in">
+            <div class="panel-body" style="min-height: 460px;">
+              <div class="row">
+                <div class="col-xs-12">
+                  <form class="form-inline">
+                    <div class="form-group">
+                      <label>number of threads</label>
+                      <select class="form-control input-sm" ng-model="threads" ng-options="t for t in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>node</label>
+                      <select class="form-control input-sm" ng-model="node" ng-options="n.id as n.name for n in nodes">
+                        <option value="">all nodes</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>type</label>
+                      <select class="form-control input-sm" ng-model="type" ng-options="t for t in types">
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>sampling interval</label>
+                      <input type="text" ng-model="interval"
+                             class="form-control input-sm"
+                             placeholder="sampling interval">
+                    </div>
+                    <div class="checkbox inline-checkbox">
+                      <input type="checkbox" ng-model="ignoreIdleThreads"> ignore idle threads
+                    </div>
+                    <div class="form-group inline-button">
+                      <button type="submit" class="btn btn-primary input-sm pull-right" ng-click="execute()">
+                        <i class="fa fa-bolt"></i> execute
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="row content-panel">
+                <div class="col-xs-12 content-panel">
+                  <div ng-repeat="nodeHotThreads in nodesHotThreads track by $index">
+                    <div id="#{{nodeHotThreads.node}}Accordion">
+                      <a data-toggle="collapse" data-parent="#{{nodeHotThreads.node}}Accordion" target="_self" href="#{{nodeHotThreads.node}}Panel">
+                        <div class="hot-threads-output">:::{{nodeHotThreads.header}}</div>
+                        <div ng-show="nodeHotThreads.subHeader" class="hot-threads-output">{{nodeHotThreads.subHeader}}</div>
+                      </a>
+                      &nbsp;&nbsp;&nbsp;
+                      <div id="{{nodeHotThreads.node}}Panel" class="panel-collapse collapse in">
+                        <div ng-repeat="hotThread in nodeHotThreads.threads track by $index">
+                          <div class="hot-threads-output">{{hotThread.header}}</div>
+                          <div class="hot-threads-output">{{hotThread.subHeader}}</div>
+                          <div ng-repeat="line in hotThread.stack track by $index" class="hot-threads-output">{{line}}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <br>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

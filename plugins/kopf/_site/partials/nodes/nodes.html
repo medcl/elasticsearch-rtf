@@ -1,0 +1,150 @@
+<div class="row">
+  <div class="col-lg-10">
+    <div class="row">
+      <div class="col-lg-3 col-sm-6  cluster-overview-filter">
+        <input type="text" ng-model="filter.name" class="form-control input-sm" placeholder="filter nodes by name">
+      </div>
+      <div class="col-lg-4 col-sm-6 cluster-overview-filter cluster-map-node-types">
+        <div class="row">
+          <div class="col-xs-4 cluster-map-node-type" data-toggle="tooltip" data-placement="bottom" title="display master nodes">
+            <input type="checkbox" ng-model="filter.master">
+            <i class="fa fa-star-o node-type-icon"></i> master
+          </div>
+          <div class="col-xs-4 cluster-map-node-type" data-toggle="tooltip" data-placement="bottom" title="display data nodes">
+            <input type="checkbox" ng-model="filter.data">
+            <i class="fa fa-hdd-o node-type-icon"></i> data
+          </div>
+          <div class="col-xs-4 cluster-map-node-type" data-toggle="tooltip" data-placement="bottom" title="display client nodes">
+            <input type="checkbox" ng-model="filter.client">
+            <i class="fa fa-search node-type-icon"></i> client
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<table class="table table-bordered table-condensed table-rounded overview">
+  <thead>
+    <th class="table-header box">
+      <ng-sort-by property="name" text="name">name</ng-sort-by>
+    </th>
+    <th class="table-header box">
+      <ng-sort-by property="load_average" text="load average"></ng-sort-by>
+    </th>
+    <th class="table-header box">
+      <ng-sort-by property="cpu" text="cpu %"></ng-sort-by>
+    </th>
+    <th class="table-header box">
+      <ng-sort-by property="heap_used_percent" text="heap usage %"></ng-sort-by>
+    </th>
+    <th class="table-header box">
+      <ng-sort-by property="disk_used_percent" text="disk usage %"></ng-sort-by>
+    </th>
+    <th class="table-header box">
+      <ng-sort-by property="uptime" text="uptime"></ng-sort-by>
+    </th>
+  </thead>
+  <tbody>
+    <tr ng-repeat="node in nodes | orderBy:sortBy:reverse track by $index">
+      <td class="box">
+        <div class="node-badges">
+          <div ng-show="node.master">
+            <i ng-show="node.current_master" class="fa fa-fw fa-star" title="current master"></i>
+            <i ng-show="!node.current_master" class="fa fa-fw fa-star-o" title="master eligible"></i>
+          </div>
+          <div ng-show="node.data">
+            <i class="fa fa-fw fa-hdd-o" title="data node"></i>
+          </div>
+          <div ng-show="node.client">
+            <i class="fa fa-fw fa-search" title="client node"></i>
+          </div>
+        </div>
+        <div class="node-info">
+          <div class="dropdown">
+            <a data-toggle="dropdown" href="#" target="_self" class="cluster-map-header-index-name">
+              <i class="fa fa-fw fa-caret-down pull-right"></i>
+              <span class="cluster-map-header-index-name">{{node.name}} </span>
+            </a>
+            <ul class="dropdown-menu index-dropdown" role="menu">
+              <li role="presentation">
+                <a data-toggle="modal" class="cluster-map-header-index-action" ng-click="showNodeStats(node.id)">
+                  <i class="fa fa-fw fa-info-circle index-menu-icon"></i> view node stats
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <span class="cluster-map-node-detail">{{node.host}}</span>
+          </div>
+          <div>
+            <span class="cluster-map-node-detail">{{node.transportAddress}}</span>
+          </div>
+        </div>
+        <div class="node-labels">
+          <span class="node-label label-primary">JVM: {{node.jvmVersion}}</span>
+          <span class="node-label label-primary">ES: {{node.elasticVersion}}</span>
+        </div>
+      </td>
+      <td>
+        <div ng-show="node.load_average">
+          <span class="node-stat">
+            {{node.load_average | number:1}}
+          </span>
+          <span class="node-stat-detail">
+            <div></div>
+            <div></div>
+          </span>
+        </div>
+        <div ng-hide="node.load_average">
+          <span class="node-stat">
+            N/A
+          </span>
+        </div>
+      </td>
+      <td>
+        <div>
+          <span class="node-stat">
+            {{node.cpu | number:1}}
+          </span>
+        </div>
+      </td>
+      <td>
+        <div>
+          <span class="node-stat">
+            {{node.heap_used_percent | number:1}}
+          </span>
+          <span class="node-stat-detail">
+            <div>used: {{node.heap_used}}</div>
+            <div>max: {{node.heap_max}}</div>
+          </span>
+        </div>
+      </td>
+      <td>
+        <div ng-hide="node.client">
+          <span class="node-stat">
+            {{node.disk_used_percent | number:1}}
+          </span>
+          <span class="node-stat-detail">
+            <div>free: {{node.disk_free_in_bytes | bytes}}</div>
+            <div>total: {{node.disk_total_in_bytes | bytes}}</div>
+          </span>
+        </div>
+        <div ng-show="node.client">
+          <span class="node-stat-detail">
+            <div>&nbsp;</div>
+            <div><i>no disk info for client nodes</i></div>
+          </span>
+        </div>
+      </td>
+      <td>
+        <div>
+          <span class="node-stat">
+            {{node.uptime | timeInterval}}
+          </span>
+          <span class="node-stat-detail">
+          </span>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>

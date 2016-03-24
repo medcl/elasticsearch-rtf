@@ -1,0 +1,88 @@
+<!-- snapshot restore 
+	curl -XPOST "localhost:9200/_snapshot/my_backup/snapshot_1/_restore" -d '{
+	    "indices": "index_1,index_2",
+	    "ignore_unavailable": "true",
+	    "include_global_state": false,
+	    "rename_pattern": "index_(.)+",
+	    "rename_replacement": "restored_index_$1"
+	}'
+-->
+<div class="panel-group" id="#restoreSnapshotAccordion">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h4 class="panel-title">
+				<a data-toggle="collapse" data-parent="#restoreSnapshotAccordion" href="#restoreSnapshot">
+					restore snapshot
+				</a>
+			</h4>
+		</div>
+		<div id="restoreSnapshot" class="panel-collapse collapse">
+			<div class="panel-body">
+				<div class="row">
+					<div class="form-group col-lg-6 col-md-12 col-sm-6">
+						<label class="form-label">snapshot name</label>
+						<select ng-model="restore_snap.snapshot" ng-options="s as s.snapshot for s in snapshots" class="form-control input-sm">
+						</select>
+					</div>
+					<div class="form-group col-lg-6 col-md-12 col-sm-6">
+						<label class="form-label">repository</label>
+						<input ng-model="restore_snap.snapshot.repository" class="form-control input-sm disabled" disabled="disabled" placeholder="repository name">
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-lg-6 col-md-12 col-sm-6">
+						<label class="form-label">rename pattern</label>
+						<input ng-model="restore_snap.rename_pattern" class="form-control input-sm" placeholder="index_(.)+">
+					</div>
+					<div class="form-group col-lg-6 col-md-12 col-sm-6">
+						<label class="form-label">rename replacement</label>
+						<input ng-model="restore_snap.rename_replacement" class="form-control input-sm" placeholder="restored_index_$1">
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-xs-6">
+						<label class="form-label">ignore_unavailable</label>
+						<div class="row">
+							<div class="col-xs-12">
+								<label class="cluster-map-node-type">
+									<input type="checkbox" ng-model="restore_snap.ignore_unavailable" ng-true-value="true"  class=""> True
+								</label>
+								<label class="cluster-map-node-type">
+									<input type="checkbox" ng-model="restore_snap.ignore_unavailable" ng-true-value="false"  class=""> False
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="form-group col-xs-6">
+						<label class="form-label">include_global_state</label>
+						<div class="row">
+							<div class="col-xs-12">
+								<label class="cluster-map-node-type">
+									<input type="checkbox" ng-model="restore_snap.include_global_state" ng-true-value="true" > True
+								</label>
+								<label class="cluster-map-node-type">
+									<input type="checkbox" ng-model="restore_snap.include_global_state" ng-true-value="false" > False
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-xs-12">
+						<label class="form-label">indices (default is all)</label>
+						<select multiple="multiple" ng-model="restore_snap.indices" ng-options="i for i in restore_snap.snapshot.indices" class="form-control input-sm-twoxheight">
+							<option value="">Default is All</option>
+						</select>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-lg-12 action-buttons">
+						<button type="submit" class="btn btn-primary input-sm" ng-click="restoreSnapshot()">
+							<i class="icon-upload-alt"></i> restore
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

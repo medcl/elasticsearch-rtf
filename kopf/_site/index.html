@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="kopf" ng-controller="GlobalController">
+	<head>
+		<meta charset="utf-8">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<title>kopf</title>
+		<link href="./font-awesome/css/font-awesome.css" rel="stylesheet">
+		<link href="dist/lib.css" rel="stylesheet">
+		<link href="dist/kopf.css" rel="stylesheet">
+		<link href="dist/{{getTheme()}}_style.css" rel="stylesheet">
+		<script src="dist/lib.js" type="text/javascript" charset="utf-8"></script>
+		<script src="dist/kopf.js" type="text/javascript" charset="utf-8"></script>
+  	</head>
+	<body>
+		<div id="page-wrap">
+			<div ng-include src="'partials/nav_bar.html'"></div>
+			<div class="container-fluid">
+				<div ng-include src="'partials/main_alerts.html'"></div>
+				<div class="tab-content custom-tab-content">
+					<div class="tab-pane active in" id="cluster" ng-include src="'partials/cluster_overview.html'"></div>
+					<div class="tab-pane" id="index_settings" ng-include src="'partials/index_settings.html'"></div>
+					<div class="tab-pane" id="cluster_settings" ng-include src="'partials/cluster_settings.html'"></div>
+					<div class="tab-pane" id="create_index" ng-include src="'partials/create_index.html'"></div>
+					<div class="tab-pane" id="cluster_health" ng-include src="'partials/cluster_health.html'"></div>
+					<div class="tab-pane" id="rest" ng-include src="'partials/rest_client.html'"></div>
+					<div class="tab-pane" id="aliases" ng-include src="'partials/aliases.html'"></div>
+					<div class="tab-pane" id="analysis" ng-include src="'partials/analysis.html'"></div>
+					<div class="tab-pane" id="percolator" ng-include src="'partials/percolator.html'"></div>
+					<div class="tab-pane" id="warmup" ng-include src="'partials/warmup.html'"></div>
+					<div class="tab-pane" id="repository" ng-include src="'partials/repository.html'"></div>
+				</div>
+			</div>
+			<!-- modals used through the app -->
+			<div ng-include src="'./modals/modal_info.html'"></div>
+			<div ng-include src="'./modals/confirm_dialog.html'"></div>
+		</div>
+	</body>
+</html>

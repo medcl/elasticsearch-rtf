@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="guiapp">
+<head>
+    <meta charset="utf-8">
+    <title>Elasticsearch gui</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Website for looking at elasticsearch data">
+    <meta name="author" content="Jettro Coenradie">
+
+    <!-- Le styles -->
+    <link href="assets/css/app.min.css" rel="stylesheet">
+    <link href="assets/css/c3-0.4.7.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div>
+    <navbar heading="Elasticsearch GUI">
+        <navbaritem link="dashboard" title="Dashboard"></navbaritem>
+        <navbaritem link="search" title="Search"></navbaritem>
+        <navbaritem link="query" title="Queries"></navbaritem>
+        <navbaritem link="inspect" title="Inspect"></navbaritem>
+        <navbardropdown title="Tools" link="tools">
+            <navbardropdownitem link="tools/suggestions" title="Suggestions"></navbardropdownitem>
+            <navbardropdownitem link="tools/whereareshards" title="Where are my shards"></navbardropdownitem>
+            <navbardropdownitem link="tools/snapshots" title="Snapshots"></navbardropdownitem>
+            <navbardropdownitem link="tools/monitoring" title="Monitoring"></navbardropdownitem>
+        </navbardropdown>
+        <navbaritem link="graph" title="Graphs"></navbaritem>
+        <navbaritem link="about" title="About"></navbaritem>
+    </navbar>
+</div>
+
+<guiappnotification></guiappnotification>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12" ng-view>
+        </div>
+    </div>
+
+    <hr>
+
+    <footer>
+        <p class="muted credit">Made possible by <a href="http://www.gridshore.nl">Jettro Coenradie</a>. {{ 'Version v%VERSION%.' | interpolate }}
+        </p>
+
+    </footer>
+
+</div>
+<!--/.fluid-container-->
+
+<!-- Le javascript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="assets/libs/angular.min.js"></script>
+<script src="assets/libs/angular-route.min.js"></script>
+<script src="assets/libs/ui-bootstrap-0.12.1.min.js"></script>
+<script src="assets/libs/elasticsearch.angular.min.js"></script>
+<script src="assets/libs/d3.min.js"></script>
+<script src="assets/libs/c3.min.js"></script>
+<script src="assets/libs/c3-angular.min.js"></script>
+<script src="assets/libs/moment.min.js"></script>
+
+<script src="assets/js/elasticsearch-gui.js"></script>
+
+</body>
+</html>
