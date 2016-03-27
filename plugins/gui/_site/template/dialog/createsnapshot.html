@@ -1,0 +1,47 @@
+<div class="modal-header">
+    <h1>Create a Snapshot</h1>
+</div>
+<div class="modal-body">
+    <p>Each snapshot has to have a unique name. You can enter the name of the index yourself, or you can enter a prefix
+    will will append a timestamp to the prefix in that case. If you provide a name as well as a prefix, we will use the
+        name.</p>
+    <form role="form" class="form-horizontal">
+        <div class="form-group">
+            <label class="col-sm-4 control-label">Snapshot name</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" ng-model="csVm.dialog.name" ng-disabled="csVm.dialog.prefix"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label">Snapshot prefix</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" ng-model="csVm.dialog.prefix" ng-disabled="csVm.dialog.name"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label">Index names</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="text" ng-model="csVm.dialog.indices"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label">Ignore unavailable</label>
+            <div class="col-sm-8">
+                <label class="checkbox">
+                    <input type="checkbox" ng-model="csVm.dialog.ignoreUnavailable">
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label">Include global state</label>
+            <div class="col-sm-8">
+                <label class="checkbox">
+                    <input type="checkbox" ng-model="csVm.dialog.includeGlobalState">
+                </label>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button ng-click="csVm.close(csVm.dialog)" class="btn btn-primary">Create snapshot</button>
+</div>

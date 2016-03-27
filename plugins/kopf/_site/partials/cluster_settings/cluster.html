@@ -1,0 +1,43 @@
+<div class="row">	
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">indices.ttl.interval</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="Expired documents will be automatically deleted regularly. You can dynamically set the indices.ttl.interval to fit your needs. The default value is 60s.">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<input type="text" class="form-control input-sm" ng-model="settings[active_settings]['indices.ttl.interval']" placeholder="">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">indices.cache.filter.size</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="The setting that allows one to control the memory size for the filter cache is indices.cache.filter.size, which defaults to 10%. Note, this is not an index level setting but a node level setting (can be configured in the node configuration).">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<input type="text" class="form-control input-sm" ng-model="settings[active_settings]['indices.cache.filter.size']" placeholder=""/>
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">discovery.zen.minimum_master_nodes</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="The discovery.zen.minimum_master_nodes allows to control the minimum number of master eligible nodes a node should 'see' in order to operate within the cluster. Its recommended to set it to a higher value than 1 when running more than 2 nodes in the cluster.">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<input type="text" class="form-control input-sm" ng-model="settings[active_settings]['discovery.zen.minimum_master_nodes']" placeholder=""/>
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">blocks.read_only</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="makes the cluster read only. indices won't accept write operations and metadata can't be updated(create or delete indices)">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<BR>
+			<label class="cluster-map-node-type">
+				<!-- input type checkbox margin-top -5px -->
+				<input type="checkbox" ng-model="settings[active_settings]['cluster.blocks.read_only']" ng-true-value="true"  class=""> True
+				<input type="checkbox" ng-model="settings[active_settings]['cluster.blocks.read_only']" ng-true-value="false"  class=""> False
+			</label>			
+		</div>
+	</div>	
+</div>

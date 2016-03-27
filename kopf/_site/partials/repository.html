@@ -1,0 +1,17 @@
+<div ng-controller="RepositoryController" ng-show="hasConnection()">
+	<div class="row">
+		<div class="col-md-6">
+			<div class="content-panel" ng-include src="'partials/repositories/create_repository.html'"></div>
+			<div class="content-panel" ng-include src="'partials/repositories/create_snapshot.html'"></div>
+		</div>
+		<div class="col-md-6">
+			<div class="content-panel" ng-include src="'partials/repositories/repositories_table.html'"></div>
+			<div class="content-panel" ng-include src="'partials/repositories/restore_snapshot.html'"></div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12">
+			<div class="content-panel" ng-include src="'partials/repositories/snapshots_table.html'"></div>
+		</div>
+	</div>
+</div>

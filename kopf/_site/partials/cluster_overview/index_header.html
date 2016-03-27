@@ -1,0 +1,78 @@
+<!-- index name -->
+<span ng-show="index(position) != null">
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="dropdown">
+			  <a data-toggle="dropdown" href="#" class="cluster-map-header-index-name">
+						<i class="icon-angle-down pull-right cluster-map-header-index-icon"></i>
+						<span ng-class="{'closed-index': index(position).closed()}" class="cluster-map-header-index-name">{{index(position).name}} </span>
+				</a>
+			  <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+  				  <li role="presentation">
+					  <a class="cluster-map-header-index-action" role="menuitem" tabindex="-1" ng-click="displayInfo('settings for index ' + index(position).name,index(position).metadata)">
+						  <i class="icon-info-sign index-menu-icon"></i> settings and stats
+	  				</a>
+				  </li>
+  				  <li role="presentation">
+					  <a ng-show="index(position).open()" data-toggle="modal" href="#confirm_dialog" class="cluster-map-header-index-action" data-backdrop="static" role="menuitem" tabindex="-1" ng-click="closeIndex(index(position).name)">
+						  <i class="icon-folder-open index-menu-icon"></i> close index
+					  </a>
+					  <a data-toggle="modal" ng-show="index(position).closed()" href="#confirm_dialog" class="cluster-map-header-index-action" data-backdrop="static" role="menuitem" tabindex="-1" ng-click="openIndex(index(position).name)">
+						  <i class="icon-folder-close index-menu-icon" title="open index" ></i>  open index
+					  </a>
+				  </li>
+  				  <li role="presentation">
+	  				<a data-toggle="modal" href="#confirm_dialog" class="cluster-map-header-index-action" role="menuitem" tabindex="-1" data-backdrop="static" ng-click="optimizeIndex(index(position).name)">
+	  					<i class="icon-wrench index-menu-icon"></i> optimize index
+	  				</a>
+				  </li>
+  				  <li role="presentation">
+					  <a data-toggle="modal" href="#confirm_dialog" class="cluster-map-header-index-action" title="refresh index" role="menuitem" tabindex="-1" data-backdrop="static" ng-click="refreshIndex(index(position).name)">
+						  <i class="icon-refresh index-menu-icon"></i> refresh index
+					  </a>
+				  </li>
+  				  <li role="presentation">
+					  <a data-toggle="modal" href="#confirm_dialog" class="cluster-map-header-index-action" role="menuitem" tabindex="-1" data-backdrop="static" data-keyboard="false" ng-click="clearCache(index(position).name)">
+						  <i class="icon-circle-blank index-menu-icon"></i> clear cache
+					  </a>
+				  </li>
+  				  <li role="presentation">
+					  <a href="#" ng-click="loadIndexSettings(index(position).name)" class="cluster-map-header-index-action" role="menuitem" tabindex="-1">
+						  <i class="icon-cog index-menu-icon"></i> index settings
+					  </a>
+				  </li>
+				  <li role="presentation" class="divider"></li>
+  				  <li role="presentation">
+					  <a data-toggle="modal" href="#confirm_dialog" class="cluster-map-header-index-action" title="delete index" role="menuitem" tabindex="-1" data-backdrop="static" ng-click="deleteIndex(index(position).name)">
+						  <i class="icon-trash index-menu-icon"></i> delete index
+					  </a>
+				  </li>
+			  </ul>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="cluster-map-header-index-alias" ng-class="{'closed-index': index(position).closed()}">
+				<span title="{{index(position).num_of_shards}} shards and {{index(position).num_of_replicas}} replicas">shards: {{index(position).num_of_shards}} * {{index(position).num_of_replicas + 1}} |</span>
+				<span title="{{index(position).num_docs}} docs, {{index(position).max_doc}} max docs, {{index(position).deleted_docs}} deleted docs">docs: {{index(position).num_docs}} |</span> 
+				<span title="size: {{index(position).size_in_bytes}}, total size: {{index(position).total_size_in_bytes}}">size: {{index(position).size_in_bytes}}</span>
+			</div>
+		</div>	
+	</div>
+	<!-- index info -->
+	<div ng-show="index(position).aliases.length <= 5" class="row" ng-repeat="alias in index(position).visibleAliases()">
+		<div class="col-lg-12">
+			<div class="cluster-map-header-index-alias" ng-class="{'closed-index': index(position).closed()}">
+				<i class="icon-tag"></i> {{alias}}
+			</div>
+		</div>
+	</div>
+	<div ng-show="index(position).aliases.length > 5" class="row">
+		<div class="col-lg-12">
+			<div class="cluster-map-header-index-alias" ng-class="{'closed-index': index(position).closed()}">
+				<i class="icon-tags"></i> {{index(position).aliases.length}} total aliases
+			</div>
+		</div>
+	</div>
+</span>

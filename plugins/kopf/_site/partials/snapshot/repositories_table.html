@@ -1,0 +1,60 @@
+<div class="panel-group" id="#repositoriesAccordion">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#repositoriesAccordion" target="_self" href="#repositoryAccordionContent">
+          repositories
+        </a>
+      </h4>
+    </div>
+    <div id="repositoryAccordionContent" class="panel-collapse collapse in">
+      <div class="panel-body" style="min-height: 565px">
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label class="form-label">repository name</label>
+            <input ng-model="repository_form.name" class="form-control input-sm" placeholder="repository name">
+          </div>
+          <div class="form-group col-md-6">
+            <label class="form-label">type</label>
+            <select class="form-control input-sm" ng-model="repository_form.type" ng-options="t for t in ['fs', 'url', 's3', 'hdfs', 'azure']"></select>
+          </div>
+        </div>
+        <div class="row" ng-static-include file="snapshot/fs_repository" ng-show="repository_form.type == 'fs'"></div>
+        <div class="row" ng-static-include file="snapshot/url_repository" ng-show="repository_form.type == 'url'"></div>
+        <div class="row" ng-static-include file="snapshot/s3_repository" ng-show="repository_form.type == 's3'"></div>
+        <div class="row" ng-static-include file="snapshot/azure_repository" ng-show="repository_form.type == 'azure'"></div>
+        <div class="row" ng-static-include file="snapshot/hdfs_repository" ng-show="repository_form.type == 'hdfs'"></div>
+        <div class="row">
+          <div class="col-lg-12 action-buttons">
+            <span class="validation-error">{{validation_error}}</span>
+            <button type="submit" class="btn btn-primary rest-client-execute input-sm" ng-click="createRepository()">
+              <i class="fa fa-file-o"></i> create
+            </button>
+          </div>
+        </div>
+        <div class="row content-panel">
+          <div class="col-lg-12">
+            <table class="table table-bordered table-striped table-condensed">
+              <tr class="header-row">
+                <td>name</td>
+                <td>type</td>
+              </tr>
+              <tr ng-repeat="r in repositories track by $index" ng-show="r != null">
+                <td>
+                  {{r.name}}
+                  <a data-toggle="modal" target="_self" href="#confirm_dialog" class="remove-icon" data-backdrop="static" data-keyboard="false">
+                    <i class="fa fa-times remove-icon" ng-click="deleteRepository(r)"></i>
+                  </a>
+                  <span class="normal-action" ng-click="displayInfo(r.name,r.settings)">
+                    <i class="fa fa-info-circle details-icon"></i>
+                  </span>
+                </td>
+                <td>{{r.type}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

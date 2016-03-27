@@ -1,0 +1,47 @@
+<div class="row">
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">disable_allocation</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="disable shards allocation. defaults to false" data-original-title="index.disable_allocation" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<select ng-model="service.index.editable_settings['index.routing.allocation.disable_allocation']" class="form-control input-sm">
+				<option value="true">true</option>
+				<option value="false">false</option>
+			</select>
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">disable_new_allocation</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="disable new shards allocation. defaults to false" data-original-title="index.disable_new_allocation" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<select ng-model="service.index.editable_settings['index.routing.allocation.disable_new_allocation']" class="form-control input-sm">
+				<option value="true">true</option>
+				<option value="false">false</option>
+			</select>
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">disable_replica_allocation</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="disable shard replica allocation. defaults to false" data-original-title="index.disable_replica_allocation" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<select ng-model="service.index.editable_settings['index.routing.allocation.disable_replica_allocation']" class="form-control input-sm">
+				<option value="true">true</option>
+				<option value="false">false</option>
+			</select>
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">total_shards_per_node</label>
+			<a href="#" class="setting-info" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="maximum number of shards for this index that each node can have" data-original-title="index.routing.allocation.total_shards_per_node" title="">
+				<i class="icon-info-sign"></i>
+			</a>
+			<input type="text" class="form-control input-sm" ng-model="service.index.editable_settings['index.routing.allocation.total_shards_per_node']" placeholder="">
+		</div>
+	</div>
+</div>

@@ -1,0 +1,56 @@
+   =========================================================================
+   ==   Bigdesk - Live charts and statistics for elasticsearch cluster.   ==
+   =========================================================================
+
+   Copyright 2011-2014 Lukas Vlcek
+
+   This product includes:
+  
+   Meyer CSS reset
+   http://meyerweb.com/eric/tools/css/reset/
+   License: none (public domain)
+
+   normalize.css
+   http://github.com/necolas/normalize.css
+   Copyright (c) Nicolas Gallagher and Jonathan Neal
+   License: https://github.com/necolas/normalize.css/blob/master/LICENSE.md
+
+   CssGrid
+   http://cssgrid.net
+   Copyright (c) Andy Taylor
+   License: http://creativecommons.org/licenses/by/3.0/au/
+
+   D3.js
+   http://d3js.org
+   Copyright (c) 2012, Michael Bostock
+   License: http://opensource.org/licenses/BSD-3-Clause
+
+   Backbone.js
+   http://backbonejs.org
+   Copyright (c) 2010-2012 Jeremy Ashkenas, DocumentCloud
+   License: MIT License, https://github.com/documentcloud/backbone/blob/master/LICENSE
+
+   CSS3-mediaqueries.js
+   http://code.google.com/p/css3-mediaqueries-js/
+   License: MIT License, http://www.opensource.org/licenses/mit-license.php
+
+   jQuery
+   Copyright 2012 jQuery Foundation and other contributors
+   http://jquery.com
+   License: MIT License, http://jquery.org/license/
+
+   Mustache.js
+   Copyright (c) 2009 Chris Wanstrath (Ruby)
+   Copyright (c) 2010 Jan Lehnardt (JavaScript)
+   http://mustache.github.com
+   License: MIT License
+
+   Tinysort.js
+   http://code.google.com/p/tinysort/
+   http://tinysort.sjeiti.com/
+   License: MIT License 
+
+   Underscore.js
+   http://underscorejs.org
+   Copyright (c) 2009-2012 Jeremy Ashkenas, DocumentCloud
+   License: MIT License, https://github.com/documentcloud/underscore/blob/master/LICENSE

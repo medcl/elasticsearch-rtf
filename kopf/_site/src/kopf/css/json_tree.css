@@ -1,0 +1,22 @@
+.json-content {
+	font-size: 10px;
+	font-weight: 400;
+	color: #d0d0d0;
+	font-family: "Lucida Console", Monaco, monospace;
+}
+/* json property name style */
+.json-property {
+	font-weight: 500;
+}
+/* json object */
+.json-object {
+	padding-left: 2em;
+}
+/* visible object */
+.json-visible {
+	height: auto;
+}
+/* collapsed object */
+.json-collapsed {
+	display: none;
+}

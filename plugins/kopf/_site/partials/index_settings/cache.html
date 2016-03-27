@@ -1,0 +1,20 @@
+<div class="row">
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">filter.max_size</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="the maximum size of filter cache (per segment in shard). Set to -1 to disable">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.cache.filter.max_size']">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">filter.expire</label>
+			<span class="setting-info" data-toggle="tooltip" data-placement="bottom" title="the expire after access time for filter cache. Set to -1 to disable">
+				<i class="fa fa-info-circle"></i>
+			</span>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.cache.filter.expire']">
+		</div>
+	</div>
+</div>

@@ -1,0 +1,5 @@
+.idea/
+node_modules
+bower_components
+elasticsearch-gui.iml
+.sass-cache

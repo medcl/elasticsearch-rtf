@@ -1,0 +1,78 @@
+<div ng-controller="RestController">
+	<div class="row">
+		<div class="col-md-6 content-panel">
+			<div class="panel-group" id="#restRequestAccordion">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h4 class="panel-title">
+							<a data-toggle="collapse" data-parent="#restRequestAccordion" href="#restRequest">request</a>
+						</h4>
+					</div>
+					<div id="restRequest" class="panel-collapse collapse in">
+						<div class="panel-body">
+							<div>
+								<span class="history-icon">
+									<a title="show/hide request history" data-toggle="collapse" data-parent="#restAccordion" href="#restHistory"><i class="icon-time"></i></a>
+								</span>
+								<span>
+									<select ng-model="request.method" class="form-control input-sm rest-client-request-method">
+										<option value="GET" selected="selected">GET</option>
+										<option value="PUT">PUT</option>
+										<option value="POST">POST</option>
+										<option value="DELETE">DELETE</option>
+									</select>
+									<span class="rest-client-request-url">
+										<input type="url" ng-model="request.url" class="form-control input-sm" placeholder="complete url (e.g.: http://localhost:9200/index/type/_search)">
+									</span>
+									<div id="restHistory" class="panel-collapse collapse" style="margin-right: 30px">
+										<a data-toggle="collapse" data-parent="#restAccordion" href="#restHistory">
+											<span>
+												<table class="table table-striped table-condensed" style="width: 100%; margin-bottom: 0px;">
+													<tr ng-repeat="h in history" ng-click="loadFromHistory(h)" title="{{h.body}}" class="normal-action">
+														<td style="width: 75px">{{h.timestamp}}</td>
+														<td>{{h.url}}</td>
+														<td style="width: 75px">{{h.method}}</td>
+													</tr>
+												</table>
+											</span>
+										</a>
+									</div>
+								</span>
+							</div>
+							<div class="content-panel">
+								<div id="rest-client-editor" class="kopf-ace-editor" style="height: 580px"></div>
+							</div>
+							<div class="content-panel action-buttons">
+								<span class="danger-action">{{editor.error}}</span>
+								<button type="submit" class="btn btn-default input-sm" ng-click="editor.format()">
+									<i class="icon-align-left"></i> format
+								</button>
+								<button type="submit" class="btn btn-primary input-sm" ng-click="sendRequest()">
+									<i class="icon-bolt"></i> send
+								</button>
+							</div>
+						</div>
+						
+					</div>
+					
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6 content-panel">
+			<div class="panel-group" id="#restResponseAccordion">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h4 class="panel-title">
+							<a data-toggle="collapse" data-parent="#restResponseAccordion" href="#restResponse">response</a>
+						</h4>
+					</div>
+					<div id="restResponse" class="panel-collapse collapse in" style="min-height: 691px">
+						<div class="panel-body">
+							<div id="rest-client-response" style="min-height: 614px"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

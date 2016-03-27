@@ -1,0 +1,87 @@
+<!-- query -->
+<h4>slow log for searches</h4>
+<div class="row">
+	<div class="col-md-3 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">warn</label>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.search.slowlog.threshold.query.warn']" placeholder="(e.g.: 500ms)">
+		</div>
+	</div>
+	<div class="col-md-3 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">info</label>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.search.slowlog.threshold.query.info']" placeholder="(e.g.: 400ms)">
+		</div>
+	</div>
+	<div class="col-md-3 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">debug</label>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.search.slowlog.threshold.query.debug']" placeholder="(e.g.: 200ms)">
+		</div>
+	</div>
+	<div class="col-md-3 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">trace</label>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.search.slowlog.threshold.query.trace']" placeholder="(e.g.: 100ms)">
+		</div>
+	</div>
+</div>
+<!-- fetch -->
+<h4>slow log for fetching</h4>
+<div class="row">
+	<div class="col-md-3 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">warn</label>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.search.slowlog.threshold.fetch.warn']" placeholder="(e.g.: 200ms)">
+		</div>
+	</div>
+	<div class="col-md-3 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">info</label>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.search.slowlog.threshold.fetch.info']" placeholder="(e.g.: 100ms)">
+		</div>
+	</div>
+	<div class="col-md-3 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">debug</label>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.search.slowlog.threshold.fetch.debug']" placeholder="(e.g.: 50ms)">
+		</div>
+	</div>
+	<div class="col-md-3 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">trace</label>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.search.slowlog.threshold.fetch.trace']" placeholder="(e.g.: 25ms)">
+		</div>
+	</div>
+</div>
+<!-- index -->
+<h4>slow log for indexing</h4>
+<div class="row">
+	<div class="col-md-3 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">warn</label>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.indexing.slowlog.threshold.index.warn']" placeholder="(e.g.: 100ms)">
+		</div>
+	</div>
+	<div class="col-md-3 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">info</label>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.indexing.slowlog.threshold.index.info']" placeholder="(e.g.: 80ms)">
+		</div>
+	</div>
+	<div class="col-md-3 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">debug</label>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.indexing.slowlog.threshold.index.debug']" placeholder="(e.g.: 500ms)">
+		</div>
+	</div>
+	<div class="col-md-3 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">trace</label>
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.indexing.slowlog.threshold.index.trace']" placeholder="(e.g.: 30ms)">
+		</div>
+	</div>
+</div>
+<script>
+    $(function () { $(".setting-info").tooltip();});
+</script>

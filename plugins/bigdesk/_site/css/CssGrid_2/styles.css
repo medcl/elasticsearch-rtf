@@ -1,0 +1,52 @@
+/* ============================== */
+/* ! Layout for desktop version   */
+/* ============================== */
+
+	body {}
+    .container p {
+        font-size: 14px;
+    }
+
+    .masterNode {
+        background: url("../../images/award_star_gold.png") no-repeat 1px 3px;
+    }
+
+@media only screen and (max-width: 1023px) {
+
+    body {}
+    .container p {
+        font-size: 12px;
+    }
+    .masterNode {
+        background: url("../../images/award_star_gold.png") no-repeat 1px 1px;
+    }
+}
+
+/* ============================= */
+/* ! Layout for mobile version   */
+/* ============================= */
+
+@media handheld, only screen and (max-width: 767px) {
+
+    body {}
+    .container p {
+        font-size: 12px;
+    }
+    .masterNode {
+        background: url("../../images/award_star_gold.png") no-repeat 1px 1px;
+    }
+}
+
+
+/* ========================================== */
+/* ! Provide higher res assets for iPhone 4   */
+/* ========================================== */
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2) { 
+
+/*	.logo {
+		background: url(logo2x.jpg) no-repeat;
+		background-size: 212px 303px;
+	}*/
+
+}

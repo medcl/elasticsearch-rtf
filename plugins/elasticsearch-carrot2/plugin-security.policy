@@ -1,0 +1,6 @@
+grant {
+  // required for simpleframework (XML deserialization)
+  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+  // required for Lingo3G
+  permission java.lang.RuntimePermission "getClassLoader";
+};

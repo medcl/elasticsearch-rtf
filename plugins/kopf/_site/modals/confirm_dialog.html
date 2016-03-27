@@ -1,0 +1,21 @@
+<div class="modal custom-modal" id="confirm_dialog" tabindex="-1" role="dialog" ng-controller="ConfirmDialogController">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<i class="fa fa-times-circle-o modal-close-icon" data-dismiss="modal" ng-click='dialog_service.close()'></i>
+				<h4 class="modal-title">{{dialog_service.header}}</h4>
+      		</div>
+      		<div class="modal-body">
+				<pre class="confirm-dialog-body">{{dialog_service.body}}</pre>
+      		</div>
+	        <div class="modal-footer">
+				<!-- button type="button" class="btn btn-default" data-dismiss="modal" ng-click='dialog_service.cancel()'>
+					{{dialog_service.cancel_text}}
+				</button-->
+				<button type="button" class="btn btn-primary" data-dismiss="modal" ng-click='dialog_service.confirm()'>
+					{{dialog_service.action}}
+				</button>
+	        </div>
+    	</div>
+  	</div>
+</div>

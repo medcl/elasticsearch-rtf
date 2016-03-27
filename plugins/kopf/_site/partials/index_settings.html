@@ -1,0 +1,39 @@
+<div>
+	<div class="content-panel">
+        <div class="row section-title">
+            <div class="col-xs-12">
+                <h4>settings for {{index}}</h4>
+            </div>
+        </div>
+		<div class="row">
+			<div class="col-sm-2">
+				<ul class="nav nav-pills nav-stacked" id="idx_settings_tabs">
+					<li class="active"><a target="_self" href="#idx_settings_index" data-toggle="tab">index</a></li>
+					<li><a target="_self" href="#idx_settings_index_blocks" data-toggle="tab">block operations</a></li>
+					<li><a target="_self" href="#idx_settings_index_translog" data-toggle="tab">translog</a></li>
+					<li><a target="_self" href="#idx_settings_index_routing" data-toggle="tab">routing</a></li>
+					<li><a target="_self" href="#idx_settings_index_cache" data-toggle="tab">cache</a></li>
+					<li><a target="_self" href="#idx_settings_index_slowlog" data-toggle="tab">slow log</a></li>
+				</ul>
+			</div>
+			<div class="col-sm-10">
+				<div class="tab-content">
+					<div class="tab-pane active" id="idx_settings_index" ng-include src="'partials/index_settings/index.html'"></div>
+					<div class="tab-pane" id="idx_settings_index_blocks" ng-include src="'partials/index_settings/blocks.html'"></div>
+					<div class="tab-pane" id="idx_settings_index_translog" ng-include src="'partials/index_settings/translog.html'"></div>
+					<div class="tab-pane" id="idx_settings_index_routing" ng-include src="'partials/index_settings/routing.html'"></div>
+					<div class="tab-pane" id="idx_settings_index_cache" ng-include src="'partials/index_settings/cache.html'"></div>
+					<div class="tab-pane" id="idx_settings_index_slowlog" ng-include src="'partials/index_settings/slowlog.html'"></div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12">
+				<span class="pull-right">
+					<a href="#!cluster" class="btn btn-default">back</a>
+					<button type="button" class="btn btn-primary" ng-click='save()'><i class="fa fa-check"></i> save</button>
+				</span>
+			</div>
+		</div>
+	</div>
+</div>

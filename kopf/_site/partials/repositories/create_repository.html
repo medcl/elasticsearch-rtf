@@ -1,0 +1,42 @@
+<div class="panel-group" id="#createRepositoryAccordion">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h4 class="panel-title">
+				<a data-toggle="collapse" data-parent="#createRepositoryAccordion" href="#newRepository">
+					create new repository
+				</a>
+			</h4>
+		</div>
+		<div id="newRepository" class="panel-collapse collapse">
+			<div class="panel-body">
+				<div class="row">
+					<div class="form-group col-md-6">
+						<label class="form-label">repository name</label>
+						<input ng-model="new_repo.name" class="form-control input-sm" placeholder="repository name">
+					</div>
+					<div class="form-group col-md-6">
+						<label class="form-label">type</label>
+						<input ng-model="new_repo.type" class="form-control input-sm" placeholder="repository type (fs, hdfs, s3)">
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-xs-12">
+						<label class="form-label">settings</label>
+						<div id="repository-settings-editor" style="height: 400px" class="kopf-ace-editor"></div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-lg-12 action-buttons">
+						<span class="validation-error">{{validation_error}}</span>
+						<button type="submit" class="btn btn-default input-sm" ng-click="editor.format()">
+							<i class="icon-align-left"></i> format
+						</button>
+						<button type="submit" class="btn btn-primary rest-client-execute input-sm" ng-click="createRepository()">
+							<i class="icon-file-alt"></i> create
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

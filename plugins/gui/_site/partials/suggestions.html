@@ -1,0 +1,59 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-info">
+            <p>On this page you can play around with the term suggester.</p>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Using the term suggester</h3>
+    </div>
+    <div class="panel-body">
+		<div class="row">
+			<div class="col-md-4">
+			    <form role="form">
+			        <div class="form-group">
+			            <label>Index</label>
+		                <select class="form-control" ng-model="vm.suggest.index" ng-options="index.name for index in vm.sourcedata.indices">
+			                <option value="">-- chose field --</option>
+		    	        </select>
+			        </div>
+			        <div class="form-group">
+			            <label>Field</label>
+		                <select class="form-control" ng-model="vm.suggest.field" ng-options="key as value.forPrint for (key,value) in vm.sourcedata.fields">
+			                <option value="">-- chose field --</option>
+		    	        </select>
+			        </div>
+			        <div class="form-group">
+			            <label>Minimum length of suggestion</label>
+			            <input type="number" class="form-control" ng-model="vm.suggest.min_word_length"/>
+			        </div>
+			        <div class="form-group">
+			            <label>Minimum characters at beginning of suggestion</label>
+			            <input type="number" class="form-control" ng-model="vm.suggest.prefix_length"/>
+			        </div>
+			        <div class="form-group">
+			            <label>Term to find suggestions for</label>
+			            <input type="text" class="form-control" ng-model="vm.suggest.query"/>
+			        </div>
+			        <button ng-click="vm.doSuggest()" ng-disabled="!(vm.suggest.index&&vm.suggest.field&&vm.suggest.query)" class="btn btn-primary">Find suggestions</button>
+			    </form>
+			</div>
+			<div class="col-md-8">
+				<table class="table">
+					<thead>
+						<th>Term</th>
+						<th>Suggestions</th>
+					</thead>
+					<tbody>
+						<tr ng-repeat="(key,value) in vm.results">
+							<td>{{key}}</td>
+							<td>{{value}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>

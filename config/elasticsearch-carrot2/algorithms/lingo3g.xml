@@ -1,0 +1,9 @@
+<component-suite>
+  <algorithms>
+    <algorithm component-class="com.carrotsearch.lingo3g.Lingo3GClusteringAlgorithm" id="lingo3g"
+      attribute-sets-resource="lingo3g-attributes.xml">
+      <label>Lingo3G</label>
+      <title>Lingo3G Clustering</title>
+    </algorithm>
+  </algorithms>
+</component-suite>

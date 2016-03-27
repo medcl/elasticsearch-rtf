@@ -1,0 +1,77 @@
+<div ng-controller="ClusterOverviewController" ng-show="hasConnection() && cluster != null">
+	<div ng-include src="'partials/cluster_overview/cluster_stats.html'"></div>
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="row">
+				<div class="col-lg-6">
+					<div class="row">
+						<div class="col-lg-6 col-sm-6 cluster-overview-filter">
+							<input type="text" ng-model="pagination.query" class="form-control input-sm" placeholder="filter indices by name">
+						</div>
+						<div class="col-lg-3 col-sm-3 cluster-overview-filter">
+							<select ng-model="pagination.state" class="form-control input-sm">
+								<option selected="selected" value="">all</option>
+								<option value="open">open</option>
+								<option value="close">closed</option>
+								<option value="unhealthy">unhealthy</option>
+							</select>
+						</div>
+						<div class="col-lg-3 col-sm-3 cluster-overview-filter cluster-map-node-types">
+			    	  <label class="cluster-map-node-type">
+			    	    <input type="checkbox" ng-model="pagination.hide_special"> <i class="icon-asterisk node-type-icon"> </i> hide special ({{cluster.special_indices}})
+			    	  </label>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-6">
+					<div class="row">
+						<div class="col-lg-6 col-sm-6 cluster-overview-filter">
+							<input type="text" ng-model="pagination.node_name" class="form-control input-sm" placeholder="filter nodes by name">
+						</div>
+						<div class="col-lg-6 col-sm-6 cluster-map-node-types cluster-overview-filter">
+							<div class="row">
+								<div class="col-xs-4">
+						    	  <label class="cluster-map-node-type">
+						    	    <input type="checkbox" ng-model="pagination.master"> <i class="icon-star-empty node-type-icon"> </i> master
+						    	  </label>
+								</div>
+								<div class="col-xs-4">
+						    	  <label class="cluster-map-node-type">
+										<input type="checkbox" ng-model="pagination.data"> <i class="icon-hdd node-type-icon"> </i> data
+									</label>
+								</div>
+								<div class="col-xs-4">
+						    	  <label class="cluster-map-node-type">
+						    	    <input type="checkbox" ng-model="pagination.client"> <i class="icon-search node-type-icon"> </i> client
+						    	  </label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-6" style="text-align: left;">
+			<div class="cluster-map-pagination" data-toggle="tooltip" data-placement="top" data-original-title="number of shards in the cluster (closed indices are not taken into account)">
+				{{cluster_health.fetched_at}} - {{cluster_health.cluster_name}}
+			</div>
+		</div>
+		<div class="col-xs-6" style="text-align: right;">
+			<div class="cluster-map-pagination">
+				<span ng-switch on="hasPreviousPage()">
+					<i class="icon-double-angle-left normal-action" ng-click="previousPage()" ng-switch-when="true"></i>
+					<i class="icon-double-angle-left inactive-action" ng-switch-when="false"></i>
+				</span>
+				{{firstResult()}}-{{lastResult()}} of {{total()}}
+				<span ng-switch on="hasNextPage()">
+					<i class="icon-double-angle-right normal-action" ng-click="nextPage()" ng-switch-when="true"></i>
+					<i class="icon-double-angle-right inactive-action" ng-switch-when="false"></i>
+				</span>
+			</div>
+		</div>
+	</div>
+	<table class="table table-bordered table-condensed table-rounded overview">
+		<thead ng-include src="'partials/cluster_overview/shard_map_header.html'"></thead>
+		<tbody ng-include src="'partials/cluster_overview/shard_map_body.html'"></tbody>
+	</table>
+</div>

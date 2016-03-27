@@ -1,0 +1,106 @@
+<div class="navbar navbar-fixed-top navbar-cluster-status-{{cluster_health.status}}" ng-controller="NavbarController">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle dropdown-toggle navbar-toggle-{{cluster_health.status}}" data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand dropdown-toggle navbar-cluster-status-{{cluster_health.status}}" href="#" data-toggle="dropdown">kopf
+				<i class="icon-caret-down navbar-logo-action"></i>
+			</a>
+			<ul class="dropdown-menu form-horizontal navbar-app-settings">
+				<li class="navbar-menu-section">
+					<div class="row">
+						<div class="col-lg-12">
+							<h5>refresh rate</h5>
+						</div>
+						<div class="col-lg-12">
+							<select ng-model="new_refresh" class="form-control ng-pristine ng-valid" ng-change="changeRefresh()">
+								<option value="1000">every second</option>
+								<option value="3000">every 3 seconds</option>
+								<option value="5000">every 5 seconds</option>
+								<option value="10000">every 10 seconds</option>
+								<option value="60000">every minute</option>
+							</select>
+						</div>
+					</div>
+				</li>
+				<li class="navbar-menu-section">
+					<div class="row">
+						<div class="col-lg-12">
+							<h5>theme</h5>
+						</div>
+						<div class="col-lg-12">
+							<select ng-model="theme" class="form-control ng-pristine ng-valid" ng-change="changeTheme()">
+								<option value="default">default</option>
+								<option value="dark">dark</option>
+							</select>
+						</div>
+					</div>
+				</li>
+				<li class="navbar-menu-section">
+					<div class="row">
+						<div class="col-lg-12">
+							<h5>connect to host</h5>
+						</div>
+						<div class="col-lg-12">
+							<input type="text" class="form-control" ng-model="new_host" ng-keypress="connectToHost($event)" placeholder="connect to a different host">
+						</div>
+					</div>
+				</li>
+				<li class="divider"></li>
+				<li class="active navbar-menu-section">
+					<div class="row">
+						<div class="col-lg-12">
+							<span class="navbar-menu-item ng-binding">kopf v{{version}} - found a bug? <a href="https://github.com/lmenezes/elasticsearch-kopf/issues" target="_blank">report it!</a></span>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div class="collapse navbar-collapse">
+			<ul class="nav navbar-nav navbar-cluster-status-{{cluster_health.status}}">
+				<li class="active" id="cluster_option" ng-click="selectTab()">
+					<a href="#cluster" data-toggle="tab"><i class="icon-sitemap"></i> cluster</a>
+				</li>
+				<li id="index_settings_option" style="display: none;">
+					<a href="#index_settings" data-toggle="tab"></a>
+				</li>
+				<li id="cluster_settings_option" style="display: none;">
+					<a href="#cluster_settings" data-toggle="tab"></a>
+				</li>
+				<li id="cluster_health_option" style="display: none;">
+					<a href="#cluster_health" data-toggle="tab"></a>
+				</li>
+				<li id="create_index_option" style="display: none;">
+					<a href="#create_index" data-toggle="tab"></a>
+				</li>
+				<li class="" id="rest_option" ng-click="selectTab()">
+					<a href="#rest" data-toggle="tab" class=""><i class="icon-edit"></i> rest</a>
+				</li>
+				<li class="" id="aliases_option" ng-click="selectTab('loadAliasesEvent')">
+					<a href="#aliases" data-toggle="tab" class=""><i class="icon-tags"></i> aliases</a>
+				</li>
+				<li class="" id="analysis_option" ng-click="selectTab('loadAnalysisEvent')">
+					<a href="#analysis" data-toggle="tab" class=""><i class="icon-puzzle-piece"></i> analysis</a>
+				</li>
+				<li class="" id="percolator_option" ng-click="selectTab('loadPercolatorEvent')">
+					<a href="#percolator" data-toggle="tab" class=""><i class="icon-bullseye"></i> percolator</a>
+				</li>
+				<li class="" id="warmup_option" ng-click="selectTab('loadWarmupEvent')">
+					<a href="#warmup" data-toggle="tab" class=""><i class="icon-fire"></i> warmers</a>
+				</li>
+				<li class="" id="repository_option" ng-click="selectTab('loadRepositoryEvent')" ng-show="client != null && client.is1()">
+					<a href="#repository" data-toggle="tab" class=""><i class="icon-suitcase"></i> repository</a>
+				</li>				
+			</ul>
+		</div>
+	</div>
+</div>
+<script>
+$(function() { 
+  $('.dropdown-menu input').click(function(e) { e.stopPropagation(); });
+  $('.dropdown-menu select').click(function(e) { e.stopPropagation(); });
+});
+</script>

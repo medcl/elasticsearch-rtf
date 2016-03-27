@@ -1,0 +1,50 @@
+<div class="row">
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">translog.flush_threshold_ops</label>
+			<span  class="setting-info" data-toggle="tooltip" data-placement="bottom" title="when to flush based on operations">
+				<i class="fa fa-info-circle"></i>
+			</span> 
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.translog.flush_threshold_ops']">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">translog.flush_threshold_size</label>
+			<span  class="setting-info" data-toggle="tooltip" data-placement="bottom" title="when to flush based on translog (bytes) size">
+				<i class="fa fa-info-circle"></i>
+			</span> 
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.translog.flush_threshold_size']">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">translog.flush_threshold_period</label>
+			<span  class="setting-info" data-toggle="tooltip" data-placement="bottom" title="when to flush based on a period of not flushing">
+				<i class="fa fa-info-circle"></i>
+			</span> 
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.translog.flush_threshold_period']">
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">translog.disable_flush</label>
+			<span  class="setting-info" data-toggle="tooltip" data-placement="bottom" title="disables flushing. Note, should be set for a short interval and then enabled.">
+				<i class="fa fa-info-circle"></i>
+			</span> 
+			<select ng-model="editable_settings['index.translog.disable_flush']" class="form-control input-sm">
+				<option value="true">true</option>
+				<option value="false">false</option>
+			</select>
+		</div>
+	</div>
+	<div class="col-md-4 col-sm-6 col-xs-12">
+		<div class="form-group">
+			<label class="form-label">translog.fs.type</label>
+			<span  class="setting-info" data-toggle="tooltip" data-placement="bottom" title="either simple or buffered (default)">
+				<i class="fa fa-info-circle"></i>
+			</span> 
+			<input type="text" class="form-control input-sm" ng-model="editable_settings['index.translog.fs.type']">
+		</div>
+	</div>
+</div>

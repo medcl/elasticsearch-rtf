@@ -1,0 +1,31 @@
+.rest-client-request-url {
+	overflow: hidden;
+	display: block;
+}
+.rest-client-request-method {
+	width: 80px;
+	float: right;
+	margin-left: 10px;
+}
+.rest-client-execute {
+	float: right;
+	margin-left: 10px;
+	line-height: 12px;
+}
+.rest-client-request-body {
+	font-size: 11px;
+	margin-top: 20px;
+}
+.request-client-request-body-options {
+	overflow: hidden;
+	display: block;
+}
+.history-icon {
+	float: right;
+	padding-left: 10px;
+	font-size: 22px;
+}
+
+.history-icon > a:hover {
+	text-decoration: none;
+}

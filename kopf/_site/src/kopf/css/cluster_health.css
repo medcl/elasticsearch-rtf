@@ -1,0 +1,24 @@
+.cluster-health-top-actions {
+	text-align: right;
+}
+.cluster-health-content {
+	font-family: monospace;
+	white-space: pre;
+}
+
+.cluster-health-form-group {
+	padding-left: 5px;
+	float: right;
+}
+.gist-timestamp-col {
+	width: 70px;
+}
+.gist-link-col {
+	width: 240px;
+}
+.gist-title-col {
+	width: auto;
+}
+.cluster-health-filters {
+	padding-top: 6px;
+}

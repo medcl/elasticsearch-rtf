@@ -1,0 +1,6 @@
+{
+    "elasticsearch_root_path": "",
+    "with_credentials": false,
+    "theme": "dark",
+    "refresh_rate": 5000
+}

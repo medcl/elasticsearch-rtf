@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="kopf" ng-controller="GlobalController">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title ng-bind="title"></title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="dist/lib.css" rel="stylesheet">
+    <link href="dist/kopf.css" rel="stylesheet">
+    <link ng-href="dist/{{getTheme()}}_style.css" rel="stylesheet">
+    <script src="dist/lib.js" type="text/javascript" charset="utf-8"></script>
+    <script src="dist/kopf.js" type="text/javascript" charset="utf-8"></script>
+  </head>
+  <body>
+    <div id="page-wrap">
+      <div ng-include src="'partials/nav_bar.html'"></div>
+      <div ng-include src="'partials/main_alerts.html'" ng-controller="AlertsController" class="alerts-container"></div>
+      <div ng-include src="'partials/cluster_stats.html'" style="padding-bottom: 20px;"></div>
+      <div class="container-fluid">
+        <div class="tab-content custom-tab-content">
+          <ng-view onload="initializeController()" ng-show="hasConnection()"></ng-view>
+        </div>
+      </div>
+      <div ng-include src="'./modals/modal_info.html'"></div>
+      <div ng-include src="'./modals/confirm_dialog.html'"></div>
+      <div ng-include src="'partials/debug.html'"></div>
+    </div>
+  </body>
+</html>

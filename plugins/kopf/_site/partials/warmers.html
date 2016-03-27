@@ -1,0 +1,116 @@
+<div class="row">
+  <div class="col-md-6">
+    <div class="content-panel">
+      <div class="panel-group" id="#newWarmerAccordion">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#newWarmerAccordion" target="_self" href="#newWarmer">
+                create warmer
+              </a>
+            </h4>
+          </div>
+          <div id="newWarmer" class="panel-collapse collapse in">
+            <div class="panel-body">
+              <div class="row">
+                <div class="form-group col-md-4">
+                  <label class="form-label">index</label>
+                  <select class="form-control input-sm" ng-model="warmer.index" ng-options="i.name as i.name for i in indices | orderBy:'name'" ng-change="loadIndexWarmers()">
+                    <option value="">select target index</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-4">
+                  <label class="form-label">types</label>
+                  <input ng-model="warmer.types" class="form-control input-sm" placeholder="types(e.g.: type_1,type2)">
+                </div>
+                <div class="form-group col-md-4">
+                  <label class="form-label">warmer id</label>
+                  <input ng-model="warmer.id" class="form-control input-sm" placeholder="warmer id">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-12">
+                  <div class="form-group">
+                    <label class="form-label">query</label>
+
+                    <div id="warmer-editor" style="min-height: 400px" class="kopf-ace-editor"></div>
+                  </div>
+                </div>
+                <div class="col-lg-12 action-buttons">
+                  <span class="validation-error">{{editor.error}}</span>
+                  <button type="submit" class="btn btn-default input-sm" ng-click="editor.format()">
+                    <i class="fa fa-align-left"></i> format
+                  </button>
+                  <button type="submit" class="btn btn-danger input-sm" ng-click="createWarmer()">
+                    <i class="fa fa-save"></i> create
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="content-panel">
+      <div class="panel-group" id="#warmersListAccordion">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#warmersListAccordion" target="_self" href="#warmers">
+                registered warmers
+              </a>
+            </h4>
+          </div>
+          <div id="warmers" class="panel-collapse collapse in">
+            <div class="panel-body" style="min-height: 565px">
+              <div class="row">
+                <div class="form-group col-md-6">
+                  <label class="form-label">index</label>
+                  <select class="form-control input-sm" ng-model="index" ng-options="i.name as i.name for i in indices | orderBy:'name'" ng-change="loadIndexWarmers()">
+                    <option value="">load warmers for selected index</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-6">
+                  <label class="form-label">warmer id</label>
+                  <input ng-model="paginator.filter.id" class="form-control input-sm" placeholder="warmer id">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-12">
+                  <ng-pagination page="page" paginator="paginator"></ng-pagination>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-12">
+                  <table class="table table-bordered table-striped table-condensed">
+                    <tr class="header-row">
+                      <td>id</td>
+                      <td>type</td>
+                      <td>source</td>
+                    </tr>
+                    <tr ng-repeat="warmer in page.elements track by $index" ng-show="warmer != null">
+                      <td>{{warmer.id}}</td>
+                      <td>{{warmer.types}}</td>
+                      <td class="table-actions">{{warmer.source}}
+                        <a data-toggle="modal" target="_self" href="#confirm_dialog"
+                           class="remove-icon" data-backdrop="static">
+                          <i class="fa fa-times remove-icon" title="remove query" ng-click="deleteWarmer(warmer)"></i>
+                        </a>
+                        <a data-toggle="modal" target="_self" href="#"
+                           class="details-icon" data-backdrop="static">
+                          <i class="fa fa-info-circle details-icon" title="view details" ng-click="displayInfo('warmer ' + warmer.id,warmer.source)"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

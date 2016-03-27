@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Test of time-area-chart</title>
+    <script type="text/javascript" src="../../lib/D3-v2.8.1/d3.v2.min.js"></script>
+    <script type="text/javascript" src="time-area-chart.js"></script>
+
+    <link rel="stylesheet" type="text/css" media="screen" href="../common.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="time-area-chart.css" />
+
+    <style type="text/css">
+        .chart {
+            /*width: 750px;*/
+            height: 158px;
+            margin: 40px;
+        }
+    </style>
+
+</head>
+<body>
+
+<div id="chart1" class="chart"></div>
+Click at least 3 times: <input type="button" id="updateChart1" value="update" onclick="updateChart1()">
+<input type="checkbox" id="animatedChart1" checked='checked'> animated
+<br>
+Chart holds series up to 20 data points.
+
+<div id="chart2" class="chart"></div>
+Click at least 3 times: <input type="button" id="updateChart2" value="update" onclick="updateChart2()">
+<input type="checkbox" id="animatedChart2" checked='checked'> animated
+<br>
+Chart holds series up to 20 data points.
+
+<script type="text/javascript">
+
+    var data1Chart1 = [
+//        { timestamp: 1331840053059, value: 130 },
+//        { timestamp: 1331840055024, value: 150 },
+//        { timestamp: 1331840057038, value: 120 },
+//        { timestamp: 1331840059029, value: 130 },
+//        { timestamp: 1331840061040, value: 110 },
+//        { timestamp: 1331840063046, value: 140 },
+//        { timestamp: 1331840067051, value: 130 }
+        ],
+        data2Chart1 = [],
+        data3Chart1 = [];
+
+    var data1Chart2 = [],
+        data2Chart2 = [],
+        data3Chart2 = [];
+
+    var width = 330,
+        height = 150;
+
+    var svgChart1 = d3.select("#chart1").append("svg")
+            .attr("preserveAspectRatio","xMinYMin")
+            .attr("clip_id", "chart1")
+            .attr("viewBox", "0 0 "+width+" "+height);
+
+    var svgChart2 = d3.select("#chart2").append("svg")
+            .attr("preserveAspectRatio","xMinYMin")
+            .attr("clip_id", "chart2")
+            .attr("viewBox", "0 0 "+width+" "+height);
+
+    var chart1 = timeAreaChart()
+            .width(width).height(height)
+            .legend({
+                caption: "2x Time area",
+                series1: "sys",
+                series2: "user",
+                series3: "idle",
+                margin_left: 5,
+                margin_bottom: 6,
+                width: 60})
+            .svg(svgChart1);
+
+    var chart2 = timeAreaChart()
+            .width(width).height(height)
+            .legend({
+                caption: "3x Time area",
+                series1: "sys",
+                series2: "user",
+                series3: "idle",
+                margin_left: 5,
+                margin_bottom: 6,
+                width: 60})
+            .svg(svgChart2);
+
+    chart1.update(data1Chart1, data2Chart1);
+    chart2.update(data1Chart2, data2Chart2);
+
+    var random1 = d3.random.normal(5, 3);
+    var random2 = d3.random.normal(15, 9);
+
+    var updateChart1 = function() {
+
+        var animate1 = d3.select("#animatedChart1").property("checked");
+
+        if (data1Chart1.length > 19) {
+            data1Chart1.shift();
+            data2Chart1.shift();
+        }
+        var now = new Date().getTime();
+        data1Chart1.push({ timestamp: now, value: random1() });
+        data2Chart1.push({ timestamp: now, value: random2() });
+
+        chart1.animate(animate1).update(data1Chart1, data2Chart1);
+    }
+
+    var updateChart2 = function() {
+
+        var animate2 = d3.select("#animatedChart2").property("checked");
+
+        if (data1Chart2.length > 19) {
+            data1Chart2.shift();
+            data2Chart2.shift();
+            data3Chart2.shift();
+        }
+        var now = new Date().getTime();
+
+        var r1 = random1();
+        var r2 = random2();
+        var r3 = 100;
+
+        data1Chart2.push({ timestamp: now, value: r1 });
+        data2Chart2.push({ timestamp: now, value: r2 });
+        data3Chart2.push({ timestamp: now, value: r3 });
+
+        chart2.animate(animate2).update(data1Chart2, data2Chart2, data3Chart2);
+    }
+
+</script>
+
+</body>
+</html>

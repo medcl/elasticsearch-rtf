@@ -1,0 +1,39 @@
+<div class="row">
+  <div class="col-lg-6">
+    <div class="row">
+      <div class="col-lg-6 col-sm-6 cluster-overview-filter">
+        <input type="text" ng-model="index_paginator.filter.name"
+               class="form-control input-sm"
+               placeholder="filter indices by name">
+      </div>
+      <div
+          class="col-lg-3 col-sm-3 col-xs-6 cluster-overview-filter cluster-map-node-types">
+        <input type="checkbox"
+               ng-model="index_paginator.filter.closed"> <i
+          class="fa fa-fw fa-folder-o node-type-icon"> </i> closed
+        ({{cluster.closedIndices}})
+      </div>
+      <div
+          class="col-lg-3 col-sm-3 col-xs-6 cluster-overview-filter cluster-map-node-types">
+        <input type="checkbox"
+               ng-model="index_paginator.filter.special"> <i
+          class="fa fa-fw fa-asterisk node-type-icon"> </i> special
+        ({{cluster.special_indices}})
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="row">
+      <div class="col-lg-6 col-sm-6  cluster-overview-filter">
+        <input type="text" ng-model="node_filter.name"
+               class="form-control input-sm"
+               placeholder="filter nodes by name">
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  $(function() {
+    $(".cluster-map-node-type").tooltip();
+  });
+</script>

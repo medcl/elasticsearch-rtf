@@ -1,0 +1,97 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-info">
+            <p>This page helps you trying out different aggregations and how to present the data.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <span class="text-info">Aggregations</span>
+        <button type="button" popover-placement="right"
+                popover="Here you can select the agregate to return. "
+                class="btn btn-sm btn-link"><span class="glyphicon glyphicon-question-sign"></span></button>
+        <button class="btn btn-info btn-sm" ng-click="vm.openDialog()" title="Set the Aggregate">Add/Change Aggregate
+            <span class="glyphicon glyphicon-edit glyphicon-white"></span>
+        </button>
+        <span ng-show="vm.aggregate">{{vm.aggregate.name}} ({{vm.aggregate.aggsType}})</span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div ng-hide="vm.results">
+            <div class="alert alert-link">Here we'll show the graphics when you have executed the query.</div>
+        </div>
+        <div ng-show="vm.results">
+            <div ng-switch on="vm.aggregate.aggsType">
+                <div ng-switch-when="term" class="container">
+                    <c3chart bindto-id="chartterm" chart-data="vm.results" chart-columns="vm.columns">
+                        <chart-legend show-legend="true" legend-position="right"/>
+                        <chart-size chart-height="400" chart-width="600"/>
+                    </c3chart>
+                </div>
+                <span ng-switch-when="datehistogram">
+                    <c3chart bindto-id="charthisto" chart-data="vm.results" chart-columns="vm.columns" chart-x="xaxis" show-subchart="true" enable-zoom="true">
+                        <chart-legend show-legend="false"/>
+                        <chart-size chart-height="400" chart-width="600"/>
+                        <chart-axis>
+                            <chart-axis-x axis-position="outer-left"
+                                          axis-label="Date by {{vm.aggregate.interval}}"
+                                          axis-type="timeseries">
+                                <chart-axis-x-tick tick-fit="true"
+                                                   tick-rotate="50"
+                                                   tick-format="%Y-%m-%d"/>
+                            </chart-axis-x>
+                            <chart-axis-y axis-id="y"
+                                          axis-position="outer-right"
+                                          axis-label="Document count"
+                                          padding-bottom="0"
+                                          range-min="0"/>
+                        </chart-axis>
+                    </c3chart>
+                </span>
+                <span ng-switch-when="histogram">
+                    <c3chart bindto-id="charthisto" chart-data="vm.results" chart-columns="vm.columns" chart-x="xaxis">
+                        <chart-legend show-legend="false"/>
+                        <chart-size chart-height="400" chart-width="600"/>
+                        <chart-axis>
+                            <chart-axis-x axis-position="outer-left"
+                                          axis-label="Number by {{vm.aggregate.interval}}"
+                                          axis-type="category">
+                                <chart-axis-x-tick tick-fit="true"
+                                                   tick-rotate="50"/>
+                            </chart-axis-x>
+                            <chart-axis-y axis-id="y"
+                                          axis-position="outer-right"
+                                          axis-label="Document count"
+                                          padding-bottom="0"
+                                          range-min="0"/>
+                            </chart-axis>
+                    </c3chart>
+                </span>
+                <span ng-switch-when="range">
+                    <!-- TODO Prefer not copying the whole thing -->
+                    <c3chart bindto-id="chartrange" chart-data="vm.results" chart-columns="vm.columns" chart-x="xaxis">
+                        <chart-legend show-legend="false"/>
+                        <chart-size chart-height="400" chart-width="600"/>
+                        <chart-axis>
+                            <chart-axis-x axis-position="outer-left"
+                                          axis-label="Number by {{vm.aggregate.interval}}"
+                                          axis-type="category">
+                                <chart-axis-x-tick tick-fit="true"
+                                                   tick-rotate="50"/>
+                            </chart-axis-x>
+                            <chart-axis-y axis-id="y"
+                                          axis-position="outer-right"
+                                          axis-label="Document count"
+                                          padding-bottom="0"
+                                          range-min="0"/>
+                        </chart-axis>
+                    </c3chart>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

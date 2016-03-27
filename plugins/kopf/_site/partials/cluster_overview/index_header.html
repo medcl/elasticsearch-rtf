@@ -1,0 +1,85 @@
+<span ng-show="index != null">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="dropdown">
+          <a data-toggle="dropdown" href="#" target="_self" class="cluster-map-header-index-name">
+            <i class="fa fa-fw fa-caret-down pull-right"></i>
+            <span ng-class="{'closed-index': index.closed}" class="cluster-map-header-index-name" title="{{index.name}}">{{index.name}} </span>
+          </a>
+          <ul class="dropdown-menu index-dropdown" role="menu">
+            <li role="presentation">
+              <a class="cluster-map-header-index-action" role="menuitem" tabindex="-1" ng-click="showIndexSettings(index.name)">
+                <i class="fa fa-fw fa-info-circle index-menu-icon"></i> show settings
+              </a>
+            </li>
+            <li role="presentation">
+              <a class="cluster-map-header-index-action" role="menuitem" tabindex="-1" ng-click="showIndexMappings(index.name)">
+                <i class="fa fa-fw fa-code index-menu-icon"></i> show mappings
+              </a>
+            </li>
+            <li role="presentation">
+              <a ng-show="index.open" data-toggle="modal" href="#confirm_dialog" target="_self" class="cluster-map-header-index-action" data-backdrop="static" role="menuitem" tabindex="-1" ng-click="promptCloseIndex(index.name)">
+                <i class="fa fa-fw fa-folder-open index-menu-icon"></i> close index
+              </a>
+              <a data-toggle="modal" ng-show="index.closed" href="#confirm_dialog" target="_self" class="cluster-map-header-index-action" data-backdrop="static" role="menuitem" tabindex="-1" ng-click="promptOpenIndex(index.name)">
+                <i class="fa fa-fw fa-folder index-menu-icon" title="open index"></i> open index
+              </a>
+            </li>
+            <li role="presentation">
+              <a data-toggle="modal" href="#confirm_dialog" target="_self" class="cluster-map-header-index-action" role="menuitem" tabindex="-1" data-backdrop="static" ng-click="promptOptimizeIndex(index.name)">
+                <i class="fa fa-fw fa-wrench index-menu-icon"></i> optimize index
+              </a>
+            </li>
+            <li role="presentation">
+              <a data-toggle="modal" href="#confirm_dialog" target="_self" class="cluster-map-header-index-action" title="refresh index" role="menuitem" tabindex="-1" data-backdrop="static" ng-click="promptRefreshIndex(index.name)">
+                <i class="fa fa-fw fa-refresh index-menu-icon"></i> refresh index
+              </a>
+            </li>
+            <li role="presentation">
+              <a data-toggle="modal" href="#confirm_dialog" target="_self" class="cluster-map-header-index-action" role="menuitem" tabindex="-1" data-backdrop="static" data-keyboard="fa fa-fwlse" ng-click="promptClearCache(index.name)">
+                <i class="fa fa-fw fa-circle-o index-menu-icon"></i> clear cache
+              </a>
+            </li>
+            <li role="presentation">
+              <a href="#!indexSettings?index={{index.name}}" class="cluster-map-header-index-action" role="menuitem" tabindex="-1">
+                <i class="fa fa-fw fa-cog index-menu-icon"></i> edit settings
+              </a>
+            </li>
+            <li role="presentation" class="divider"></li>
+            <li role="presentation">
+              <a data-toggle="modal" href="#confirm_dialog" target="_self" class="cluster-map-header-index-action" title="delete index" role="menuitem" tabindex="-1" data-backdrop="static" ng-click="promptDeleteIndex(index.name)">
+                <i class="fa fa-fw fa-trash-o danger-action index-menu-icon"></i> delete index
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="cluster-map-header-index-alias" ng-class="{'closed-index': index.closed}">
+          <span title="{{index.num_of_shards}} shards and {{index.num_of_replicas}} replicas">shards: {{index.num_of_shards}} * {{index.num_of_replicas + 1}} |</span>
+          <span title="{{index.num_docs | number:0}} docs, {{index.deleted_docs | number:0}} deleted docs">docs: {{index.num_docs | number:0}} |</span>
+          <span title="size: {{index.size_in_bytes | bytes}}, total size: {{index.total_size_in_bytes | bytes}}">size: {{index.size_in_bytes | bytes}}</span>
+        </div>
+      </div>
+    </div>
+    <!-- index info -->
+    <div class="row" ng-show="index.aliases.length > 0">
+      <div class="col-lg-12">
+        <div class="idx-alias" ng-class="{'closed-index': index.closed}">
+          <i class="fa fa-tag"></i> {{index.aliases[0]}}
+          <span ng-show="index.aliases.length > 1">
+            <span class="tooltiped" data-placement="bottom" title="{{index.aliases.join('\n')}}">
+              (+{{index.aliases.length }})
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+</span>
+<script>
+  $(function() {
+    $(".tooltiped").tooltip();
+  });
+</script>

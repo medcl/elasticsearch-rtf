@@ -1,0 +1,314 @@
+/*
+ * Lucene Query Grammar for PEG.js
+ * ========================================
+ *
+ * Original version: https://github.com/thoward/lucene-query-parser.js
+ * Slightly modified by Zachary Tong, 03/05/2013.  Add prefix matching to fields
+ *
+ * This grammar supports many of the constructs contained in the Lucene Query Syntax.
+ *
+ * Supported features:
+ * - conjunction operators (AND, OR, ||, &&, NOT)
+ * - prefix operators (+, -)
+ * - quoted values ("foo bar")
+ * - named fields (foo:bar)
+ * - range expressions (foo:[bar TO baz], foo:{bar TO baz})
+ * - proximity search expressions ("foo bar"~5)
+ * - boost expressions (foo^5, "foo bar"^5)
+ * - fuzzy search expressions (foo~, foo~0.5)
+ * - parentheses grouping ( (foo OR bar) AND baz )
+ * - field groups ( foo:(bar OR baz) )
+ *
+ * The grammar will create a parser which returns an AST for the query in the form of a tree
+ * of nodes, which are dictionaries. There are three basic types of expression dictionaries:
+ *
+ * A node expression generally has the following structure:
+ *
+ * {
+ *     'left' : dictionary,     // field expression or node
+ *     'operator': string,      // operator value
+ *     'right': dictionary,     // field expression OR node
+ *     'field': string          // field name (for field group syntax) [OPTIONAL]
+ * }
+ *
+ *
+ * A field expression has the following structure:
+ *
+ * {
+ *     'field': string,         // field name
+ *     'term': string,          // term value
+ *     'prefix': string         // prefix operator (+/-) [OPTIONAL]
+ *     'boost': float           // boost value, (value > 1 must be integer) [OPTIONAL]
+ *     'similarity': float      // similarity value, (value must be > 0 and < 1) [OPTIONAL]
+ *     'proximity': integer     // proximity value [OPTIONAL]
+ * }
+ *
+ *
+ * A range expression has the following structure:
+ *
+ * {
+ *     'field': string,         // field name
+ *     'term_min': string,      // minimum value (left side) of range
+ *     'term_max': string,      // maximum value (right side) of range
+ *     'inclusive': boolean     // inclusive ([...]) or exclusive ({...})
+ * }
+ *
+ * Other Notes:
+ *
+ * - For any field name, unnamed/default fields will have the value "<implicit>".
+ * - Wildcards (fo*, f?o) and fuzzy search modifiers (foo~.8) will be part of the term value.
+ * - Escaping is not supported and generally speaking, will break the parser.
+ * - Conjunction operators that appear at the beginning of the query violate the logic of the
+ *   syntax, and are currently "mostly" ignored. The last element will be returned.
+ *
+ *   For example:
+ *       Query: OR
+ *       Return: { "operator": "OR" }
+ *
+ *       Query: OR AND
+ *       Return: { "operator": "AND" }
+ *
+ *       Query: OR AND foo
+ *       Return: { "left": { "field": "<implicit>", "term": "foo" } }
+ *
+ *  To test the grammar, use the online parser generator at http://pegjs.majda.cz/online
+ *
+ */
+
+start
+  = _* node:node+
+    {
+        return node[0];
+    }
+  / _*
+    {
+        return {};
+    }
+  / EOF
+    {
+        return {};
+    }
+
+node
+  = operator:operator_exp EOF
+    {
+        return {
+            'operator': operator
+            };
+    }
+  / operator:operator_exp right:node
+    {
+        return right;
+    }
+  / left:group_exp operator:operator_exp* right:node*
+    {
+        var node= {
+            'left':left
+            };
+
+        var right =
+                right.length == 0
+                ? null
+                : right[0]['right'] == null
+                    ? right[0]['left']
+                    : right[0];
+
+        if (right != null)
+        {
+            node['operator'] = operator==''? 'OR' : operator[0];
+            node['right'] = right;
+        }
+
+        return node;
+    }
+
+group_exp
+  = field_exp:field_exp _*
+    {
+        return field_exp;
+    }
+  / paren_exp
+
+paren_exp
+  = "(" node:node+ ")" _*
+    {
+        return node[0];
+    }
+
+field_exp
+  = fieldname:fieldname? range:range_operator_exp
+    {
+        range['field'] =
+            fieldname == ''
+                ? "<implicit>"
+                : fieldname;
+
+        return range;
+    }
+  / fieldname:fieldname node:paren_exp
+    {
+        node['field']= fieldname;
+        return node;
+    }
+  / fieldname:fieldname? term:term
+    {
+        var fieldexp = {
+            'field':
+                fieldname == ''
+                    ? "<implicit>"
+                    : fieldname
+            };
+
+        for(var key in term)
+            fieldexp[key] = term[key];
+
+        return fieldexp;
+    }
+
+fieldname
+  = op:prefix_operator_exp? fieldname:unquoted_term [:]
+      {
+        var result = { 'field' : fieldname };
+
+        if('' != op)
+        {
+            result['prefix'] = op;
+        }
+
+        return result;
+    }
+
+term
+  = op:prefix_operator_exp? term:quoted_term proximity:proximity_modifier? boost:boost_modifier? _*
+      {
+        var result = { 'term': term };
+
+        if('' != proximity)
+        {
+            result['proximity'] = proximity;
+        }
+        if('' != boost)
+        {
+            result['boost'] = boost;
+        }
+        if('' != op)
+        {
+            result['prefix'] = op;
+        }
+
+        return result;
+    }
+  / op:prefix_operator_exp? term:unquoted_term similarity:fuzzy_modifier? boost:boost_modifier? _*
+    {
+        var result = { 'term': term };
+        if('' != similarity)
+        {
+            result['similarity'] = similarity;
+        }
+        if('' != boost)
+        {
+            result['boost'] = boost;
+        }
+        if('' != op)
+        {
+            result['prefix'] = op;
+        }
+        return result;
+    }
+
+unquoted_term
+  = term:[^: \t\r\n\f\{\}()"+-/^~\[\]]+
+    {
+        return term.join('');
+    }
+
+quoted_term
+  = '"' term:[^"]+ '"'
+    {
+        return term.join('');
+    }
+
+proximity_modifier
+  = '~' proximity:int_exp
+    {
+        return proximity;
+    }
+
+boost_modifier
+  = '^' boost:decimal_or_int_exp
+    {
+        return boost;
+    }
+
+fuzzy_modifier
+  = '~' fuzziness:decimal_exp?
+    {
+        return fuzziness == '' ? 0.5 : fuzziness;
+    }
+
+decimal_or_int_exp
+ = decimal_exp
+ / int_exp
+
+decimal_exp
+ = '0.' val:[0-9]+
+    {
+        return parseFloat("0." + val.join(''));
+    }
+
+int_exp
+  = val:[0-9]+
+    {
+        return parseInt(val.join(''));
+    }
+
+range_operator_exp
+  = '[' term_min:unquoted_term _* 'TO' _+ term_max:unquoted_term ']'
+    {
+        return {
+            'term_min': term_min,
+            'term_max': term_max,
+            'inclusive': true
+        };
+    }
+  / '{' term_min:unquoted_term _* 'TO' _+ term_max:unquoted_term '}'
+    {
+        return {
+            'term_min': term_min,
+            'term_max': term_max,
+            'inclusive': false
+        };
+    }
+
+operator_exp
+  = _* operator:operator _+
+    {
+        return operator;
+    }
+  / _* operator:operator EOF
+    {
+        return operator;
+    }
+
+operator
+  = 'OR'
+  / 'AND'
+  / 'NOT'
+  / '||' { return 'OR'; }
+  / '&&' { return 'AND'; }
+
+prefix_operator_exp
+  = _* operator:prefix_operator
+    {
+        return operator;
+    }
+
+prefix_operator
+  = '+'
+  / '-'
+
+_ "whitespace"
+  = [ \t\r\n\f]+
+
+EOF
+  = !.

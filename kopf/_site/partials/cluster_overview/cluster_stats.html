@@ -1,0 +1,66 @@
+<div class="row">
+	<div class="col-md-12">
+		<div class="cluster-map-stats-section bordered box">
+			<div class="row">
+				<div class="col-sm-4 col-md-2 col-xs-6 cluster-map-stat-block" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="number of nodes in the cluster">
+					<div class="stat-block">
+						<span class="cluster-map-stat-number">{{cluster_health.number_of_nodes}}</span>
+						<span class="cluster-map-stat-description">nodes</span>
+					</div>
+				</div>
+				<div class="col-sm-4 col-md-2 col-xs-6 cluster-map-stat-block" data-toggle="tooltip" data-placement="bottom" data-original-title="number of indices on the cluster (open or closed)">
+					<div class="stat-block">
+						<span class="cluster-map-stat-number">{{cluster.total_indices}}</span>
+						<span class="cluster-map-stat-description">indices</span>
+					</div>
+				</div>
+				<div class="col-sm-4 col-md-2 col-xs-6 cluster-map-stat-block" data-toggle="tooltip" data-placement="bottom" data-original-title="number of shards in the cluster (closed indices are not taken into account)">
+					<div class="stat-block">
+						<div class="cluster-stat-detail">
+							<span class="cluster-map-stat-number">{{cluster_health.shards}}</span>
+							<span class="cluster-map-stat-description">shards</span>
+							<span ng-show="cluster_health.relocating_shards != 0">{{cluster_health.relocating_shards}} relocating</span>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4 col-md-2 col-xs-6 cluster-map-stat-block" data-toggle="tooltip" data-placement="bottom" data-original-title="initializing shards">
+					<div class="stat-block">
+						<div class="cluster-stat-detail">
+							<span class="cluster-map-stat-number">{{cluster_health.unassigned_shards}}</span>
+							<span class="cluster-map-stat-description">unassigned</span>
+							<span ng-show="cluster_health.initializing_shards != 0">{{cluster_health.initializing_shards}} initializing</span>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4 col-md-2 col-xs-6 cluster-map-stat-block tooltip-enabled" data-toggle="tooltip" data-placement="bottom" data-original-title="number of documents (replicas are not taken into account)">
+					<div class="stat-block">
+						<div class="cluster-stat-detail">
+							<span class="cluster-map-stat-number">{{cluster.num_docs}}</span>
+							<span class="cluster-map-stat-description">docs</span>	
+							<span ng-show="cluster.changes.getDocDelta() != 0">
+								<i ng-show="cluster.changes.getDocDelta() > 0" class="icon-arrow-up"></i>
+								<i ng-show="cluster.changes.getDocDelta() < 0" class="icon-arrow-down"></i>
+								{{cluster.changes.absDocDelta()}}
+							</span>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4 col-md-2 col-xs-6 cluster-map-stat-block" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="total data in the cluster(replicas are taken into account)">
+					<div class="stat-block">
+						<div class="cluster-stat-detail">
+							<span class="cluster-map-stat-number">{{cluster.total_size}}</span>
+							<span ng-show="cluster.changes.getDataDelta() != 0">
+								<i ng-show="cluster.changes.getDataDelta() > 0" class="icon-arrow-up"></i>
+								<i ng-show="cluster.changes.getDataDelta() < 0" class="icon-arrow-down"></i>
+								{{cluster.changes.absDataDelta()}}
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>	
+	</div>
+</div>
+<script>  
+	$(function () { $(".cluster-map-stat-block").tooltip();});  
+</script>

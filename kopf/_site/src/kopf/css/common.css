@@ -1,0 +1,113 @@
+.content-panel {
+	padding-top: 10px;
+}
+/* BOOTSTRAP CUSTOMIZATION */
+.btn {
+	font-size: 13px;
+}
+
+/* PAGINATION BLOCK */
+.pagination-block  {
+	padding-top: 10px;
+	float: right;
+}
+
+/* smaller padding for stacked pills */
+.nav-stacked > li > a {
+	padding: 6px 15px;
+}
+
+/** ############### START - modals - START ############### **/
+
+.modal-title {
+	padding: 0px;
+}
+.modal-body {
+	padding: 12px;
+	
+}
+.modal-footer {
+	padding: 0px 10px 10px;
+	margin-top: 0px;
+	border: 0px;
+}
+.modal-header {
+	padding: 5px 10px 5px 10px;
+}
+
+.custom-modal {
+	padding-top: 5px;
+	text-align: left;
+	word-break: break-word;
+}
+/** ############### END - modals - END ############### **/
+
+#page-wrap { min-height: 100%; height: auto !important; height: 100%; margin: 0 auto -60px; padding: 0px 25px 60px; }
+
+.popover {
+	z-index: 1050;
+}
+.setting-info {
+	padding-left: 1px;
+}
+
+a.setting-info:hover {
+	text-decoration: none;
+}
+
+.response-pre {
+	font-size: 9px;
+	border: 0px;
+}
+
+.normal-action {
+	cursor: pointer;
+}
+
+.modal-open {
+	margin-right: 0px !important;
+}
+
+.create-index-editor {
+	height: 424px;
+}
+.alert-block {
+	font-size: 12px;
+	font-weight: 300;
+	padding-top: 10px;
+	padding-bottom: 0px;
+	text-align: left;
+}
+
+.alert {
+	margin-bottom: 0px;
+}
+.settings-area {
+	font-size: 9px;
+}
+
+.node_stats {
+	padding-top: 15px;
+}
+
+.table-nonfluid {
+   width: auto;
+}
+.node-info {
+	display: inline-block;
+	vertical-align: top;
+	margin-left: 5px;
+}
+.table-actions > a:hover {
+	text-decoration: none;	
+}
+
+.details-icon {
+	float: right;
+	line-height: 18px;
+	padding-left: 5px;
+}
+
+.action-buttons {
+	text-align: right;
+}

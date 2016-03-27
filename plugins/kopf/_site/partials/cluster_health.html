@@ -1,0 +1,134 @@
+<div>
+	<div class="content-panel">
+		<div class="panel-group" id="#diagnosisAccordion">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h4 class="panel-title">
+						<a data-toggle="collapse" data-parent="#diagnosisAccordion" target="_self" href="#diagnosisOptions">
+							cluster diagnosis options
+						</a>
+					</h4>
+				</div>
+				<div id="diagnosisOptions" class="panel-collapse in">
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-xs-12 col-sm-6">
+								<div class="row cluster-health-filters form-group">
+									<div class="col-xs-6 col-sm-3">
+									  <label class="cluster-map-node-type">
+									    <input type="checkbox" ng-model="retrieveHealth"> <i class="fa fa-heart-o node-type-icon"> </i> cluster health
+									  </label>
+									</div>
+									<div class="col-xs-6 col-sm-3">
+									  <label class="cluster-map-node-type">
+									    <input type="checkbox" ng-model="retrieveState"> <i class="fa fa-sitemap node-type-icon"> </i> cluster state
+									  </label>
+									</div>
+									<div class="col-xs-6 col-sm-3">
+									  <label class="cluster-map-node-type">
+											<input type="checkbox" ng-model="retrieveStats"> <i class="fa fa-bar-chart-o node-type-icon"> </i> nodes stats
+										</label>
+									</div>
+									<div class="col-xs-6 col-sm-3">
+									  <label class="cluster-map-node-type">
+									    <input type="checkbox" ng-model="retrieveHotThreads"> <i class="fa fa-fire node-type-icon"> </i> hot threads
+									  </label>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-xs-12 form-group" style="text-align: right;">
+										<button type="button" class="btn btn-primary input-sm" title="load cluster information" ng-click='loadClusterHealth()'>
+											<i class="fa fa-stethoscope"></i> Load
+										</button>
+									</div>
+								</div>
+								
+							</div>
+							<div class="col-xs-12 col-sm-6">
+								<div class="row">
+									<div class="col-xs-12 form-group">
+										<input type="text" ng-model="gist_title" class="form-control input-sm" placeholder="gist title" ng-disabled="results == null">
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-xs-12 form-group" style="text-align: right;">
+										<button type="button" title="easily share cluster information with others" class="btn btn-success input-sm" ng-click='checkPublishClusterHealth()' ng-disabled="results == null" data-toggle="modal" href="#confirm_dialog" data-backdrop="static" tabindex="-1">
+											<i class="fa fa-github"></i> Gist
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-xs-12">
+								<table class="table table-striped table-condensed" style="width: 100%; margin-bottom: 0px">
+									<tr ng-repeat="h in gist_history" style="font-size: 13px">
+										<td class="gist-timestamp-col">{{h.timestamp}}</td>
+										<td class="gist-link-col"><a href="{{h.url}}" target="_blank">{{h.url}}</a></td>
+										<td class="gist-title-col">{{h.title}}</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="panel panel-default" ng-show="results.health != null">
+				<div class="panel-heading">
+					<h4 class="panel-title">
+						<a data-toggle="collapse" data-parent="#diagnosisAccordion" target="_self" href="#diagnosisHealth">
+							cluster health
+						</a>
+					</h4>
+				</div>
+				<div id="diagnosisHealth" class="panel-collapse collapse">
+					<div class="panel-body">
+						<span ng-bind-html="results.health"></span>	
+					</div>
+				</div>
+			</div>
+			<div class="panel panel-default" ng-show="results.state != null">
+				<div class="panel-heading">
+					<h4 class="panel-title">
+						<a data-toggle="collapse" data-parent="#diagnosisAccordion" target="_self" href="#diagnosisState">
+							cluster state
+						</a>
+					</h4>
+				</div>
+				<div id="diagnosisState" class="panel-collapse collapse">
+					<div class="panel-body">
+						<span ng-bind-html="results.state"></span>	
+					</div>
+				</div>
+			</div>
+			<div class="panel panel-default" ng-show="results.stats != null">
+				<div class="panel-heading">
+					<h4 class="panel-title">
+						<a data-toggle="collapse" data-parent="#diagnosisAccordion" target="_self" href="#diagnosisStats">
+							nodes stats
+						</a>
+					</h4>
+				</div>
+				<div id="diagnosisStats" class="panel-collapse collapse">
+					<div class="panel-body">
+						<span ng-bind-html="results.stats"></span>	
+					</div>
+				</div>
+			</div>
+			<div class="panel panel-default" ng-show="results.hot_threads != null">
+				<div class="panel-heading">
+					<h4 class="panel-title">
+						<a data-toggle="collapse" data-parent="#diagnosisAccordion" target="_self" href="#diagnosisHotthreads">
+							hot threads
+						</a>
+					</h4>
+				</div>
+				<div id="diagnosisHotthreads" class="panel-collapse collapse">
+					<div class="panel-body">
+						<span class="cluster-health-content">{{results.hot_threads}}</span>	
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,5 @@
+<div ng-show="index != null">
+    <span ng-repeat="shard in cluster.getUnassignedShards(index.name) track by $index">
+        <span class="shard shard-unallocated">{{shard.shard}}</span>
+    </span>
+</div>

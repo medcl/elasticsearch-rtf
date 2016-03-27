@@ -1,0 +1,132 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Bigdesk</title>
+    <meta name="description" content="Live charts and statistics for ElasticSearch cluster, v2.4.0">
+
+    <!-- css reset -->
+    <link rel="stylesheet" href="css/reset.css">
+
+    <!-- css grid -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- 1140px Grid styles for IE -->
+    <!--[if lte IE 9]><link rel="stylesheet" type="text/css" media="screen" href="css/CssGrid_2/ie.css" /><![endif]-->
+
+    <!-- The 1140px Grid - http://cssgrid.net/ -->
+    <link rel="stylesheet" type="text/css" media="screen" href="css/CssGrid_2/1140.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="css/CssGrid_2/styles.css" />
+
+    <!-- bigdesk styles -->
+    <link rel="stylesheet" type="text/css" media="screen" href="css/bigdesk.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="js/charts/common.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="js/charts/not-available/not-available-chart.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="js/charts/time-series/time-series-chart.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="js/charts/time-area/time-area-chart.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="js/charts/pack/pack.css" />
+
+    <!--  css3-mediaqueries-js -->
+    <script type="text/javascript" src="js/lib/css3-mediaqueries/css3-mediaqueries.js"></script>
+    <!-- end of css grid deps -->
+
+    <!-- jQuery & plugins -->
+    <script type="text/javascript" src="js/lib/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="js/lib/tinysort/jquery.tinysort.min.js"></script>
+
+    <!-- Mustache -->
+    <script type="text/javascript" src="js/lib/mustache/mustache.js"></script>
+
+    <!-- backbone & uderscore -->
+    <script type="text/javascript" src="js/lib/underscore/underscore-min.js"></script>
+    <script type="text/javascript" src="js/lib/backbone/backbone-min.js"></script>
+
+    <!-- D3 -->
+    <script type="text/javascript" src="js/lib/D3-v2.8.1/d3.v2.min.js"></script>
+
+    <!-- bigdesk -->
+    <script type="text/javascript" src="js/util/bigdesk_extension.js"></script>
+    <!-- models & collections -->
+    <script type="text/javascript" src="js/models/Hello.js"></script>
+    <script type="text/javascript" src="js/models/cluster/IndicesStatus.js"></script>
+    <script type="text/javascript" src="js/models/cluster/ClusterState.js"></script>
+    <script type="text/javascript" src="js/models/cluster/ClusterHealth.js"></script>
+    <script type="text/javascript" src="js/models/cluster/NodesState.js"></script>
+    <script type="text/javascript" src="js/models/cluster/NodesStats.js"></script>
+    <script type="text/javascript" src="js/models/cluster/NodeInfo.js"></script>
+    <!-- templates -->
+    <script type="text/javascript" src="js/views/templates.js"></script>
+    <!-- views -->
+    <script type="text/javascript" src="js/views/ClusterHealthView.js"></script>
+    <script type="text/javascript" src="js/views/ClusterNodesListView.js"></script>
+    <script type="text/javascript" src="js/views/SelectedClusterNodeView.js"></script>
+    <script type="text/javascript" src="js/views/ClusterStateView.js"></script>
+    <!-- charts -->
+    <script type="text/javascript" src="js/charts/not-available/not-available-chart.js"></script>
+    <script type="text/javascript" src="js/charts/time-series/time-series-chart.js"></script>
+    <script type="text/javascript" src="js/charts/time-area/time-area-chart.js"></script>
+    <script type="text/javascript" src="js/charts/bigdesk_charts.js"></script>
+    <!-- application -->
+    <script type="text/javascript" src="js/store/BigdeskStore.js"></script>
+    <script type="text/javascript" src="js/bigdeskApp.js"></script>
+
+    <link rel="icon" href="images/favicon.png" type="image/png">
+</head>
+
+<body>
+<div class="container">
+    <form>
+    <div class="row connectionPanel">
+        <div class="sixcol">
+            <span class="connectionPanelSectionWithoutDecoration">
+                ES node REST endpoint
+                <input id="restEndPoint" type="text" size="40" value="http://localhost:9200" />
+            </span>
+        </div>
+        <div class="sixcol last">
+            <span class="connectionPanelSection">
+            Refresh every
+            <select id="refreshInterval">
+                <option value="1000" label="1 sec">1 sec</option>
+                <option value="2000" label="2 sec" selected="selected">2 sec</option>
+                <option value="3000" label="3 sec">3 sec</option>
+                <option value="5000" label="5 sec">5 sec</option>
+                <option value="10000" label="10 sec">10 sec</option>
+                <option value="30000" label="30 sec">30 sec</option>
+            </select>
+            </span>
+            <span class="connectionPanelSection">
+                Keep
+                <select id="storeSize">
+                    <option value="10000" label="10 sec">10 sec</option>
+                    <option value="30000" label="30 sec">30 sec</option>
+                    <option value="60000" label="1 min">1 min</option>
+                    <option value="180000" label="3 min">3 min</option>
+                    <option value="300000" label="5 min" selected="selected">5 min</option>
+                    <option value="600000" label="10 min">10 min</option>
+                    <option value="900000" label="15 min">15 min</option>
+                    <option value="1800000" label="30 min">30 min</option>
+                    <option value="3600000" label="1 hr">1 hr</option>
+                </select>
+                history
+            </span>
+            <span class="connectionPanelSectionWithoutDecoration">
+                <input id="connectButton" type="button" value="Connect"/>
+            </span>
+            <span id="ajaxIndicator">&nbsp;&nbsp;&nbsp;</span>
+        </div>
+    </div>
+    <div class="row connectionPanel settings">
+        <div class="onecol center">
+            <a href="#nodes/master">nodes</a>
+        </div>
+        <div class="onecol center">
+            <a href="#cluster">cluster</a>
+        </div>
+        <div class="tencol last">&nbsp;</div>
+    </div>
+    </form>
+    <div id="selectedViewDetail"></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<component-suite>
+  <algorithms>
+    <algorithm component-class="org.carrot2.clustering.synthetic.ByUrlClusteringAlgorithm" id="byurl">
+      <label>By URL</label>
+      <title>By URL Clustering</title>
+    </algorithm>
+  </algorithms>
+</component-suite>

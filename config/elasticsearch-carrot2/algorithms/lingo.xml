@@ -1,0 +1,12 @@
+<!-- Components included in all applications -->
+<component-suite>
+  <algorithms>
+    <algorithm
+        id="lingo" 
+        component-class="org.carrot2.clustering.lingo.LingoClusteringAlgorithm" 
+        attribute-sets-resource="lingo-attributes.xml">
+      <label>Lingo</label>
+      <title>Lingo Clustering</title>
+    </algorithm>
+  </algorithms>
+</component-suite>

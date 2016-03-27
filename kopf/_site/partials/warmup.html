@@ -1,0 +1,132 @@
+<div ng-controller="WarmupController" ng-show="hasConnection()">
+	<div class="row">
+		<div class="col-md-6">
+			<div class="content-panel">
+				<div class="panel-group" id="#newWarmupAccordion">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h4 class="panel-title">
+								<a data-toggle="collapse" data-parent="#newWarmupAccordion" href="#newWarmupQuery">
+									create warmer
+								</a>
+							</h4>
+						</div>
+						<div id="newWarmupQuery" class="panel-collapse collapse in">
+							<div class="panel-body">
+								<div class="row">
+									<div class="form-group col-md-4">
+										<label class="form-label">index</label>
+										<select class="form-control input-sm" ng-model="new_index" ng-options="i.name for i in indices" ng-change="loadIndexWarmers()">
+											<option value="">select target index</option>
+										</select>
+									</div>
+									<div class="form-group col-md-4">
+										<label class="form-label">types</label>
+										<input ng-model="new_types" class="form-control input-sm" placeholder="types(e.g.: type_1,type2)">
+									</div>
+									<div class="form-group col-md-4">
+										<label class="form-label">warmer id</label>
+										<input ng-model="new_warmer_id" class="form-control input-sm" placeholder="warmer id">
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-xs-12">
+										<div class="form-group">
+											<label class="form-label">query</label>
+											<div id="warmup-query-editor" style="height: 400px" class="kopf-ace-editor"></div>
+										</div>
+									</div>
+									<div class="col-lg-12 action-buttons">
+										<span class="validation-error">{{editor.error}}</span>
+										<button type="submit" class="btn btn-default input-sm" ng-click="editor.format()">
+											<i class="icon-align-left"></i> format
+										</button>
+										<button type="submit" class="btn btn-danger input-sm" ng-click="createWarmerQuery()">
+											<i class="icon-save"></i> create
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="content-panel">
+				<div class="panel-group" id="#warmupListAccordion">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h4 class="panel-title">
+								<a data-toggle="collapse" data-parent="#warmupListAccordion" href="#warmupQueries">
+									registered warmers
+								</a>
+							</h4>
+						</div>
+						<div id="warmupQueries" class="panel-collapse collapse in">
+							<div class="panel-body" style="min-height: 565px">
+								<div class="row">
+									<div class="form-group col-md-6">
+										<label class="form-label">index</label>
+										<select class="form-control input-sm" ng-model="index" ng-options="i.name for i in indices" ng-change="loadIndexWarmers()">
+											<option value="">load warmers for selected index</option>
+										</select>
+									</div>
+									<div class="form-group col-md-6">
+										<label class="form-label">warmer id</label>
+										<input ng-model="pagination.warmer_id" class="form-control input-sm" placeholder="warmer id(accepts wildcards. e.g.: warm*)">
+									</div>
+									<div class="col-xs-12 action-buttons">
+										<button type="submit" class="btn btn-primary input-sm pull-right" ng-click="loadIndexWarmers()">
+											<i class="icon-filter"></i> filter
+										</button>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="pagination-block">
+											<span ng-switch on="pagination.hasPreviousPage()">
+												<i class="icon-double-angle-left normal-action" ng-click="pagination.previousPage()" ng-switch-when="true"></i>
+												<i class="icon-double-angle-left inactive-action" ng-switch-when="false"></i>
+											</span>
+											{{pagination.firstResult()}}-{{pagination.lastResult()}} of {{pagination.total()}}
+											<span ng-switch on="pagination.hasNextPage()">
+												<i class="icon-double-angle-right normal-action" ng-click="pagination.nextPage()" ng-switch-when="true"></i>
+												<i class="icon-double-angle-right inactive-action" ng-switch-when="false"></i>
+											</span>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-lg-12">
+										<table class="table table-bordered table-striped table-condensed">
+											<tr class="header-row">
+												<td>id</td>
+												<td>type</td>
+												<td>source</td>
+											</tr>
+											<tr ng-repeat="(id, body) in pagination.getPage()">
+												<td>{{id}}</td>
+												<td>{{body.types}}</td>
+												<td class="table-actions">{{body.source}}
+													<a data-toggle="modal" href="#confirm_dialog" 
+													class="remove-icon" data-backdrop="static">
+														<i class="icon-remove remove-icon" title="remove query" ng-click="deleteWarmupQuery(id, body.source)"></i>
+													</a>
+													<a data-toggle="modal" href="#" 
+													class="details-icon" data-backdrop="static">
+														<i class="icon-eye-open details-icon" title="view details" ng-click="displayInfo('warmup query ' + id,body.source)"></i>
+													</a>
+												</td>
+											</tr>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

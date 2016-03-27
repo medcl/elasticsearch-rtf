@@ -1,0 +1,56 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="content-panel">
+      <div class="panel-group" id="#catAccordion">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#catAccordion" target="_self" href="#catPanel">
+                cat apis
+              </a>
+            </h4>
+          </div>
+          <div id="catPanel" class="panel-collapse collapse in">
+            <div class="panel-body" style="min-height: 460px;">
+              <div class="row">
+                <div class="col-xs-12">
+                  <form class="form-inline">
+                    <div class="form-group">
+                      <select class="form-control input-sm" ng-model="api" ng-options="a for a in apis">
+                        <option value="">select api</option>
+                      </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary input-sm" ng-click="execute()">
+                      <i class="fa fa-bolt"></i> execute
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div class="row content-panel">
+                <div class="col-xs-12">
+                  <table class="table table-bordered table-condensed table-rounded table-striped">
+                    <thead>
+                      <th ng-repeat="column in result.columns" class="table-header box">
+                        {{column}}
+                      </th>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="line in result.lines track by $index">
+                        <td class="box" ng-repeat="value in line track by $index">
+                          {{value}}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div ng-show="result && result.lines.length == 0">
+                    no data available
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

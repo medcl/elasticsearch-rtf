@@ -1,0 +1,101 @@
+<div class="container-fluid" id="content" style="margin-top:20px" ng-controller="AnalyzerCtrl">
+    <div class="row-fluid">
+        <div class="span8 offset2">
+            <form>
+                <fieldset >
+                    <textarea rows="2" ng-model="analyzer.query">{{analyzer.query}}</textarea><br/>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    <div class="row-fluid">
+        <div class="span10 offset1">
+            <table class="table table-bordered" style="width:100%">
+                <thead>
+                    <tr>
+                        <td style="width:100px">Standard Analyzers</td>
+                        <td>Analyzed Text</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="a in analyzer.analyzers">
+                        <td>{{a}}</td>
+                        <td>
+                            <span class="label" style="margin-right: 0.25em" ng-repeat="token in analyzer.atext['standard.' + a]">
+                                {{token.token}} <span style="color:lightgray">{{token.position}}</span>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+            <table class="table table-bordered" ng-controller="AdhocCtrl" style="width:100%">
+                <thead>
+                <tr>
+                    <td style="width:200px">Tokenizer</td>
+                    <td>Filters</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td style="width:200px">
+                        <input type="text" id="tokenizerSelection" ui-select2="tokenizerAllOptions" ng-model="tokenizerSelection" style="width:100%;" />
+                    </td>
+                    <td >
+                        <input type="text" id="filterSelection" ui-select2="filterAllOptions" ng-model="filterSelection" style="width:100%;" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <span class="label" style="margin-right: 0.25em" ng-repeat="token in analyzer.atext['adhoc']">
+                            {{token.token}} <span style="color:lightgray">{{token.position}}</span>
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <table class="table table-bordered" style="width:100%" ng-repeat="(index, val) in analyzer.customAnalyzers">
+                <thead>
+                <tr>
+                    <td style="width:100px"><input type="checkbox" ng-model="val.enable" ng-click="indexEnabled(index)" style="margin:2px">Index: {{index}}</td>
+                    <td>Analyzed Text</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="(analyzerName, analyzerDetails) in val.index.analysis.analyzer">
+                    <td>{{analyzerName}}</td>
+                    <td>
+                        <span class="label" style="margin-right: 0.25em" ng-repeat="token in analyzer.atext[index + '.' + analyzerName]">
+                            {{token.token}} <span style="color:lightgray">{{token.position}}</span>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="dropdown"  ng-cloak>
+                            <a class="btn btn-small dropdown-toggle">
+                                <strong>Property:</strong> {{analyzer.currentField[index]}} <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li ng-repeat="choice in analyzer.fields[index]">
+                                    <a ng-click="$parent.analyzer.currentField[index] = choice">{{choice}}</a>
+                                </li>
+                            </ul>
+                        </div>
+
+
+                    </td>
+                    <td>
+                        <span class="label" style="margin-right: 0.25em" ng-repeat="token in analyzer.atext[index + '.' + analyzer.currentField[index]]">
+                            {{token.token}} <span style="color:lightgray">{{token.position}}</span>
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+           </div>
+    </div>
+</div>

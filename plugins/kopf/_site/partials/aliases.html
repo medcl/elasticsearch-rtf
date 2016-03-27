@@ -1,0 +1,139 @@
+<div class="row">
+  <div class="col-md-6">
+    <div class="content-panel">
+      <div class="panel-group" id="#newAliasAccordion">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#newAliasAccordion" target="_self" href="#newAliasPanel">
+                create new alias
+              </a>
+            </h4>
+          </div>
+          <div id="newAliasPanel" class="panel-collapse collapse in">
+            <div class="panel-body" style="min-height: 460px;">
+              <div class="row">
+                <div class="col-md-12">
+                  <form role="form">
+                    <div class="row">
+                      <div class="col-xs-6">
+                        <div class="form-group">
+                          <label class="form-label">alias name</label>
+                          <input type="text" class="form-control input-sm" placeholder="alias" ng-model="new_alias.alias">
+                        </div>
+                      </div>
+                      <div class="col-xs-6">
+                        <div class="form-group">
+                          <label class="form-label">target index</label>
+                          <select class="form-control input-sm" ng-model="new_alias.index" ng-options="i.name as i.name for i in indices | orderBy:'name'">
+                            <option value="">select index</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-xs-6">
+                        <div class="form-group">
+                          <label class="form-label">index routing</label>
+                          <input type="text" class="form-control input-sm" placeholder="index_routing value" ng-model="new_alias.index_routing">
+                        </div>
+                      </div>
+                      <div class="col-xs-6">
+                        <div class="form-group">
+                          <label class="form-label">search routing</label>
+                          <input type="text" class="form-control input-sm" placeholder="search_routing value" ng-model="new_alias.search_routing">
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label class="form-label">filter</label>
+
+                    <div id="alias-filter-editor" class="kopf-ace-editor" style="height: 225px"></div>
+                  </div>
+                </div>
+                <div class="col-lg-12 action-buttons">
+                  <span class="validation-error">{{editor.error}}</span>
+                  <button type="submit" class="btn btn-default input-sm" ng-click="editor.format()">
+                    <i class="fa fa-align-left"></i> format
+                  </button>
+                  <button type="submit" class="btn btn-primary input-sm" ng-click="addAlias()">
+                    <i class="fa fa-plus-circle"></i> add
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="content-panel">
+      <div class="panel-group" id="#listAliasAccordion">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#listAliasAccordion" target="_self" href="#aliasesList">
+                existing aliases
+              </a>
+            </h4>
+          </div>
+          <div id="aliasesList" class="panel-collapse collapse in">
+            <div class="panel-body" style="min-height: 460px;">
+              <div class="row">
+                <form class="form-inline" role="form">
+                  <div class="col-xs-6 form-group">
+                    <label class="form-label">alias name</label>
+                    <input type="text" ng-model="paginator.filter.alias" class="form-control input-sm" placeholder="filter by alias name">
+                  </div>
+                  <div class="col-xs-6 form-group">
+                    <label class="form-label">index name</label>
+                    <input type="text" ng-model="paginator.filter.index" class="form-control input-sm" placeholder="filter by index name">
+                  </div>
+                </form>
+              </div>
+              <div class="row">
+                <div class="col-lg-12">
+                  <ng-pagination page="page" paginator="paginator"></ng-pagination>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-12">
+                  <table class="table table-striped table-bordered table-condensed">
+                    <tr class="header-row">
+                      <td class="aliases-alias-cell">index</td>
+                      <td>aliases</td>
+                    </tr>
+                    <tr ng-repeat="index_alias in page.elements track by $index" ng-show="index_alias != null">
+                      <td>
+                        <i class="fa fa-times remove-icon normal-action" ng-click="removeIndexAliases(index_alias.index)" title="remove all aliases for this index"></i>
+                        <span class="aliases-new-alias-input">{{index_alias.index}}</span>
+                      </td>
+                      <td>
+                        <span ng-repeat="alias in index_alias.aliases track by $index" class="aliases-index-alias">
+                          <span class="aliases-new-alias-input" ng-click="viewDetails(alias)">
+                            <a data-toggle="modal" target="_self" href="#alias_details" data-backdrop="static">
+                              {{alias.alias}}
+                            </a>
+                          </span>
+                          <i class="fa fa-times normal-action danger-action" ng-click="removeIndexAlias(index_alias.index,alias.alias)" title="remove alias from a single index"></i>
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <div class="action-buttons">
+                <button type="submit" class="btn btn-danger input-sm" ng-click="mergeAliases()">
+                  <i class="fa fa-save"></i> save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div ng-include src="'./partials/aliases/alias_details.html'"></div>

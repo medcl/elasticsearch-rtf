@@ -1,0 +1,10 @@
+<!--
+Component suites (algorithms) for ES Carrot2 clustering plugin. 
+ -->
+<component-suite>
+  <include suite="lingo3g.xml" />
+  <include suite="lingo.xml" />
+  <include suite="stc.xml" />
+  <include suite="kmeans.xml" />
+  <include suite="byurl.xml" />
+</component-suite>
