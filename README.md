@@ -22,6 +22,9 @@ RTF是Ready To Fly的缩写，在航模里面，表示无需自己组装零件�
 linux:
 <pre>cd elasticsearch/bin
 ./elasticsearch</pre>
+<pre>
+sudo -u ops ES_JAVA_OPTS="-Xms2024m -Xmx2024m"  ./bin/elasticsearch  -d
+</pre>
 
 windows:
 <pre>cd elasticsearch/bin
