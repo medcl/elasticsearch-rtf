@@ -1,0 +1,244 @@
+/*
+ * Base structure
+ */
+
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+  padding-top: 50px;
+}
+
+
+/*
+ * Global add-ons
+ */
+
+.sub-header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+/*
+ * Top navigation
+ * Hide default border to remove 1px line.
+ */
+.navbar-fixed-top {
+  border: 0;
+}
+
+/*
+ * Sidebar
+ */
+
+/* Hide for mobile, show later */
+.sidebar {
+  display: none;
+}
+@media (min-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 51px;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: block;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    background-color: #f5f5f5;
+    border-right: 1px solid #eee;
+  }
+}
+
+/* Sidebar navigation */
+.nav-sidebar {
+  margin-right: -21px; /* 20px padding + 1px border */
+  margin-bottom: 20px;
+  margin-left: -20px;
+}
+.nav-sidebar > li > a {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:hover,
+.nav-sidebar > .active > a:focus {
+  color: #fff;
+  background-color: #428bca;
+}
+
+
+/*
+ * Main content
+ */
+
+.main {
+  padding: 20px;
+}
+@media (min-width: 768px) {
+  .main {
+    padding-right: 40px;
+    padding-left: 40px;
+  }
+}
+.main .page-header {
+  margin-top: 0;
+}
+
+
+/*
+ * Placeholder dashboard ideas
+ */
+
+.placeholders {
+  margin-bottom: 30px;
+  text-align: center;
+}
+.placeholders h4 {
+  margin-bottom: 0;
+}
+.placeholder {
+  margin-bottom: 20px;
+}
+.placeholder img {
+  display: inline-block;
+  border-radius: 50%;
+}
+
+
+.search-area {
+  margin-bottom: 50px;
+}
+
+
+.search-button {
+  float:right;
+  margin-right: 20%;
+  margin-top: 10px;
+}
+
+#exportCSV {
+  float:left;
+  margin-top: 10px;
+  height: 100%;
+}
+
+
+.explain-button {
+  float:right;
+  margin-right: 25px;
+  margin-top: 10px;
+}
+
+
+.next-button {
+  float:left;
+  margin-left:5px;
+  margin-top: 10px;
+}
+
+
+.keyboardSection {
+  margin-top:35px;
+}
+
+
+
+#errorBox {
+  width:80%;
+  margin-top:70px;
+}
+
+
+[ng\:cloak], [ng-cloak], .ng-cloak {
+  display: none !important;
+}
+
+
+
+/* After the transition this will be the only class remaining */
+
+.fadein {
+  -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1.5s;
+  -moz-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1.5s;
+  -o-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1.5s;
+  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 1.0s;
+  opacity: 1; /* Default value but added for clarity */
+}
+
+/* Initial state when showing */
+.fadein.ng-hide {
+    -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0s;
+    -moz-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0s;
+    -o-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0s;
+    transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0s;
+    opacity: 0;
+}
+
+
+
+
+
+/* Loading button animation */
+.glyphicon-refresh-animate {
+    -animation: spin .7s infinite linear;
+    -webkit-animation: spin2 .7s infinite linear;
+}
+
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}
+
+/* result options */
+
+.result_options {
+  padding-top: 2%;
+}
+.delimiter {
+  display: inline;
+  width: 20%;
+  margin-left: 10%;
+}
+
+.delimiterLable {
+ font-weight: 100;
+}
+
+.scrollSize {
+  display: inline;
+  width: 30%;
+  margin-left: 10%;
+}
+
+.scrollSizeLable {
+ font-weight: 100;
+}
+
+#searchResultZone{
+  width: 80%;
+}
+
+/* accordion */
+.panel-heading .accordion-toggle:after {
+    /* symbol for "opening" panels */
+    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+    content: "\e114";    /* adjust as needed, taken from bootstrap.css */
+    float: right;        /* adjust as needed */
+    color: grey;         /* adjust as needed */
+}
+.panel-heading .accordion-toggle.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\e080";    /* adjust as needed, taken from bootstrap.css */
+}
+
+.rotate-glyph {
+  -webkit-transform:rotate(90deg) scaleX(1.5) ;
+  -moz-transform:rotate(90deg) scaleX(1.5) ;
+  -o-transform:rotate(90deg) scaleX(1.5) ;
+  -ms-transform:rotate(90deg) scaleX(1.5); 
+}
