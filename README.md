@@ -78,3 +78,43 @@ bin/elasticsearch-plugin install discovery-gce
 ** 数据迁移工具 **
 
 https://github.com/medcl/elasticsearch-migration
+
+
+** 通过模板设置默认全局分词 **
+
+<pre>
+curl -XDELETE http://localhost:9200/_template/rtf
+
+
+curl -XPUT http://localhost:9200/ _template/rtf
+-d'
+{
+  "template":   "*", 
+  "settings": { "number_of_shards": 1 }, 
+  "mappings": {
+    "_default_": {
+      "_all": { 
+        "enabled": true
+      },
+      "dynamic_templates": [
+        {
+          "strings": { 
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "text",
+              "analyzer":"ik_max_word",
+              "ignore_above": 256,
+              "fields": {
+                "keyword": {
+                  "type":  "keyword"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+'
+</pre>
