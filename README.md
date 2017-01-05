@@ -80,7 +80,7 @@ bin/elasticsearch-plugin install discovery-gce
 https://github.com/medcl/elasticsearch-migration
 
 
-** 通过模板设置默认全局分词 **
+** 通过模板设置全局默认分词器 **
 
 <pre>
 curl -XDELETE http://localhost:9200/_template/rtf
