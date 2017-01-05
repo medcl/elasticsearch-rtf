@@ -1,5 +1,5 @@
-**什么是ElasticSearch-RTF？**
-RTF是Ready To Fly的缩写，在航模里面，表示无需自己组装零件即可直接上手即飞的航空模型，elasticsearch-RTF是针对中文的一个发行版，即使用最新稳定的elasticsearch版本，并且帮你下载测试好对应的插件，如中文分词插件等，目的是让你可以下载下来就可以直接的使用（虽然es已经很简单了，但是很多新手还是需要去花时间去找配置，中间的过程其实很痛苦），当然等你对这些都熟悉了之后，你完全可以自己去diy了，跟linux的众多发行版是一个意思。
+**什么是Elasticsearch-RTF？**
+RTF是Ready To Fly的缩写，在航模里面，表示无需自己组装零件即可直接上手即飞的航空模型，Elasticsearch-RTF是针对中文的一个发行版，即使用最新稳定的elasticsearch版本，并且帮你下载测试好对应的插件，如中文分词插件等，目的是让你可以下载下来就可以直接的使用（虽然es已经很简单了，但是很多新手还是需要去花时间去找配置，中间的过程其实很痛苦），当然等你对这些都熟悉了之后，你完全可以自己去diy了，跟linux的众多发行版是一个意思。
 
 
 当前版本 Elasticsearch 5.1.1
@@ -17,6 +17,8 @@ RTF是Ready To Fly的缩写，在航模里面，表示无需自己组装零件�
 2.下载
 
 <pre>git clone git://github.com/medcl/elasticsearch-rtf.git -b master --depth 1</pre>
+
+百度网盘：https://pan.baidu.com/s/1pJNkrUV
 
 
 3.运行
