@@ -34,7 +34,7 @@ Windows:
 <pre>cd elasticsearch/bin
 elasticsearch.bat</pre>
 
-以下是安装的官方插件，需要分别配置才能使用，可根据需要删除 plugins 目录无关的插件，重启 elasticsearch 生效。
+以下是安装的官方插件，个别插件需要配置才能使用，可根据需要删除 plugins 目录无关的插件，重启 elasticsearch 生效。
 
 <pre>
 bin/elasticsearch-plugin install discovery-multicast
