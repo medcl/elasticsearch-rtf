@@ -63,26 +63,26 @@ bin/elasticsearch-plugin install discovery-azure-classic
 bin/elasticsearch-plugin install discovery-gce
 </pre>
 
-** 安装 X-Pack **
+**安装 X-Pack**
 
-# 注册免费的 license， https://register.elastic.co
+1.注册免费的 license， https://register.elastic.co
 
-运行安装命令
+2.运行安装命令
 <pre> 
 	bin/elasticsearch-plugin install x-pack 
 </pre>
 
-安装证书，参见：https://www.elastic.co/guide/en/x-pack/current/installing-license.html
+3.安装证书，参见：https://www.elastic.co/guide/en/x-pack/current/installing-license.html
 <pre>
 	curl -XPUT -u elastic 'http://<host>:<port>/_xpack/license' -d @license.json
 </pre>
 
-** 数据迁移工具 **
+**数据迁移工具**
 
 https://github.com/medcl/elasticsearch-migration
 
 
-** 通过模板设置全局默认分词器 **
+**通过模板设置全局默认分词器**
 
 <pre>
 curl -XDELETE http://localhost:9200/_template/rtf
