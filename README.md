@@ -88,7 +88,7 @@ https://github.com/medcl/elasticsearch-migration
 curl -XDELETE http://localhost:9200/_template/rtf
 
 
-curl -XPUT http://localhost:9200/ _template/rtf
+curl -XPUT http://localhost:9200/_template/rtf
 -d'
 {
   "template":   "*", 
