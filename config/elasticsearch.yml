@@ -1,3 +1,24 @@
+# custom config 
+
+# cluster.name: my_cluster
+# node.name: lingyfh
+
+# network.bind_host: 0.0.0.0
+# network.publish_host: _en0:ipv4_
+
+# transport.bind_host: 0.0.0.0
+# transport.publish_host: _en0:ipv4_
+# transport.tcp.compress: true
+# ex: discovery.zen.ping.unicast.hosts: ["host1", "host2"]
+# discovery.zen.ping.unicast.hosts: ["localhost"]
+# discovery.zen.ping_timeout: 3s
+# discovery.zen.ping_retries: 3
+
+# script.inline: on
+# script.indexed: on
+
+
+
 # ======================== Elasticsearch Configuration =========================
 #
 # NOTE: Elasticsearch comes with reasonable defaults for most settings.
